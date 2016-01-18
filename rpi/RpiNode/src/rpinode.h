@@ -69,7 +69,7 @@ private:
 	void SetInput();
 	void SetOutput();
 
-	void ReadSensor(float& Temp, float& Hum);
+	void ReadSensor();
 
 private:	// JS functions
 	JsDeclareFunction(init);

@@ -131,7 +131,7 @@ void TDHT11TempHumSensor::SetOutput() {
 	*(MmioGpio+((Pin)/10)) |=  (1<<(((Pin)%10)*3));
 }
 
-void TDHT11TempHumSensor::ReadSensor(float& Temp, float& Hum) {
+void TDHT11TempHumSensor::ReadSensor() {
 	if (TTm::GetCurUniMSecs() - PrevReadTm < MIN_SAMPLING_PERIOD) { return; }
 
 	// Validate humidity and temperature arguments and set them to zero.
@@ -246,8 +246,7 @@ void TDHT11TempHumSensor::read(const v8::FunctionCallbackInfo<v8::Value>& Args) 
 
 	TDHT11TempHumSensor* JsSensor = ObjectWrap::Unwrap<TDHT11TempHumSensor>(Args.Holder());
 
-	float Temp, Hum;
-	JsSensor->ReadSensor(Temp, Hum);
+	JsSensor->ReadSensor();
 
 	PJsonVal RetVal = TJsonVal::NewObj();
 	RetVal->AddToObj("temperature", Temp);
