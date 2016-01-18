@@ -249,8 +249,8 @@ void TDHT11TempHumSensor::read(const v8::FunctionCallbackInfo<v8::Value>& Args) 
 	JsSensor->ReadSensor();
 
 	PJsonVal RetVal = TJsonVal::NewObj();
-	RetVal->AddToObj("temperature", Temp);
-	RetVal->AddToObj("humidity", Hum);
+	RetVal->AddToObj("temperature", JsSensor->Temp);
+	RetVal->AddToObj("humidity", JsSensor->Hum);
 
 	Args.GetReturnValue().Set(TNodeJsUtil::ParseJson(Isolate, RetVal));
 }
