@@ -25,6 +25,7 @@ try {
 	hackClasses();
 	
 	var sensor = new rpi.DHT11(4);
+	sensor.init();
 	
 	log.info('Sensor: %s', JSON.stringify(sensor.read()));
 } catch (e) {

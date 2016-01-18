@@ -1,9 +1,5 @@
 #include "rpinode.h"
 
-volatile uint32_t* MmioGpio = nullptr;
-
-const int TDHT11TempHumSensor::DHT_PULSES = 41;
-
 void TRPiUtil::BusyWait(const uint32_t& Millis) {
 	// Set delay time period.
 	struct timeval deltatime;
@@ -29,6 +25,8 @@ void TRPiUtil::Sleep(const uint32& Millis) {
 
 /////////////////////////////////////////
 // DHT11 - Digital temperature and humidity sensor
+const int TDHT11TempHumSensor::DHT_PULSES = 41;
+
 void TDHT11TempHumSensor::Init(v8::Handle<v8::Object> Exports) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
@@ -40,17 +38,78 @@ void TDHT11TempHumSensor::Init(v8::Handle<v8::Object> Exports) {
 	tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
 	// Add all methods, getters and setters here.
+	NODE_SET_PROTOTYPE_METHOD(tpl, "init", _init);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "read", _read);
 
 	Exports->Set(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()), tpl->GetFunction());
 }
 
-TDHT11TempHumSensor* TDHT11TempHumSensor::NewFromArgs(
-		const v8::FunctionCallbackInfo<v8::Value>& Args) {
+TDHT11TempHumSensor* TDHT11TempHumSensor::NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
 
 	const int Pin = TNodeJsUtil::GetArgInt32(Args, 0);
-
 	return new TDHT11TempHumSensor(Pin);
+}
+
+TDHT11TempHumSensor::TDHT11TempHumSensor(const int& _Pin):
+		MmioGpio(nullptr),
+		Pin(_Pin) {}
+
+TDHT11TempHumSensor::~TDHT11TempHumSensor() {
+	// TODO release the memory map
+}
+
+void TDHT11TempHumSensor::Init() {
+	if (MmioGpio == nullptr) {
+		FILE *FPtr = fopen("/proc/device-tree/soc/ranges", "rb");
+		EAssertR(FPtr != nullptr, "Failed to open devices file!");
+		fseek(FPtr, 4, SEEK_SET);
+		unsigned char Buff[4];
+		EAssertR(fread(Buff, 1, sizeof(Buff), FPtr) == sizeof(Buff), "Failed to read from devices file!");
+
+		uint32_t peri_base = Buff[0] << 24 | Buff[1] << 16 | Buff[2] << 8 | Buff[3] << 0;
+		uint32_t gpio_base = peri_base + GPIO_BASE_OFFSET;
+		fclose(FPtr);
+
+		int FileDesc = open("/dev/mem", O_RDWR | O_SYNC);
+		EAssertR(FileDesc != -1, "Error opening /dev/mem. Probably not running as root.");
+
+		// Map GPIO memory to location in process space.
+		MmioGpio = (uint32_t*) mmap(nullptr, GPIO_LENGTH, PROT_READ | PROT_WRITE, MAP_SHARED, FileDesc, gpio_base);
+		close(FileDesc);
+
+		if (MmioGpio == MAP_FAILED) {
+			// Don't save the result if the memory mapping failed.
+			MmioGpio = nullptr;
+			throw TExcept::New("mmap failed!");
+		}
+	}
+}
+
+void TDHT11TempHumSensor::SetLow() {
+	*(MmioGpio+10) = 1 << Pin;
+}
+
+void TDHT11TempHumSensor::SetHigh() {
+	*(MmioGpio+7) = 1 << Pin;
+}
+
+void TDHT11TempHumSensor::SetDefaultPriority() {
+	struct sched_param sched;
+	memset(&sched, 0, sizeof(sched));
+	// Go back to default scheduler with default 0 priority.
+	sched.sched_priority = 0;
+	sched_setscheduler(0, SCHED_OTHER, &sched);
+}
+
+uint32_t TDHT11TempHumSensor::Input() {
+	return *(MmioGpio+13) & (1 << Pin);
+}
+
+void TDHT11TempHumSensor::SetInput() {
+	// Set GPIO register to 000 for specified GPIO number.
+	*(MmioGpio+((Pin)/10)) &= ~(7<<(((Pin)%10)*3));
 }
 
 void TDHT11TempHumSensor::ReadSensor(float& Temp, float& Hum) {
@@ -58,8 +117,8 @@ void TDHT11TempHumSensor::ReadSensor(float& Temp, float& Hum) {
 	Temp = 0.0f;
 	Hum = 0.0f;
 
-	// Initialize GPIO library.
-	TRPiUtil::MmioInit();
+	// Initialize
+	Init();
 
 	// Store the count that each DHT bit pulse is low and high.
 	// Make sure array is initialized to start at zero.
@@ -68,27 +127,27 @@ void TDHT11TempHumSensor::ReadSensor(float& Temp, float& Hum) {
 
 
 	// Set pin high for ~500 milliseconds.
-	TRPiUtil::MmioSetHigh(Pin);
+	SetHigh();
 	TRPiUtil::Sleep(500);
 
 	// The next calls are timing critical and care should be taken
 	// to ensure no unnecssary work is done below.
 
 	// Set pin low for ~20 milliseconds.
-	TRPiUtil::MmioSetLow(Pin);//pi_2_mmio_set_low(pin);
+	SetLow();//pi_2_mmio_set_low(pin);
 	TRPiUtil::BusyWait(20);
 
 	// Set pin at input.
-	TRPiUtil::MmioSetInput(Pin);
+	SetInput();
 	// Need a very short delay before reading pins or else value is sometimes still low.
 	for (volatile int i = 0; i < 50; ++i) {}
 
 	// Wait for DHT to pull pin low.
 	uint32_t count = 0;
-	while (TRPiUtil::MmioInput(Pin)) {
+	while (Input()) {
 		if (++count >= DHT_MAXCOUNT) {
 			// Timeout waiting for response.
-			TRPiUtil::SetDefaultPriority();
+			SetDefaultPriority();
 			throw TExcept::New("DHT11 timed out!");
 		}
 	}
@@ -96,18 +155,18 @@ void TDHT11TempHumSensor::ReadSensor(float& Temp, float& Hum) {
 	// Record pulse widths for the expected result bits.
 	for (int i=0; i < DHT_PULSES*2; i+=2) {
 		// Count how long pin is low and store in pulseCounts[i]
-		while (!TRPiUtil::MmioInput(Pin)) {
+		while (!Input()) {
 			if (++pulseCounts[i] >= DHT_MAXCOUNT) {
 				// Timeout waiting for response.
-				TRPiUtil::SetDefaultPriority();
+				SetDefaultPriority();
 				throw TExcept::New("DHT11 timed out!");
 			}
 		}
 		// Count how long pin is high and store in pulseCounts[i+1]
-		while (TRPiUtil::MmioInput(Pin)) {
+		while (Input()) {
 			if (++pulseCounts[i+1] >= DHT_MAXCOUNT) {
 				// Timeout waiting for response.
-				TRPiUtil::SetDefaultPriority();
+				SetDefaultPriority();
 				throw TExcept::New("DHT11 timed out!");
 			}
 		}
@@ -116,7 +175,7 @@ void TDHT11TempHumSensor::ReadSensor(float& Temp, float& Hum) {
 	// Done with timing critical code, now interpret the results.
 
 	// Drop back to normal priority.
-	TRPiUtil::SetDefaultPriority();
+	SetDefaultPriority();
 
 	// Compute the average low pulse width to use as a 50 microsecond reference threshold.
 	// Ignore the first two readings because they are a constant 80 microsecond pulse.
@@ -148,6 +207,16 @@ void TDHT11TempHumSensor::ReadSensor(float& Temp, float& Hum) {
 	// Get humidity and temp for DHT11 sensor.
 	Hum = (float) data[0];
 	Temp = (float) data[2];
+}
+
+void TDHT11TempHumSensor::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	TDHT11TempHumSensor* JsSensor = ObjectWrap::Unwrap<TDHT11TempHumSensor>(Args.Holder());
+	JsSensor->Init();
+
+	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
 void TDHT11TempHumSensor::read(const v8::FunctionCallbackInfo<v8::Value>& Args) {
