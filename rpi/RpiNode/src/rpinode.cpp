@@ -234,3 +234,11 @@ void TDHT11TempHumSensor::read(const v8::FunctionCallbackInfo<v8::Value>& Args) 
 
 	Args.GetReturnValue().Set(TNodeJsUtil::ParseJson(Isolate, RetVal));
 }
+
+//////////////////////////////////////////////
+// module initialization
+void Init(v8::Handle<v8::Object> Exports) {
+	TDHT11TempHumSensor::Init(Exports);
+}
+
+NODE_MODULE(rpinode, Init);
