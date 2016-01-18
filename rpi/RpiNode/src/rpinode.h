@@ -24,28 +24,8 @@ class TRPiUtil {
 private:
 	static volatile uint32_t* MmioGpio;
 public:
-	static void BusyWait(uint32_t Millis) {
-		// Set delay time period.
-		struct timeval deltatime;
-		deltatime.tv_sec = Millis / 1000;
-		deltatime.tv_usec = (Millis % 1000) * 1000;
-		struct timeval walltime;
-		// Get current time and add delay to find end time.
-		gettimeofday(&walltime, NULL);
-		struct timeval endtime;
-		timeradd(&walltime, &deltatime, &endtime);
-		// Tight loop to waste time (and CPU) until enough time as elapsed.
-		while (timercmp(&walltime, &endtime, <)) {
-			gettimeofday(&walltime, NULL);
-		}
-	}
-
-	static void Sleep(const uint32& millis) {
-		struct timespec sleep;
-		sleep.tv_sec = millis / 1000;
-		sleep.tv_nsec = (millis % 1000) * 1000000L;
-		while (clock_nanosleep(CLOCK_MONOTONIC, 0, &sleep, &sleep) && errno == EINTR);
-	}
+	static void BusyWait(const uint32_t& Millis);
+	static void Sleep(const uint32& millis);
 
 
 	static void MmioInit() {
@@ -103,6 +83,7 @@ public:
 
 /////////////////////////////////////////
 // DHT11 - Digital temperature and humidity sensor
+//
 // Hookup (RPi2):
 // VCC: 3.3V
 // GND: GND

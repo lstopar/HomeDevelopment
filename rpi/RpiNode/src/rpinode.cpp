@@ -4,6 +4,31 @@ volatile uint32_t* MmioGpio = nullptr;
 
 const int TDHT11TempHumSensor::DHT_PULSES = 41;
 
+void TRPiUtil::BusyWait(const uint32_t& Millis) {
+	// Set delay time period.
+	struct timeval deltatime;
+	deltatime.tv_sec = Millis / 1000;
+	deltatime.tv_usec = (Millis % 1000) * 1000;
+	struct timeval walltime;
+	// Get current time and add delay to find end time.
+	gettimeofday(&walltime, NULL);
+	struct timeval endtime;
+	timeradd(&walltime, &deltatime, &endtime);
+	// Tight loop to waste time (and CPU) until enough time as elapsed.
+	while (timercmp(&walltime, &endtime, <)) {
+		gettimeofday(&walltime, NULL);
+	}
+}
+
+void TRPiUtil::Sleep(const uint32& Millis) {
+	struct timespec sleep;
+	sleep.tv_sec = Millis / 1000;
+	sleep.tv_nsec = (Millis % 1000) * 1000000L;
+	while (clock_nanosleep(CLOCK_MONOTONIC, 0, &sleep, &sleep) && errno == EINTR);
+}
+
+/////////////////////////////////////////
+// DHT11 - Digital temperature and humidity sensor
 void TDHT11TempHumSensor::Init(v8::Handle<v8::Object> Exports) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
