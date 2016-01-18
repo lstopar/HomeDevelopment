@@ -25,6 +25,7 @@ void TRPiUtil::Sleep(const uint32& Millis) {
 
 /////////////////////////////////////////
 // DHT11 - Digital temperature and humidity sensor
+const uint64 TDHT11TempHumSensor::MIN_SAMPLING_PERIOD = 2000;
 const int TDHT11TempHumSensor::DHT_PULSES = 41;
 
 void TDHT11TempHumSensor::Init(v8::Handle<v8::Object> Exports) {
@@ -54,7 +55,10 @@ TDHT11TempHumSensor* TDHT11TempHumSensor::NewFromArgs(const v8::FunctionCallback
 
 TDHT11TempHumSensor::TDHT11TempHumSensor(const int& _Pin):
 		MmioGpio(nullptr),
-		Pin(_Pin) {}
+		Pin(_Pin),
+		Temp(0),
+		Hum(0),
+		PrevReadTm(TTm::GetCurUniMSecs()) {}
 
 TDHT11TempHumSensor::~TDHT11TempHumSensor() {
 	// TODO release the memory map
@@ -128,6 +132,8 @@ void TDHT11TempHumSensor::SetOutput() {
 }
 
 void TDHT11TempHumSensor::ReadSensor(float& Temp, float& Hum) {
+	if (TTm::GetCurUniMSecs() - PrevReadTm < MIN_SAMPLING_PERIOD) { return; }
+
 	// Validate humidity and temperature arguments and set them to zero.
 	Temp = 0.0f;
 	Hum = 0.0f;
@@ -220,6 +226,8 @@ void TDHT11TempHumSensor::ReadSensor(float& Temp, float& Hum) {
 	// Get humidity and temp for DHT11 sensor.
 	Hum = (float) data[0];
 	Temp = (float) data[2];
+
+	PrevReadTm = TTm::GetCurUniMSecs();
 }
 
 void TDHT11TempHumSensor::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {

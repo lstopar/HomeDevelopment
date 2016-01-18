@@ -42,10 +42,16 @@ public:
 private:
 	static TDHT11TempHumSensor* NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args);
 
+	static const uint64 MIN_SAMPLING_PERIOD;
 	static const int DHT_PULSES;
 
 	volatile uint32_t* MmioGpio;
-	int Pin;
+	const int Pin;
+
+	float Temp;
+	float Hum;
+
+	uint64 PrevReadTm;
 
 	TDHT11TempHumSensor(const int& Pin);
 	~TDHT11TempHumSensor();
