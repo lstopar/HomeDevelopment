@@ -51,12 +51,17 @@ private:
 	~TDHT11TempHumSensor();
 
 	void Init();
+
 	void SetLow();
 	void SetHigh();
+
+	void SetMaxPriority();
 	void SetDefaultPriority();
 
 	uint32_t Input();
+
 	void SetInput();
+	void SetOutput();
 
 	void ReadSensor(float& Temp, float& Hum);
 

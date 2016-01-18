@@ -95,6 +95,14 @@ void TDHT11TempHumSensor::SetHigh() {
 	*(MmioGpio+7) = 1 << Pin;
 }
 
+void TDHT11TempHumSensor::SetMaxPriority() {
+	struct sched_param sched;
+	memset(&sched, 0, sizeof(sched));
+	// Use FIFO scheduler with highest priority for the lowest chance of the kernel context switching.
+	sched.sched_priority = sched_get_priority_max(SCHED_FIFO);
+	sched_setscheduler(0, SCHED_FIFO, &sched);
+}
+
 void TDHT11TempHumSensor::SetDefaultPriority() {
 	struct sched_param sched;
 	memset(&sched, 0, sizeof(sched));
@@ -112,19 +120,24 @@ void TDHT11TempHumSensor::SetInput() {
 	*(MmioGpio+((Pin)/10)) &= ~(7<<(((Pin)%10)*3));
 }
 
+void TDHT11TempHumSensor::SetOutput() {
+	// First set to 000 using input function.
+	SetInput();
+	// Next set bit 0 to 1 to set output.
+	*(MmioGpio+((Pin)/10)) |=  (1<<(((Pin)%10)*3));
+}
+
 void TDHT11TempHumSensor::ReadSensor(float& Temp, float& Hum) {
 	// Validate humidity and temperature arguments and set them to zero.
 	Temp = 0.0f;
 	Hum = 0.0f;
 
-	// Initialize
-	Init();
-
 	// Store the count that each DHT bit pulse is low and high.
 	// Make sure array is initialized to start at zero.
 	int pulseCounts[DHT_PULSES*2] = {0};
 
-
+	SetOutput();
+	SetMaxPriority();
 
 	// Set pin high for ~500 milliseconds.
 	SetHigh();
