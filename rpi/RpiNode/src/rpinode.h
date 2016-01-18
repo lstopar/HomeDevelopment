@@ -125,6 +125,7 @@ private:
 
 	void ReadSensor(float& Temp, float& Hum);
 
+private:	// JS functions
 	JsDeclareFunction(read);
 };
 

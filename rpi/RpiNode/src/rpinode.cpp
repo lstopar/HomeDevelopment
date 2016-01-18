@@ -56,8 +56,7 @@ void TDHT11TempHumSensor::ReadSensor(float& Temp, float& Hum) {
 	// Set pin at input.
 	TRPiUtil::MmioSetInput(Pin);
 	// Need a very short delay before reading pins or else value is sometimes still low.
-	for (volatile int i = 0; i < 50; ++i) {
-	}
+	for (volatile int i = 0; i < 50; ++i) {}
 
 	// Wait for DHT to pull pin low.
 	uint32_t count = 0;
@@ -122,8 +121,8 @@ void TDHT11TempHumSensor::ReadSensor(float& Temp, float& Hum) {
 	// Verify checksum of received data.
 	EAssertR(data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF), "Checksum error!");
 	// Get humidity and temp for DHT11 sensor.
-	Hum = (float)data[0];
-	Temp = (float)data[2];
+	Hum = (float) data[0];
+	Temp = (float) data[2];
 }
 
 void TDHT11TempHumSensor::read(const v8::FunctionCallbackInfo<v8::Value>& Args) {

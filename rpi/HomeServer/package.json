@@ -1,0 +1,21 @@
+
+{
+  "name": "HomeServer",
+  "version": "0.1.0",
+  "description": "Server for controlling your home",
+  "author": "Luka Stopar <luka@lstopar.si>",
+  "contributors": [],
+  "repository": {},
+  "main": "./main.js",
+  "engines": {
+    "node": "0.12.0"
+  },
+  "dependencies": {
+    "bunyan": "^1.3.4",
+    "bunyan-format": "^0.2.1",
+    "express": "^4.12.2"
+  },
+  "devDependencies": {},
+  "scripts": {},
+  "keywords": []
+}

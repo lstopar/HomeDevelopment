@@ -1,0 +1,38 @@
+{
+	"rpilib": "../RpiNode/",
+	"server": {
+		"port": 8888
+	},
+	"log": {
+		"logger": {
+			"level": "debug",
+			"outputMode": "short",
+			"stream": {
+				"type": "stdout",
+				"file": "log.log"
+			}
+		},
+		"print": {
+			"rawData": 100000,
+			"streamStory": 10000,
+			"stores": 100000,
+			"broker": 10000,
+			"coeff": 1000
+		}
+	},
+	"database": {
+		"host": "localhost",
+		"user": "StreamStory",
+		"password": "StreamStory",
+		"database": "StreamStoryDemo"
+	},
+	"integration": {
+		"type": "http",
+		"brokerUrl": "10.172.67.55",
+		"zookeperPort": 2181,
+		"producerPort": 8090
+	},
+	"useCase": "mhwirth",
+	"interpolation": "current",
+	"dataPath": "/mnt/raidM2T/project-data/StreamStory/StreamStory-demo/"
+}
