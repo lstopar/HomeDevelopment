@@ -58,7 +58,7 @@ TDHT11TempHumSensor::TDHT11TempHumSensor(const int& _Pin):
 		Pin(_Pin),
 		Temp(0),
 		Hum(0),
-		PrevReadTm(TTm::GetCurUniMSecs()) {}
+		PrevReadTm(0) {}
 
 TDHT11TempHumSensor::~TDHT11TempHumSensor() {
 	// TODO release the memory map
