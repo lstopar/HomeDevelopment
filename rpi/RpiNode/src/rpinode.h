@@ -71,6 +71,9 @@ private:
 
 	void ReadSensor();
 
+	const float& GetTemp() const { return Temp; }
+	const float& GetHum() const { return Hum; }
+
 private:	// JS functions
 	JsDeclareFunction(init);
 	JsDeclareFunction(read);

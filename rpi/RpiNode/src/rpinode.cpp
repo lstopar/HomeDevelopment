@@ -135,8 +135,8 @@ void TDHT11TempHumSensor::ReadSensor() {
 	if (TTm::GetCurUniMSecs() - PrevReadTm < MIN_SAMPLING_PERIOD) { return; }
 
 	// Validate humidity and temperature arguments and set them to zero.
-	Temp = 0.0f;
-	Hum = 0.0f;
+//	Temp = 0.0f;
+//	Hum = 0.0f;
 
 	// Store the count that each DHT bit pulse is low and high.
 	// Make sure array is initialized to start at zero.
@@ -224,8 +224,8 @@ void TDHT11TempHumSensor::ReadSensor() {
 	// Verify checksum of received data.
 	EAssertR(data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF), "Checksum error!");
 	// Get humidity and temp for DHT11 sensor.
-	Hum = (float) data[0];
 	Temp = (float) data[2];
+	Hum = (float) data[0];
 
 	PrevReadTm = TTm::GetCurUniMSecs();
 }
@@ -249,8 +249,8 @@ void TDHT11TempHumSensor::read(const v8::FunctionCallbackInfo<v8::Value>& Args) 
 	JsSensor->ReadSensor();
 
 	PJsonVal RetVal = TJsonVal::NewObj();
-	RetVal->AddToObj("temperature", JsSensor->Temp);
-	RetVal->AddToObj("humidity", JsSensor->Hum);
+	RetVal->AddToObj("temperature", JsSensor->GetTemp());
+	RetVal->AddToObj("humidity", JsSensor->GetHum());
 
 	Args.GetReturnValue().Set(TNodeJsUtil::ParseJson(Isolate, RetVal));
 }
