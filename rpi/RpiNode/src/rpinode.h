@@ -76,7 +76,19 @@ private:
 
 private:	// JS functions
 	JsDeclareFunction(init);
-	JsDeclareFunction(read);
+	JsDeclareSyncAsync(readSync, read, TReadTask);
+
+	class TReadTask: public TNodeTask {
+	private:
+		TDHT11TempHumSensor* Sensor;
+	public:
+		TReadTask(const v8::FunctionCallbackInfo<v8::Value>& Args);
+
+		v8::Handle<v8::Function> GetCallback(const v8::FunctionCallbackInfo<v8::Value>& Args);
+		v8::Local<v8::Value> WrapResult();
+
+		void Run();
+	};
 };
 
 

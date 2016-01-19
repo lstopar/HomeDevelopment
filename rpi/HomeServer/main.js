@@ -27,7 +27,15 @@ try {
 	var sensor = new rpi.DHT11(4);
 	sensor.init();
 	
-	log.info('Sensor: %s', JSON.stringify(sensor.read()));
+	sensor.read(function (e, result) {
+		if (e != null) {
+			log.error(e, 'Failed to read sensor!');
+			return;
+		}
+		
+		log.info('Sensor: %s', JSON.stringify(result));
+	});
+	
 } catch (e) {
 	log.error(e, 'Exception in main, exiting ...');
 	process.exit(1);

@@ -41,6 +41,7 @@ void TDHT11TempHumSensor::Init(v8::Handle<v8::Object> Exports) {
 	// Add all methods, getters and setters here.
 	NODE_SET_PROTOTYPE_METHOD(tpl, "init", _init);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "read", _read);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "readSync", _readSync);
 
 	Exports->Set(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()), tpl->GetFunction());
 }
@@ -135,8 +136,8 @@ void TDHT11TempHumSensor::ReadSensor() {
 	if (TTm::GetCurUniMSecs() - PrevReadTm < MIN_SAMPLING_PERIOD) { return; }
 
 	// Validate humidity and temperature arguments and set them to zero.
-//	Temp = 0.0f;
-//	Hum = 0.0f;
+	Temp = 0.0f;
+	Hum = 0.0f;
 
 	// Store the count that each DHT bit pulse is low and high.
 	// Make sure array is initialized to start at zero.
@@ -240,19 +241,35 @@ void TDHT11TempHumSensor::init(const v8::FunctionCallbackInfo<v8::Value>& Args) 
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
-void TDHT11TempHumSensor::read(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+TDHT11TempHumSensor::TReadTask::TReadTask(const v8::FunctionCallbackInfo<v8::Value>& Args):
+		TNodeTask(Args),
+		Sensor(nullptr) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
-	TDHT11TempHumSensor* JsSensor = ObjectWrap::Unwrap<TDHT11TempHumSensor>(Args.Holder());
+	Sensor = ObjectWrap::Unwrap<TDHT11TempHumSensor>(Args.Holder());
+}
 
-	JsSensor->ReadSensor();
+v8::Handle<v8::Function> TDHT11TempHumSensor::TReadTask::GetCallback(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	return TNodeJsUtil::GetArgFun(Args, 0);
+}
+
+v8::Local<v8::Value> TDHT11TempHumSensor::TReadTask::WrapResult() {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
 
 	PJsonVal RetVal = TJsonVal::NewObj();
-	RetVal->AddToObj("temperature", JsSensor->GetTemp());
-	RetVal->AddToObj("humidity", JsSensor->GetHum());
+	RetVal->AddToObj("temperature", Sensor->GetTemp());
+	RetVal->AddToObj("humidity", Sensor->GetHum());
+	return TNodeJsUtil::ParseJson(Isolate, RetVal);
+}
 
-	Args.GetReturnValue().Set(TNodeJsUtil::ParseJson(Isolate, RetVal));
+void TDHT11TempHumSensor::TReadTask::Run() {
+	try {
+		Sensor->ReadSensor();
+	} catch (const PExcept& Except) {
+		SetExcept(Except);
+	}
 }
 
 //////////////////////////////////////////////
