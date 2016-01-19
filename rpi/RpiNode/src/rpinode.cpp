@@ -261,6 +261,7 @@ v8::Local<v8::Value> TDHT11TempHumSensor::TReadTask::WrapResult() {
 	PJsonVal RetVal = TJsonVal::NewObj();
 	RetVal->AddToObj("temperature", Sensor->GetTemp());
 	RetVal->AddToObj("humidity", Sensor->GetHum());
+
 	return TNodeJsUtil::ParseJson(Isolate, RetVal);
 }
 
