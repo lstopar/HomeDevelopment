@@ -35,7 +35,6 @@ try {
 		
 		log.info('Sensor: %s', JSON.stringify(result));
 	});
-	
 } catch (e) {
 	log.error(e, 'Exception in main, exiting ...');
 	process.exit(1);

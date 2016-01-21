@@ -70,11 +70,11 @@ v8::Local<v8::Value> TNodejsDHT11Sensor::TReadTask::WrapResult() {
 
 	printf("Wrapping result: temp: %.3f, hum: %.3f\n", Temp, Hum);
 
-	PJsonVal RetVal = TJsonVal::NewObj();
-	RetVal->AddToObj("temperature", Temp);
-	RetVal->AddToObj("humidity", Hum);
+	v8::Local<v8::Object> RetVal = v8::Object::New(Isolate);
+	RetVal->Set(v8::String::NewFromUtf8(Isolate, "temperature"), v8::Number::New(Isolate, Temp));
+	RetVal->Set(v8::String::NewFromUtf8(Isolate, "humidity"), v8::Number::New(Isolate, Hum));
 
-	return TNodeJsUtil::ParseJson(Isolate, RetVal);
+	return RetVal;
 }
 
 void TNodejsDHT11Sensor::TReadTask::Run() {

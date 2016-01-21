@@ -69,6 +69,8 @@ void TDHT11Sensor::Init() {
 				MmioGpio = nullptr;
 				throw TExcept::New("mmap failed!");
 			}
+
+			Notify->OnNotify(TNotifyType::ntInfo, "Done");
 		}
 	} catch (const PExcept& Except) {
 		Notify->OnNotifyFmt(TNotifyType::ntErr, "Failed to map virtual address space, error: %s!", Except->GetMsgStr().CStr());
