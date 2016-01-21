@@ -61,11 +61,11 @@ v8::Handle<v8::Function> TNodejsDHT11Sensor::TReadTask::GetCallback(const v8::Fu
 	return TNodeJsUtil::GetArgFun(Args, 0);
 }
 
-v8::Local<v8::Value> TNodejsDHT11Sensor::TReadTask::WrapResult() {
+v8::Local<v8::Value> TNodejsDHT11Sensor::TReadTask::WrapResult(v8::Isolate* Isolate) {
 	printf("called correct wrap result ...\n");
 
-	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
-	v8::HandleScope HandleScope(Isolate);
+//	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+//	v8::HandleScope HandleScope(Isolate);
 
 	const double Temp = Sensor->GetTemp();
 	const double Hum = Sensor->GetHum();

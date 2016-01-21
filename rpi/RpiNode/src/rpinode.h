@@ -46,7 +46,7 @@ private:	// JS functions
 		TReadTask(const v8::FunctionCallbackInfo<v8::Value>& Args);
 
 		v8::Handle<v8::Function> GetCallback(const v8::FunctionCallbackInfo<v8::Value>& Args);
-		v8::Local<v8::Value> WrapResult();
+		v8::Local<v8::Value> WrapResult(v8::Isolate* Isolate);
 
 		void Run();
 	};
