@@ -61,7 +61,10 @@ v8::Handle<v8::Function> TNodejsDHT11Sensor::TReadTask::GetCallback(const v8::Fu
 	return TNodeJsUtil::GetArgFun(Args, 0);
 }
 
-v8::Local<v8::Value> TNodejsDHT11Sensor::TReadTask::WrapResult(v8::Isolate* Isolate) {
+v8::Local<v8::Value> TNodejsDHT11Sensor::TReadTask::WrapResult() {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::EscapableHandleScope HandleScope(Isolate);
+
 	const double Temp = Sensor->GetTemp();
 	const double Hum = Sensor->GetHum();
 
@@ -69,7 +72,7 @@ v8::Local<v8::Value> TNodejsDHT11Sensor::TReadTask::WrapResult(v8::Isolate* Isol
 	RetVal->Set(v8::String::NewFromUtf8(Isolate, "temperature"), v8::Number::New(Isolate, Temp));
 	RetVal->Set(v8::String::NewFromUtf8(Isolate, "humidity"), v8::Number::New(Isolate, Hum));
 
-	return RetVal;
+	return HandleScope.Escape(RetVal);
 }
 
 void TNodejsDHT11Sensor::TReadTask::Run() {
