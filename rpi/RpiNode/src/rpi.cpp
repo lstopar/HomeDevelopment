@@ -35,6 +35,7 @@ TDHT11Sensor::TDHT11Sensor(const int& _Pin):
 		Pin(_Pin),
 		Temp(0),
 		Hum(0),
+		CriticalSection(),
 		PrevReadTm(0),
 		Notify(TNotify::StdNotify) {}
 
@@ -44,6 +45,8 @@ TDHT11Sensor::~TDHT11Sensor() {
 
 void TDHT11Sensor::Init() {
 	try {
+		TLock Lock(CriticalSection);
+
 		if (MmioGpio == nullptr) {
 			Notify->OnNotify(TNotifyType::ntInfo, "Mapping virtual address space for the DHT11 sensor ...");
 
@@ -80,6 +83,8 @@ void TDHT11Sensor::Init() {
 }
 
 void TDHT11Sensor::ReadSensor() {
+	TLock Lock(CriticalSection);
+
 	Notify->OnNotify(TNotifyType::ntInfo, "Reading DHT11 ...");
 
 	if (TTm::GetCurUniMSecs() - PrevReadTm < MIN_SAMPLING_PERIOD) { return; }
@@ -223,6 +228,8 @@ void TDHT11Sensor::SetOutput() {
 }
 
 void TDHT11Sensor::CleanUp() {
+	TLock Lock(CriticalSection);
+
 	if (MmioGpio != nullptr) {
 		Notify->OnNotify(TNotifyType::ntInfo, "Unmapping virtual address space for the DHT11 sensor ...");
 		int ErrCode = munmap((void*) MmioGpio, GPIO_LENGTH);

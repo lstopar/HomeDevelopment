@@ -9,6 +9,7 @@
 #define SRC_RPI_H_
 
 #include "base.h"
+#include "thread.h"
 #include <sys/mman.h>
 
 #define GPIO_BASE_OFFSET 0x200000
@@ -39,6 +40,7 @@ private:
 	float Temp;
 	float Hum;
 
+	TCriticalSection CriticalSection;
 	uint64 PrevReadTm;
 
 	PNotify Notify;

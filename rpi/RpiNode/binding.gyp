@@ -97,7 +97,8 @@
                 '<(QMINER_PATH)/src/nodejs/',
                 '<(QMINER_PATH)/src/glib/base/',
                 '<(QMINER_PATH)/src/glib/mine/',
-                '<(QMINER_PATH)/src/glib/misc/'
+                '<(QMINER_PATH)/src/glib/misc/',
+                '<(QMINER_PATH)/src/glib/concurrent/'
             ],
             'defines': [
             ],
