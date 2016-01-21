@@ -35,6 +35,9 @@ try {
 		
 		log.info('result: %s', JSON.stringify(result));
 	});
+	
+	var resultSync = sensor.readSync();
+	log.info('resultSync: %s', JSON.stringify(resultSync));
 } catch (e) {
 	log.error(e, 'Exception in main, exiting ...');
 	process.exit(1);
