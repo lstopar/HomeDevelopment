@@ -33,9 +33,7 @@ try {
 			return;
 		}
 		
-		log.info('result: %s', JSON.stringify(e));
 		log.info('result: %s', JSON.stringify(result));
-		log.info('result1: %s', JSON.stringify(result1));
 	});
 	
 	var resultSync = sensor.readSync();

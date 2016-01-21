@@ -62,28 +62,14 @@ v8::Handle<v8::Function> TNodejsDHT11Sensor::TReadTask::GetCallback(const v8::Fu
 }
 
 v8::Local<v8::Value> TNodejsDHT11Sensor::TReadTask::WrapResult(v8::Isolate* Isolate) {
-	printf("called correct wrap result ...\n");
-
-//	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
-//	v8::HandleScope HandleScope(Isolate);
-
 	const double Temp = Sensor->GetTemp();
 	const double Hum = Sensor->GetHum();
-
-	// TODO remove me
-	printf("Wrapping result: temp: %.3f, hum: %.3f\n", Temp, Hum);
 
 	v8::Local<v8::Object> RetVal = v8::Object::New(Isolate);
 	RetVal->Set(v8::String::NewFromUtf8(Isolate, "temperature"), v8::Number::New(Isolate, Temp));
 	RetVal->Set(v8::String::NewFromUtf8(Isolate, "humidity"), v8::Number::New(Isolate, Hum));
 
-	// TODO remove me
-	v8::Local<v8::Value> Result = RetVal;
-
-	// TODO remove me
-	printf("In wrap result: %s\n", TJsonVal::GetStrFromVal(TNodeJsUtil::GetObjJson(Result)).CStr());
-
-	return Result;
+	return RetVal;
 }
 
 void TNodejsDHT11Sensor::TReadTask::Run() {
