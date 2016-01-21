@@ -27,13 +27,14 @@ try {
 	var sensor = new rpi.DHT11(4);
 	sensor.init();
 	
-	sensor.read(function (e, result) {
+	sensor.read(function (e, result, result1) {
 		if (e != null) {
 			log.error(e, 'Failed to read sensor!');
 			return;
 		}
 		
 		log.info('result: %s', JSON.stringify(result));
+		log.info('result1: %s', JSON.stringify(result1));
 	});
 	
 	var resultSync = sensor.readSync();
