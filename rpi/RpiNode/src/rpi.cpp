@@ -78,6 +78,8 @@ void TDHT11Sensor::Init() {
 }
 
 void TDHT11Sensor::ReadSensor() {
+	Notify->OnNotify(TNotifyType::ntInfo, "Reading DHT11 ...");
+
 	if (TTm::GetCurUniMSecs() - PrevReadTm < MIN_SAMPLING_PERIOD) { return; }
 
 	// Validate humidity and temperature arguments and set them to zero.
@@ -172,6 +174,8 @@ void TDHT11Sensor::ReadSensor() {
 	// Get humidity and temp for DHT11 sensor.
 	Temp = (float) data[2];
 	Hum = (float) data[0];
+
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Read values temperature: %.3f, humidity: %.3f", Temp, Hum);
 
 	PrevReadTm = TTm::GetCurUniMSecs();
 }

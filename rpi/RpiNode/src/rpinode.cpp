@@ -65,9 +65,14 @@ v8::Local<v8::Value> TNodejsDHT11Sensor::TReadTask::WrapResult() {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
+	const double Temp = Sensor->GetTemp();
+	const double Hum = Sensor->GetHum();
+
+	printf("Wrapping result: temp: %.3f, hum: %.3f\n", Temp, Hum);
+
 	PJsonVal RetVal = TJsonVal::NewObj();
-	RetVal->AddToObj("temperature", Sensor->GetTemp());
-	RetVal->AddToObj("humidity", Sensor->GetHum());
+	RetVal->AddToObj("temperature", Temp);
+	RetVal->AddToObj("humidity", Hum);
 
 	return TNodeJsUtil::ParseJson(Isolate, RetVal);
 }
