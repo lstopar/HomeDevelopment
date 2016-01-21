@@ -3,6 +3,10 @@
 	"server": {
 		"port": 8888
 	},
+	"session": {
+		"secret": "enigma",
+		"maxIdleTime": "1d"
+	},
 	"log": {
 		"logger": {
 			"level": "debug",

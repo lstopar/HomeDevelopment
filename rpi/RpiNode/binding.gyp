@@ -98,7 +98,8 @@
                 '<(QMINER_PATH)/src/glib/base/',
                 '<(QMINER_PATH)/src/glib/mine/',
                 '<(QMINER_PATH)/src/glib/misc/',
-                '<(QMINER_PATH)/src/glib/concurrent/'
+                '<(QMINER_PATH)/src/glib/concurrent/',
+                '<(QMINER_PATH)/src/glib/concurrent/posix/'
             ],
             'defines': [
             ],
