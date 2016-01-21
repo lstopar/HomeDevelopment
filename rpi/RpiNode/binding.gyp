@@ -89,6 +89,8 @@
             	'src/rpi.cpp',
             	'src/rpinode.h',
             	'src/rpinode.cpp',
+            	'src/threads.h',
+            	'src/threads.cpp',
                 '<(QMINER_PATH)/src/nodejs/nodeutil.h',
                 '<(QMINER_PATH)/src/nodejs/nodeutil.cpp'
             ],
@@ -97,9 +99,7 @@
                 '<(QMINER_PATH)/src/nodejs/',
                 '<(QMINER_PATH)/src/glib/base/',
                 '<(QMINER_PATH)/src/glib/mine/',
-                '<(QMINER_PATH)/src/glib/misc/',
-                '<(QMINER_PATH)/src/glib/concurrent/',
-                '<(QMINER_PATH)/src/glib/concurrent/posix/'
+                '<(QMINER_PATH)/src/glib/misc/'
             ],
             'defines': [
             ],
