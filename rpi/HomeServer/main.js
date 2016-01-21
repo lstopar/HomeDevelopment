@@ -33,7 +33,7 @@ try {
 			return;
 		}
 		
-		log.info('Sensor: %s', JSON.stringify(result));
+		log.info('result: %s', JSON.stringify(result));
 	});
 } catch (e) {
 	log.error(e, 'Exception in main, exiting ...');
