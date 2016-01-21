@@ -76,6 +76,10 @@ v8::Local<v8::Value> TNodejsDHT11Sensor::TReadTask::WrapResult() {
 	RetVal->Set(v8::String::NewFromUtf8(Isolate, "temperature"), v8::Number::New(Isolate, Temp));
 	RetVal->Set(v8::String::NewFromUtf8(Isolate, "humidity"), v8::Number::New(Isolate, Hum));
 
+	// TODO remove me
+	PJsonVal ResVal = TNodeJsUtil::GetObjJson(RetVal);
+	printf("In after run: %s\n", TJsonVal::GetStrFromVal(ResVal).CStr());
+
 	return RetVal;
 }
 
