@@ -85,6 +85,8 @@
         {
             'target_name': 'rpinode',
             'sources': [
+            	'src/rpi.h',
+            	'src/rpi.cpp',
             	'src/rpinode.h',
             	'src/rpinode.cpp',
                 '<(QMINER_PATH)/src/nodejs/nodeutil.h',

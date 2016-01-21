@@ -11,20 +11,8 @@
 #include <node.h>
 #include <node_object_wrap.h>
 
-#include <sys/mman.h>
-
-#include "base.h"
+#include "rpi.h"
 #include "nodeutil.h"
-
-#define GPIO_BASE_OFFSET 0x200000
-#define GPIO_LENGTH 4096
-#define DHT_MAXCOUNT 32000
-
-class TRPiUtil {
-public:
-	static void BusyWait(const uint32_t& Millis);
-	static void Sleep(const uint32& millis);
-};
 
 /////////////////////////////////////////
 // DHT11 - Digital temperature and humidity sensor
@@ -33,46 +21,19 @@ public:
 // VCC: 3.3V
 // GND: GND
 // DATA: GPIO4
-class TDHT11TempHumSensor: public node::ObjectWrap {
+class TNodejsDHT11Sensor: public node::ObjectWrap {
 	friend class TNodeJsUtil;
 public:
 	static void Init(v8::Handle<v8::Object> Exports);
 	static const TStr GetClassId() { return "DHT11"; };
 
 private:
-	static TDHT11TempHumSensor* NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args);
+	static TNodejsDHT11Sensor* NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args);
 
-	static const uint64 MIN_SAMPLING_PERIOD;
-	static const int DHT_PULSES;
+	TDHT11Sensor* Sensor;
 
-	volatile uint32_t* MmioGpio;
-	const int Pin;
-
-	float Temp;
-	float Hum;
-
-	uint64 PrevReadTm;
-
-	TDHT11TempHumSensor(const int& Pin);
-	~TDHT11TempHumSensor();
-
-	void Init();
-
-	void SetLow();
-	void SetHigh();
-
-	void SetMaxPriority();
-	void SetDefaultPriority();
-
-	uint32_t Input();
-
-	void SetInput();
-	void SetOutput();
-
-	void ReadSensor();
-
-	const float& GetTemp() const { return Temp; }
-	const float& GetHum() const { return Hum; }
+	TNodejsDHT11Sensor(TDHT11Sensor* Sensor);
+	~TNodejsDHT11Sensor();
 
 private:	// JS functions
 	JsDeclareFunction(init);
@@ -80,7 +41,7 @@ private:	// JS functions
 
 	class TReadTask: public TNodeTask {
 	private:
-		TDHT11TempHumSensor* Sensor;
+		TDHT11Sensor* Sensor;
 	public:
 		TReadTask(const v8::FunctionCallbackInfo<v8::Value>& Args);
 
