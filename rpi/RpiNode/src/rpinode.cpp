@@ -70,12 +70,14 @@ v8::Local<v8::Value> TNodejsDHT11Sensor::TReadTask::WrapResult() {
 	const double Temp = Sensor->GetTemp();
 	const double Hum = Sensor->GetHum();
 
+	// TODO remove me
 	printf("Wrapping result: temp: %.3f, hum: %.3f\n", Temp, Hum);
 
 	v8::Local<v8::Object> RetVal = v8::Object::New(Isolate);
 	RetVal->Set(v8::String::NewFromUtf8(Isolate, "temperature"), v8::Number::New(Isolate, Temp));
 	RetVal->Set(v8::String::NewFromUtf8(Isolate, "humidity"), v8::Number::New(Isolate, Hum));
 
+	// TODO remove me
 	v8::Local<v8::Value> Result = RetVal;
 
 	// TODO remove me
