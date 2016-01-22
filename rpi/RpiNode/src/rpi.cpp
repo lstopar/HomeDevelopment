@@ -246,33 +246,46 @@ void TDHT11Sensor::CleanUp() {
 /////////////////////////////////////////
 // YL-40 - ADC
 TYL40Adc::TYL40Adc():
-	FileDesc(0),
+	FileDesc(-1),
 	CriticalSection(),
 	Notify(TNotify::StdNotify) {}
 
 TYL40Adc::~TYL40Adc() {
 	close(FileDesc);
+	FileDesc = -1;
 }
 
 void TYL40Adc::Init() {
-	FileDesc = open("/dev/i2c-1", O_RDWR);
-	EAssertR(FileDesc >= 0, "Failed to open I2C device file!");
+	Notify->OnNotify(TNotifyType::ntInfo, "Initializing YL-40 ...");
 
-	int r = ioctl(FileDesc, I2C_SLAVE, I2C_ADDRESS);
-	EAssertR(r == 0, "Error while selecting I2C device!");
+	if (FileDesc >= 0) {
+		Notify->OnNotify(TNotifyType::ntWarn, "YL-40 already initialized, ignoring ...");
+		return;
+	}
+
+	FileDesc = open("/dev/i2c-1", O_RDWR);
+	if (FileDesc < 0) {
+		FileDesc = -1;
+		throw TExcept::New("Failed to open I2C device file!");
+	}
+
+	const int Code = ioctl(FileDesc, I2C_SLAVE, I2C_ADDRESS);
+	EAssertR(Code == 0, "Error while selecting I2C device!");
 }
 
 int TYL40Adc::Read(const int& InputN) {
 	TLock Lock(CriticalSection);
 
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading YL-40 input %d ...", InputN);
 	SetInput(InputN);
 
-	uchar Val[4];
+	uchar Val;
 	int r;
 	for (int ReadN = 0; ReadN < 2; ReadN++) {
-		r = read(FileDesc, Val, 1);
+		Notify->OnNotify(TNotifyType::ntInfo, "Reading ...");
+		r = read(FileDesc, &Val, 1);
 		EAssertR(r == 0, "Failed to read YL-40!");
-		printf("0x%02x 0x%02x 0x%02x 0x%02x\n", Val[0], Val[1], Val[2], Val[3]);
+		printf("0x%02x\n", Val);
 		usleep(PROCESSING_DELAY);
 	}
 
@@ -280,12 +293,14 @@ int TYL40Adc::Read(const int& InputN) {
 }
 
 void TYL40Adc::SetOutput(const int& OutputN, const int& Level) {
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading YL-40 output %d to level %d ...", OutputN, Level);
 	EAssertR(0 <= OutputN && OutputN <= 3, "Invalid output channel: " + TInt::GetStr(OutputN));
 	const uchar Command[2] = { (uchar) Level, uchar(ANALOG_OUTPUT | uchar(OutputN)) };
 	SendCommand(Command);
 }
 
 void TYL40Adc::SetInput(const int& InputN) {
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading YL-40 input %d ...", InputN);
 	EAssertR(0 <= InputN && InputN <= 3, "Invalid input channel: " + TInt::GetStr(InputN));
 	uchar Command[2] = { 0x00u, uchar(InputN) };
 
