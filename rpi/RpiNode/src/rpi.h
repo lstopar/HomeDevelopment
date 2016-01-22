@@ -50,7 +50,7 @@ public:
 	~TDHT11Sensor();
 
 	void Init();
-	void ReadSensor();
+	void Read();
 
 	const float& GetTemp() const { return Temp; }
 	const float& GetHum() const { return Hum; }
@@ -68,6 +68,22 @@ private:
 	void SetOutput();
 
 	void CleanUp();
+};
+
+/////////////////////////////////////////
+// YL-40 - Analog to digital signal converter + 3 sensors
+//
+// Hookup (RPi2):
+// VCC: 3.3V
+// GND: GND
+// SDA: GPIO2
+// SCL: GPIO3
+class TYL40AdcSensor {
+private:
+
+public:
+	TYL40AdcSensor();
+	~TYL40AdcSensor();
 };
 
 

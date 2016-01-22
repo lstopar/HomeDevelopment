@@ -82,108 +82,113 @@ void TDHT11Sensor::Init() {
 	}
 }
 
-void TDHT11Sensor::ReadSensor() {
+void TDHT11Sensor::Read() {
 	TLock Lock(CriticalSection);
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Reading DHT11 ...");
 
-	if (TTm::GetCurUniMSecs() - PrevReadTm < MIN_SAMPLING_PERIOD) { return; }
+	const uint64 Dt = TTm::GetCurUniMSecs() - PrevReadTm;
+	if (Dt < MIN_SAMPLING_PERIOD) {
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Less than 2 seconds since last sensor read, diff: %ld, will keep previous values ...", Dt);
+		return;
+	}
 
 	// Validate humidity and temperature arguments and set them to zero.
 	Temp = 0.0f;
 	Hum = 0.0f;
 
-	// Store the count that each DHT bit pulse is low and high.
-	// Make sure array is initialized to start at zero.
-	int pulseCounts[DHT_PULSES*2] = {0};
+	try {
+		// Store the count that each DHT bit pulse is low and high.
+		// Make sure array is initialized to start at zero.
+		int pulseCounts[DHT_PULSES*2] = {0};
 
-	SetOutput();
-	SetMaxPriority();
+		SetOutput();
+		SetMaxPriority();
 
-	// Set pin high for ~500 milliseconds.
-	SetHigh();
-	TRPiUtil::Sleep(500);
+		// Set pin high for ~500 milliseconds.
+		SetHigh();
+		TRPiUtil::Sleep(500);
 
-	// The next calls are timing critical and care should be taken
-	// to ensure no unnecssary work is done below.
+		// The next calls are timing critical and care should be taken
+		// to ensure no unnecssary work is done below.
 
-	// Set pin low for ~20 milliseconds.
-	SetLow();//pi_2_mmio_set_low(pin);
-	TRPiUtil::BusyWait(20);
+		// Set pin low for ~20 milliseconds.
+		SetLow();//pi_2_mmio_set_low(pin);
+		TRPiUtil::BusyWait(20);
 
-	// Set pin at input.
-	SetInput();
-	// Need a very short delay before reading pins or else value is sometimes still low.
-	for (volatile int i = 0; i < 50; ++i) {}
+		// Set pin at input.
+		SetInput();
+		// Need a very short delay before reading pins or else value is sometimes still low.
+		for (volatile int i = 0; i < 50; ++i) {}
 
-	// Wait for DHT to pull pin low.
-	uint32_t count = 0;
-	while (Input()) {
-		if (++count >= DHT_MAXCOUNT) {
-			// Timeout waiting for response.
-			SetDefaultPriority();
-			throw TExcept::New("DHT11 timed out!");
-		}
-	}
-
-	// Record pulse widths for the expected result bits.
-	for (int i=0; i < DHT_PULSES*2; i+=2) {
-		// Count how long pin is low and store in pulseCounts[i]
-		while (!Input()) {
-			if (++pulseCounts[i] >= DHT_MAXCOUNT) {
-				// Timeout waiting for response.
-				SetDefaultPriority();
-				throw TExcept::New("DHT11 timed out!");
-			}
-		}
-		// Count how long pin is high and store in pulseCounts[i+1]
+		// Wait for DHT to pull pin low.
+		uint32_t count = 0;
 		while (Input()) {
-			if (++pulseCounts[i+1] >= DHT_MAXCOUNT) {
+			if (++count >= DHT_MAXCOUNT) {
 				// Timeout waiting for response.
-				SetDefaultPriority();
 				throw TExcept::New("DHT11 timed out!");
 			}
 		}
+
+		// Record pulse widths for the expected result bits.
+		for (int i=0; i < DHT_PULSES*2; i+=2) {
+			// Count how long pin is low and store in pulseCounts[i]
+			while (!Input()) {
+				if (++pulseCounts[i] >= DHT_MAXCOUNT) {
+					// Timeout waiting for response.
+					throw TExcept::New("DHT11 timed out!");
+				}
+			}
+			// Count how long pin is high and store in pulseCounts[i+1]
+			while (Input()) {
+				if (++pulseCounts[i+1] >= DHT_MAXCOUNT) {
+					// Timeout waiting for response.
+					throw TExcept::New("DHT11 timed out!");
+				}
+			}
+		}
+
+		// Done with timing critical code, now interpret the results.
+
+		// Drop back to normal priority.
+		SetDefaultPriority();
+
+		// Compute the average low pulse width to use as a 50 microsecond reference threshold.
+		// Ignore the first two readings because they are a constant 80 microsecond pulse.
+		int threshold = 0;
+		for (int i=2; i < DHT_PULSES*2; i+=2) {
+		  threshold += pulseCounts[i];
+		}
+		threshold /= DHT_PULSES-1;
+
+		// Interpret each high pulse as a 0 or 1 by comparing it to the 50us reference.
+		// If the count is less than 50us it must be a ~28us 0 pulse, and if it's higher
+		// then it must be a ~70us 1 pulse.
+		uint8_t data[5] = {0};
+		for (int i=3; i < DHT_PULSES*2; i+=2) {
+		  int index = (i-3)/16;
+		  data[index] <<= 1;
+		  if (pulseCounts[i] >= threshold) {
+			// One bit for long pulse.
+			data[index] |= 1;
+		  }
+		  // Else zero bit for short pulse.
+		}
+
+		// Useful debug info:
+		//printf("Data: 0x%x 0x%x 0x%x 0x%x 0x%x\n", data[0], data[1], data[2], data[3], data[4]);
+
+		// Verify checksum of received data.
+		EAssertR(data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF), "Checksum error!");
+		// Get humidity and temp for DHT11 sensor.
+		Temp = (float) data[2];
+		Hum = (float) data[0];
+
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Read values temperature: %.3f, humidity: %.3f", Temp, Hum);
+	} catch (const PExcept& Except) {
+		SetDefaultPriority();
+		throw Except;
 	}
-
-	// Done with timing critical code, now interpret the results.
-
-	// Drop back to normal priority.
-	SetDefaultPriority();
-
-	// Compute the average low pulse width to use as a 50 microsecond reference threshold.
-	// Ignore the first two readings because they are a constant 80 microsecond pulse.
-	int threshold = 0;
-	for (int i=2; i < DHT_PULSES*2; i+=2) {
-	  threshold += pulseCounts[i];
-	}
-	threshold /= DHT_PULSES-1;
-
-	// Interpret each high pulse as a 0 or 1 by comparing it to the 50us reference.
-	// If the count is less than 50us it must be a ~28us 0 pulse, and if it's higher
-	// then it must be a ~70us 1 pulse.
-	uint8_t data[5] = {0};
-	for (int i=3; i < DHT_PULSES*2; i+=2) {
-	  int index = (i-3)/16;
-	  data[index] <<= 1;
-	  if (pulseCounts[i] >= threshold) {
-	    // One bit for long pulse.
-	    data[index] |= 1;
-	  }
-	  // Else zero bit for short pulse.
-	}
-
-	// Useful debug info:
-	//printf("Data: 0x%x 0x%x 0x%x 0x%x 0x%x\n", data[0], data[1], data[2], data[3], data[4]);
-
-	// Verify checksum of received data.
-	EAssertR(data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF), "Checksum error!");
-	// Get humidity and temp for DHT11 sensor.
-	Temp = (float) data[2];
-	Hum = (float) data[0];
-
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Read values temperature: %.3f, humidity: %.3f", Temp, Hum);
-
 	PrevReadTm = TTm::GetCurUniMSecs();
 }
 
