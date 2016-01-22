@@ -282,11 +282,11 @@ int TYL40Adc::Read(const int& InputN) {
 	SetInput(InputN);
 
 	uchar Val;
-	int r;
+	int Read;
 	for (int ReadN = 0; ReadN < 2; ReadN++) {
 		Notify->OnNotify(TNotifyType::ntInfo, "Reading ...");
-		r = read(FileDesc, &Val, 1);
-		EAssertR(r == 0, "Failed to read YL-40!");
+		Read = read(FileDesc, &Val, 1);
+		EAssertR(Read == 1, "Failed to read YL-40!");
 		printf("0x%02x\n", Val);
 		usleep(PROCESSING_DELAY);
 	}
