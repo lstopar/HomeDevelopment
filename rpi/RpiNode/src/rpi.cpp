@@ -289,7 +289,7 @@ int TYL40Adc::Read(const int& InputN) {
 		usleep(PROCESSING_DELAY);
 	}
 
-	return (int) *Val;
+	return (int) Val;
 }
 
 void TYL40Adc::SetOutput(const int& OutputN, const int& Level) {
