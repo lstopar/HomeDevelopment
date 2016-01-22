@@ -37,7 +37,9 @@ try {
 		    }
 		]
 	});
+	
 	sensor.init();
+	adc.init();
 	
 	sensor.read(function (e, result) {
 		if (e != null) {
