@@ -271,6 +271,8 @@ void TYL40Adc::Init() {
 
 	const int Code = ioctl(FileDesc, I2C_SLAVE, I2C_ADDRESS);
 	EAssertR(Code == 0, "Error while selecting I2C device!");
+
+	Notify->OnNotify(TNotifyType::ntInfo, "YL-40 initialized!");
 }
 
 int TYL40Adc::Read(const int& InputN) {
@@ -295,14 +297,14 @@ int TYL40Adc::Read(const int& InputN) {
 void TYL40Adc::SetOutput(const int& OutputN, const int& Level) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading YL-40 output %d to level %d ...", OutputN, Level);
 	EAssertR(0 <= OutputN && OutputN <= 3, "Invalid output channel: " + TInt::GetStr(OutputN));
-	const uchar Command[2] = { (uchar) Level, uchar(ANALOG_OUTPUT | uchar(OutputN)) };
+	const uchar Command[2] = { uchar(ANALOG_OUTPUT | uchar(OutputN)), (uchar) Level };
 	SendCommand(Command);
 }
 
 void TYL40Adc::SetInput(const int& InputN) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading YL-40 input %d ...", InputN);
 	EAssertR(0 <= InputN && InputN <= 3, "Invalid input channel: " + TInt::GetStr(InputN));
-	uchar Command[2] = { 0x00u, uchar(InputN) };
+	uchar Command[2] = { uchar(InputN + 1), 0x00u };
 
 	SendCommand(Command);
 }
