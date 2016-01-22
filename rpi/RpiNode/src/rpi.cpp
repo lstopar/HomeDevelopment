@@ -304,7 +304,7 @@ void TYL40Adc::SetOutput(const int& OutputN, const int& Level) {
 void TYL40Adc::SetInput(const int& InputN) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading YL-40 input %d ...", InputN);
 	EAssertR(0 <= InputN && InputN <= 3, "Invalid input channel: " + TInt::GetStr(InputN));
-	uchar Command[2] = { uchar(InputN + 1), 0x00u };
+	uchar Command[2] = { uchar(InputN + 1), 0x01u };
 
 	SendCommand(Command);
 }
