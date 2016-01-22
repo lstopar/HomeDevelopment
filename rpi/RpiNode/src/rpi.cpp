@@ -242,3 +242,9 @@ void TDHT11Sensor::CleanUp() {
 		MmioGpio = nullptr;
 	}
 }
+
+/////////////////////////////////////////
+// YL-40 - ADC
+TYL40AdcSensor::TYL40AdcSensor() {}
+
+TYL40AdcSensor::~TYL40AdcSensor() {}

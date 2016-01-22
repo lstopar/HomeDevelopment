@@ -77,7 +77,7 @@ v8::Local<v8::Value> TNodejsDHT11Sensor::TReadTask::WrapResult() {
 
 void TNodejsDHT11Sensor::TReadTask::Run() {
 	try {
-		Sensor->ReadSensor();
+		Sensor->Read();
 	} catch (const PExcept& Except) {
 		SetExcept(Except);
 	}
