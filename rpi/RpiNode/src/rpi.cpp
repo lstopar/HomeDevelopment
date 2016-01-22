@@ -307,6 +307,7 @@ void TYL40Adc::SetInput(const int& InputN) {
 //	uchar Command[2] = { uchar(InputN), 0x01u };
 	uchar Command[2] = { uchar(0x40 | ((InputN + 1) & 0x03)), uchar(TRnd().GetUniDevInt(256)) };
 	write(FileDesc, &Command, 2);
+	usleep(PROCESSING_DELAY);
 //	EAssertR(Written == 2, "Failed to send a command to the YL-40 sensor: written " + TInt::GetStr(Written) +" bytes!");
 
 //	SendCommand(Command);
@@ -314,6 +315,7 @@ void TYL40Adc::SetInput(const int& InputN) {
 
 void TYL40Adc::SendCommand(const uchar* Command) {
 	TLock Lock(CriticalSection);
+	EAssert(FileDesc >= 0);
 
 	const int Written = write(FileDesc, Command, 2);
 	EAssertR(Written == 2, "Failed to send a command to the YL-40 sensor: written " + TInt::GetStr(Written) +" bytes!");
