@@ -305,12 +305,12 @@ void TYL40Adc::SetInput(const int& InputN) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading YL-40 input %d ...", InputN);
 	EAssertR(0 <= InputN && InputN <= 3, "Invalid input channel: " + TInt::GetStr(InputN));
 //	uchar Command[2] = { uchar(InputN), 0x01u };
-	uchar Command[2] = { uchar(0x40 | ((InputN + 1) & 0x03)), uchar(TRnd().GetUniDevInt(256)) };
-	write(FileDesc, &Command, 2);
-	usleep(PROCESSING_DELAY);
+//	uchar Command[2] = { uchar(0x40 | ((InputN + 1) & 0x03)), uchar(TRnd().GetUniDevInt(256)) };
+//	write(FileDesc, &Command, 2);
+//	usleep(PROCESSING_DELAY);
 //	EAssertR(Written == 2, "Failed to send a command to the YL-40 sensor: written " + TInt::GetStr(Written) +" bytes!");
 
-//	SendCommand(Command);
+	SendCommand(Command);
 }
 
 void TYL40Adc::SendCommand(const uchar* Command) {
