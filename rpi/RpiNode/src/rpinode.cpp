@@ -87,7 +87,7 @@ void TNodeJsYL40Adc::Init(v8::Handle<v8::Object> Exports) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
-	v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(Isolate, TNodeJsUtil::_NewJs<TNodejsDHT11Sensor>);
+	v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(Isolate, TNodeJsUtil::_NewJs<TNodeJsYL40Adc>);
 	tpl->SetClassName(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()));
 
 	// ObjectWrap uses the first internal field to store the wrapped pointer.
