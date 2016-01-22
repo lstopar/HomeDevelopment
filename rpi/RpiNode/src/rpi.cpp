@@ -312,7 +312,7 @@ void TYL40Adc::SetInput(const int& InputN) {
 void TYL40Adc::SendCommand(const uchar* Command) {
 	TLock Lock(CriticalSection);
 
-	int r = write(FileDesc, Command, 2);
-	EAssertR(r == 0, "Failed to send a command to the YL-40 sensor!");
+	const int Code = write(FileDesc, Command, 2);
+	EAssertR(Code == 0, "Failed to send a command to the YL-40 sensor, code: " + TInt::GetStr(Code) + "!");
 	usleep(PROCESSING_DELAY);
 }
