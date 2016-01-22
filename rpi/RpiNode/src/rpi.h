@@ -102,8 +102,8 @@ private:
 	static constexpr uint64 PROCESSING_DELAY = 2000;
 
 	int FileDesc;
-
 	TCriticalSection CriticalSection;
+	PNotify Notify;
 
 public:
 	TYL40Adc();

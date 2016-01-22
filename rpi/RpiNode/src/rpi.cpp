@@ -247,7 +247,8 @@ void TDHT11Sensor::CleanUp() {
 // YL-40 - ADC
 TYL40Adc::TYL40Adc():
 	FileDesc(0),
-	CriticalSection() {}
+	CriticalSection(),
+	Notify(TNotify::StdNotify) {}
 
 TYL40Adc::~TYL40Adc() {
 	close(FileDesc);
@@ -271,7 +272,7 @@ int TYL40Adc::Read(const int& InputN) {
 	for (int ReadN = 0; ReadN < 2; ReadN++) {
 		r = read(FileDesc, Val, 1);
 		EAssertR(r == 0, "Failed to read YL-40!");
-//		printf("Read %s\n", TUCh)
+		printf("0x%02x 0x%02x 0x%02x 0x%02x\n", Val[0], Val[1], Val[2], Val[3]);
 		usleep(PROCESSING_DELAY);
 	}
 
