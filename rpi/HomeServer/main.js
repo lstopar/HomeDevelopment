@@ -25,15 +25,36 @@ try {
 	hackClasses();
 	
 	var sensor = new rpi.DHT11(4);
+	var adc = new rpi.YL40Adc({
+		inputs: [
+		    {
+		    	id: 'luminocity',
+		    	number: 0
+		    },
+		    {
+		    	id: 'something',
+		    	number: 1
+		    }
+		]
+	});
 	sensor.init();
 	
-	sensor.read(function (e, result, result1) {
+	sensor.read(function (e, result) {
 		if (e != null) {
 			log.error(e, 'Failed to read sensor!');
 			return;
 		}
 		
 		log.info('result: %s', JSON.stringify(result));
+	});
+	
+	adc.read(function (e, result) {
+		if (e != null) {
+			log.error(e, 'Failed to read ADC!');
+			return;
+		}
+		
+		log.info('Got output from ADC: %s', JSON.stringify(result));
 	});
 	
 	var resultSync = sensor.readSync();
