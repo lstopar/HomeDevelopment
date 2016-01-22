@@ -7,3 +7,9 @@ sudo rpi-update
 
 sudo apt-get install uuid-dev
 sudo apt-get install i2c-tools
+sudo apt-get install libi2c-dev
+
+# fix message "failed to execute /lib/udev/mtp-probe" at boot
+sudo apt-get install libmtp-runtime
+# remove the RPi network service as it is unreliable
+sudo apt-get remove raspberrypi-net-mods

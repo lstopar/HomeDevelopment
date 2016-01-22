@@ -12,6 +12,8 @@
 #include "threads.h"
 #include <sys/mman.h>
 
+#include <linux/i2c-dev.h>
+
 #define GPIO_BASE_OFFSET 0x200000
 #define GPIO_LENGTH 4096
 #define DHT_MAXCOUNT 32000
@@ -78,12 +80,24 @@ private:
 // GND: GND
 // SDA: GPIO2
 // SCL: GPIO3
+//
+// Reading the sensor from bash (the value that is sampled is returned in the next read):
+// # read the temperature (channel 0)
+// i2cget -y 1 0x48
+// # read channel 1
+// i2cset -y 1 0x48 0x01
+// i2cget -y 1 0x48
+// # analog output (add bit 0x40 to the set command)
+// i2cset -y 1 0x48 0x41 0xff
 class TYL40AdcSensor {
 private:
+	static const uint32 I2C_ADDRESS;
 
 public:
 	TYL40AdcSensor();
 	~TYL40AdcSensor();
+
+	void Init();
 };
 
 

@@ -85,6 +85,8 @@ void TNodejsDHT11Sensor::TReadTask::Run() {
 
 //////////////////////////////////////////////
 // module initialization
+uint32 TYL40AdcSensor::I2C_ADDRESS = 0x48;
+
 void Init(v8::Handle<v8::Object> Exports) {
 	TNodejsDHT11Sensor::Init(Exports);
 }
