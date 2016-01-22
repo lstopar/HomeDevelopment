@@ -52,5 +52,40 @@ private:	// JS functions
 	};
 };
 
+/////////////////////////////////////////
+// YL-40 - Analog to digital signal converter + 3 sensors
+class TNodeJsYL40Adc: public node::ObjectWrap {
+	friend class TNodeJsUtil;
+public:
+	static void Init(v8::Handle<v8::Object> Exports);
+	static const TStr GetClassId() { return "YL40Adc"; };
+
+private:
+	static TNodeJsYL40Adc* NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args);
+
+	TYL40Adc* Adc;
+	TIntStrKdV InputNumNmKdV;
+
+	TNodeJsYL40Adc(TYL40Adc* Adc, const TIntStrKdV& InputNumNmKdV);
+	~TNodeJsYL40Adc();
+
+private:
+	JsDeclareFunction(init);
+	JsDeclareFunction(setOutput);
+	JsDeclareSyncAsync(readSync, read, TReadTask);
+
+	class TReadTask: public TNodeTask {
+	private:
+		TNodeJsYL40Adc* Adc;
+		TIntV ValV;
+	public:
+		TReadTask(const v8::FunctionCallbackInfo<v8::Value>& Args);
+
+		v8::Handle<v8::Function> GetCallback(const v8::FunctionCallbackInfo<v8::Value>& Args);
+		v8::Local<v8::Value> WrapResult();
+
+		void Run();
+	};
+};
 
 #endif /* SRC_RPINODE_H_ */

@@ -83,12 +83,114 @@ void TNodejsDHT11Sensor::TReadTask::Run() {
 	}
 }
 
+void TNodeJsYL40Adc::Init(v8::Handle<v8::Object> Exports) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(Isolate, TNodeJsUtil::_NewJs<TNodejsDHT11Sensor>);
+	tpl->SetClassName(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()));
+
+	// ObjectWrap uses the first internal field to store the wrapped pointer.
+	tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+	// Add all methods, getters and setters here.
+	NODE_SET_PROTOTYPE_METHOD(tpl, "init", _init);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "setOutput", _setOutput);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "read", _read);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "readSync", _readSync);
+
+	Exports->Set(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()), tpl->GetFunction());
+}
+
+TNodeJsYL40Adc* TNodeJsYL40Adc::NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	PJsonVal ArgJson = TNodeJsUtil::GetArgJson(Args, 0);
+	PJsonVal InputJsonV = ArgJson->GetObjKey("inputs");
+
+	TIntStrKdV InputNumNmKdV(InputJsonV->GetArrVals());
+	for (int InputN = 0; InputN < InputJsonV->GetArrVals(); InputN++) {
+		PJsonVal InputJson = InputJsonV->GetArrVal(InputN);
+		InputNumNmKdV[InputN].Key = InputJson->GetObjInt("number");
+		InputNumNmKdV[InputN].Dat = InputJson->GetObjStr("id");
+	}
+
+	return new TNodeJsYL40Adc(new TYL40Adc(), InputNumNmKdV);
+}
+
+TNodeJsYL40Adc::TNodeJsYL40Adc(TYL40Adc* _Adc, const TIntStrKdV& _InputNumNmKdV):
+		Adc(_Adc),
+		InputNumNmKdV(_InputNumNmKdV) {}
+
+TNodeJsYL40Adc::~TNodeJsYL40Adc() {
+	delete Adc;
+}
+
+void TNodeJsYL40Adc::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	TNodeJsYL40Adc* JsAdc = ObjectWrap::Unwrap<TNodeJsYL40Adc>(Args.Holder());
+	JsAdc->Adc->Init();
+
+	Args.GetReturnValue().Set(v8::Undefined(Isolate));
+}
+
+void TNodeJsYL40Adc::setOutput(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	TNodeJsYL40Adc* JsAdc = ObjectWrap::Unwrap<TNodeJsYL40Adc>(Args.Holder());
+	const int OutputN = TNodeJsUtil::GetArgFlt(Args, 0);
+	const double Perc = TNodeJsUtil::GetArgFlt(Args, 1);
+
+	JsAdc->Adc->SetOutput(OutputN, 255 * Perc / 100);
+	Args.GetReturnValue().Set(v8::Undefined(Isolate));
+}
+
+TNodeJsYL40Adc::TReadTask::TReadTask(const v8::FunctionCallbackInfo<v8::Value>& Args):
+		TNodeTask(Args),
+		Adc(nullptr) {
+	Adc = ObjectWrap::Unwrap<TNodeJsYL40Adc>(Args.Holder());
+}
+
+v8::Handle<v8::Function> TNodeJsYL40Adc::TReadTask::GetCallback(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	return TNodeJsUtil::GetArgFun(Args, 0);
+}
+
+v8::Local<v8::Value> TNodeJsYL40Adc::TReadTask::WrapResult() {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::EscapableHandleScope HandleScope(Isolate);
+
+	PJsonVal ResJson = TJsonVal::NewObj();
+	for (int InputN = 0; InputN < Adc->InputNumNmKdV.Len(); InputN++) {
+		ResJson->AddToObj(Adc->InputNumNmKdV[InputN].Dat, ValV[InputN]);
+	}
+
+	return HandleScope.Escape(TNodeJsUtil::ParseJson(Isolate, ResJson));
+}
+
+void TNodeJsYL40Adc::TReadTask::Run() {
+	try {
+		const TIntStrKdV& InputNumNmKdV = Adc->InputNumNmKdV;
+		ValV.Gen(InputNumNmKdV.Len());
+
+		for (int InputN = 0; InputN < InputNumNmKdV.Len(); InputN++) {
+			int Val = Adc->Adc->Read(InputNumNmKdV[InputN].Key);
+			ValV[InputN] = Val;
+		}
+	} catch (const PExcept& Except) {
+		SetExcept(Except);
+	}
+}
+
+
 //////////////////////////////////////////////
 // module initialization
-uint32 TYL40AdcSensor::I2C_ADDRESS = 0x48;
-
 void Init(v8::Handle<v8::Object> Exports) {
 	TNodejsDHT11Sensor::Init(Exports);
+	TNodeJsYL40Adc::Init(Exports);
 }
 
 NODE_MODULE(rpinode, Init);

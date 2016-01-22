@@ -29,8 +29,10 @@
 								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.1692129553" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.debugging.level.1654541395" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.794455298" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="/home/lstopar/.node-gyp/0.12.7/src"/>
+									<listOptionValue builtIn="false" value="/usr/include"/>
 									<listOptionValue builtIn="false" value="/home/lstopar/.node-gyp/0.12.7/deps/v8/include"/>
+									<listOptionValue builtIn="false" value="/home/lstopar/.node-gyp/0.12.7/src"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/sys"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1373173093" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -38,8 +40,10 @@
 								<option id="gnu.cpp.compiler.option.optimization.level.1364686050" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.debugging.level.677071375" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.601736831" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="/home/lstopar/.node-gyp/0.12.7/src"/>
+									<listOptionValue builtIn="false" value="/usr/include"/>
 									<listOptionValue builtIn="false" value="/home/lstopar/.node-gyp/0.12.7/deps/v8/include"/>
+									<listOptionValue builtIn="false" value="/home/lstopar/.node-gyp/0.12.7/src"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/sys"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.500313276" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -55,6 +59,8 @@
 								<option id="gnu.both.asm.option.include.paths.1771290984" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/home/lstopar/.node-gyp/0.12.7/src"/>
 									<listOptionValue builtIn="false" value="/home/lstopar/.node-gyp/0.12.7/deps/v8/include"/>
+									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/sys"/>
+									<listOptionValue builtIn="false" value="/usr/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1419260865" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>

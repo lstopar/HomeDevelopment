@@ -10,6 +10,7 @@
 
 #include "base.h"
 #include "threads.h"
+//#include <fcntl.h>
 #include <sys/mman.h>
 
 #include <linux/i2c-dev.h>
@@ -89,15 +90,34 @@ private:
 // i2cget -y 1 0x48
 // # analog output (add bit 0x40 to the set command)
 // i2cset -y 1 0x48 0x41 0xff
-class TYL40AdcSensor {
+class TYL40Adc {
 private:
-	static const uint32 I2C_ADDRESS;
+	static constexpr uint32 I2C_ADDRESS = 0x48;
+
+	static constexpr uchar ANALOG_OUTPUT = 0x40;
+	static constexpr uchar MODE_READ = 0x01;
+	static constexpr uchar MODE_WRITE = 0x00;
+
+
+	static constexpr uint64 PROCESSING_DELAY = 2000;
+
+	int FileDesc;
+
+	TCriticalSection CriticalSection;
 
 public:
-	TYL40AdcSensor();
-	~TYL40AdcSensor();
+	TYL40Adc();
+	~TYL40Adc();
 
 	void Init();
+	int Read(const int& InputN);
+
+	void SetOutput(const int& OutputN, const int& Level);
+
+
+private:
+	void SetInput(const int& InputN);
+	void SendCommand(const uchar* Command);
 };
 
 

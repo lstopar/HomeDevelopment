@@ -245,6 +245,56 @@ void TDHT11Sensor::CleanUp() {
 
 /////////////////////////////////////////
 // YL-40 - ADC
-TYL40AdcSensor::TYL40AdcSensor() {}
+TYL40Adc::TYL40Adc():
+	FileDesc(0),
+	CriticalSection() {}
 
-TYL40AdcSensor::~TYL40AdcSensor() {}
+TYL40Adc::~TYL40Adc() {
+	close(FileDesc);
+}
+
+void TYL40Adc::Init() {
+	FileDesc = open("/dev/i2c-1", O_RDWR);
+	EAssertR(FileDesc >= 0, "Failed to open I2C device file!");
+
+	int r = ioctl(FileDesc, I2C_SLAVE, I2C_ADDRESS);
+	EAssertR(r == 0, "Error while selecting I2C device!");
+}
+
+int TYL40Adc::Read(const int& InputN) {
+	TLock Lock(CriticalSection);
+
+	SetInput(InputN);
+
+	uchar Val[4];
+	int r;
+	for (int ReadN = 0; ReadN < 2; ReadN++) {
+		r = read(FileDesc, Val, 1);
+		EAssertR(r == 0, "Failed to read YL-40!");
+//		printf("Read %s\n", TUCh)
+		usleep(PROCESSING_DELAY);
+	}
+
+	return (int) *Val;
+}
+
+void TYL40Adc::SetOutput(const int& OutputN, const int& Level) {
+	EAssertR(0 <= OutputN && OutputN <= 3, "Invalid output channel: " + TInt::GetStr(OutputN));
+	const uchar Command[2] = { (uchar) Level, uchar(ANALOG_OUTPUT | uchar(OutputN)) };
+	SendCommand(Command);
+}
+
+void TYL40Adc::SetInput(const int& InputN) {
+	EAssertR(0 <= InputN && InputN <= 3, "Invalid input channel: " + TInt::GetStr(InputN));
+	uchar Command[2] = { 0x00u, uchar(InputN) };
+
+	SendCommand(Command);
+}
+
+void TYL40Adc::SendCommand(const uchar* Command) {
+	TLock Lock(CriticalSection);
+
+	int r = write(FileDesc, Command, 2);
+	EAssertR(r == 0, "Failed to send a command to the YL-40 sensor!");
+	usleep(PROCESSING_DELAY);
+}
