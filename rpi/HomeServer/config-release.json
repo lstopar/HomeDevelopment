@@ -1,0 +1,22 @@
+{
+	"rpilib": "../RpiNode/build/Release/rpinode.node",
+	"server": {
+		"port": 8888
+	},
+	"session": {
+		"secret": "enigma",
+		"maxIdleTime": "1d"
+	},
+	"log": {
+		"logger": {
+			"level": "debug",
+			"outputMode": "short",
+			"stream": {
+				"type": "stdout",
+				"file": "log.log"
+			}
+		}
+	},
+	"samplingInterval": 10000,
+	"mode": "release"
+}
