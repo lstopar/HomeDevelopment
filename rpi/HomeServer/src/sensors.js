@@ -33,6 +33,9 @@ var sensors = {
 				return;
 			}
 			
+			// transform the results
+			vals.luminocity = (255 - vals.luminocity) / 255;
+			
 			log.info('Got output from ADC: %s', JSON.stringify(vals));
 		}
 	}
