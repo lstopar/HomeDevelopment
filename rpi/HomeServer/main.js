@@ -25,6 +25,7 @@ try {
 	hackClasses();
 	
 	sensors.init();
+	sensors.read();
 } catch (e) {
 	log.error(e, 'Exception in main, exiting ...');
 	process.exit(1);
