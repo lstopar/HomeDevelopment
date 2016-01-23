@@ -57,7 +57,10 @@ html, body {
         position: inherit;
         margin: 0 0 0 250px;
         width: calc(100% - 250px);
-        padding: 30px 30px;
+        /*padding: 30px 30px;*/
+        padding-top: 30px;
+        padding-left: 30px;
+        padding-right: 30px;
         border-left: 1px solid rgba(0,0,0,0.6);
     }
 }
