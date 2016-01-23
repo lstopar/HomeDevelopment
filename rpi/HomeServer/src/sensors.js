@@ -1,6 +1,7 @@
 var config = require('../config.js');
 var rpi = require('../' + config.rpilib);
 
+var values = {};
 var sensors = {
 	'DHT11': {
 		sensor: new rpi.DHT11(4),
@@ -36,15 +37,11 @@ var sensors = {
 		}
 	}
 };
-var values = {};
 
 for (var sensorId in sensors) {
 	if (sensors[sensorId].onRead == null) throw new Error('Sensor ' + sensorId + ' has no callback function!');
 }
 
-//function initSensorPool() {
-//	
-//}
 exports.read = function () {
 	for (var sensorId in sensors) {
 		var config = sensors[sensorId];
@@ -55,7 +52,7 @@ exports.read = function () {
 	}
 }
 
-module.init = function () {
+exports.init = function () {
 	log.info('Initializing sensors ...');
 	
 	for (var sensorId in sensors) {
