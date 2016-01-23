@@ -92,7 +92,7 @@ function readSensors() {
 			
 			sensor.read(function (e, vals) {
 				if (e != null) {
-					log.error(e, 'Sensor %s had an error while reading!');
+					log.error(e, 'Sensor %s had an error while reading!', sensorId);
 					return;
 				}
 				
