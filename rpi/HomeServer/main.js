@@ -1,6 +1,5 @@
 var config = require('./config.js');
 var sensors = require('./src/sensors.js');
-var rpi = require(config.rpilib);
 
 function hackClasses() {
 	if (!String.prototype.startsWith) {
