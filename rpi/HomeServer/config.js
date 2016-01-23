@@ -66,10 +66,11 @@ default:
 
 config.session.maxIdleTime = val;
 
-
 //================================================================
 //EXPORTS
 //================================================================
+
+config.PING_INTERVAL = 10000;
 
 module.exports = config;
 

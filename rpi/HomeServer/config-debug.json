@@ -16,5 +16,7 @@
 				"file": "log.log"
 			}
 		}
-	}
+	},
+	"samplingInterval": 10000,
+	"mode": "debug"
 }

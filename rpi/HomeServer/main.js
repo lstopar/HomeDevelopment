@@ -1,4 +1,5 @@
 var config = require('./config.js');
+var server = require('./src/server.js');
 var sensors = require('./src/sensors.js');
 
 function hackClasses() {
@@ -25,7 +26,9 @@ try {
 	hackClasses();
 	
 	sensors.init();
-	sensors.read();
+	server.init({
+		sensors: sensors
+	});
 } catch (e) {
 	log.error(e, 'Exception in main, exiting ...');
 	process.exit(1);

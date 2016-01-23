@@ -24,12 +24,20 @@ TNodejsDHT11Sensor* TNodejsDHT11Sensor::NewFromArgs(const v8::FunctionCallbackIn
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
-	const int Pin = TNodeJsUtil::GetArgInt32(Args, 0);
-	return new TNodejsDHT11Sensor(new TDHT11Sensor(Pin));
+	PJsonVal ParamJson = TNodeJsUtil::GetArgJson(Args, 0);
+
+	const int Pin = ParamJson->GetObjInt("pin");
+	const TStr& TempId = ParamJson->GetObjStr("temperatureId");
+	const TStr& HumId = ParamJson->GetObjStr("humidityId");
+
+	return new TNodejsDHT11Sensor(new TDHT11Sensor(Pin), TempId, HumId);
 }
 
-TNodejsDHT11Sensor::TNodejsDHT11Sensor(TDHT11Sensor* _Sensor):
-		Sensor(_Sensor) {}
+TNodejsDHT11Sensor::TNodejsDHT11Sensor(TDHT11Sensor* _Sensor, const TStr& _TempReadingId,
+		const TStr& _HumReadingId):
+			Sensor(_Sensor),
+			TempReadingId(_TempReadingId),
+			HumReadingId(_HumReadingId) {}
 
 TNodejsDHT11Sensor::~TNodejsDHT11Sensor() {
 	if (Sensor != nullptr) {
@@ -49,12 +57,11 @@ void TNodejsDHT11Sensor::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 
 TNodejsDHT11Sensor::TReadTask::TReadTask(const v8::FunctionCallbackInfo<v8::Value>& Args):
 		TNodeTask(Args),
-		Sensor(nullptr) {
+		JsSensor(nullptr) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
-	TNodejsDHT11Sensor* JsSensor = ObjectWrap::Unwrap<TNodejsDHT11Sensor>(Args.Holder());
-	Sensor = JsSensor->Sensor;
+	JsSensor = ObjectWrap::Unwrap<TNodejsDHT11Sensor>(Args.Holder());
 }
 
 v8::Handle<v8::Function> TNodejsDHT11Sensor::TReadTask::GetCallback(const v8::FunctionCallbackInfo<v8::Value>& Args) {
@@ -65,19 +72,19 @@ v8::Local<v8::Value> TNodejsDHT11Sensor::TReadTask::WrapResult() {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::EscapableHandleScope HandleScope(Isolate);
 
-	const double Temp = Sensor->GetTemp();
-	const double Hum = Sensor->GetHum();
+	const double Temp = JsSensor->Sensor->GetTemp();
+	const double Hum = JsSensor->Sensor->GetHum();
 
 	v8::Local<v8::Object> RetVal = v8::Object::New(Isolate);
-	RetVal->Set(v8::String::NewFromUtf8(Isolate, "temperature"), v8::Number::New(Isolate, Temp));
-	RetVal->Set(v8::String::NewFromUtf8(Isolate, "humidity"), v8::Number::New(Isolate, Hum));
+	RetVal->Set(v8::String::NewFromUtf8(Isolate, JsSensor->TempReadingId.CStr()), v8::Number::New(Isolate, Temp));
+	RetVal->Set(v8::String::NewFromUtf8(Isolate, JsSensor->HumReadingId.CStr()), v8::Number::New(Isolate, Hum));
 
 	return HandleScope.Escape(RetVal);
 }
 
 void TNodejsDHT11Sensor::TReadTask::Run() {
 	try {
-		Sensor->Read();
+		JsSensor->Sensor->Read();
 	} catch (const PExcept& Except) {
 		SetExcept(Except);
 	}

@@ -3,10 +3,22 @@ var session = require('express-session');
 var ejs = require('ejs');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
+var path = require('path');
 
-var SessionStore = require('./util/sessionstore.js');
+var config = require('../config.js');
+var utils = require('./utils.js');
 
+var WebSocketWrapper = require('./utils/websockets.js').WebSocketWrapper;
+var SessionStore = require('./utils/sessionstore.js');
+
+var TITLES = {
+	'/': 'Index',
+	'index.html': 'Index'
+};
+
+var UI_PATH = '/';
 var API_PATH = '/api';
+var WS_PATH = '/ws';
 
 var titles = {
 	'': 'Index',
@@ -14,6 +26,15 @@ var titles = {
 };
 
 var app = express();
+var sensors;
+
+//=====================================================
+//UTILITY METHODS
+//=====================================================
+
+function getRequestedPage(req) {
+	return req.path.split('/').pop();
+}
 
 //=====================================================
 // API
@@ -27,91 +48,47 @@ function initApi() {
 // PAGE PREPARATION
 //=====================================================
 
-function accessControl(req, res, next) {
-	var session = req.session;
+function getPageOpts(req, res) {
+	var page = getRequestedPage(req);
 	
-	if (config.mode == 'debug') {
-		initSession(session, {email: 'luka@lstopar.si', uid: 1, role: 'admin'});
-		next();
-	}
-	else {
-		var page = getRequestedPage(req);
-		var dir = getRequestedPath(req);
-		
-		if (!isLoggedIn(session)) {
-			if (log.debug())
-				log.debug('Session data missing for page %s, dir %s ...', page, dir);
-			
-			if (dir == null || dir == '')
-				redirectLogin(req, res);
-			else {
-				var isAjax = req.xhr;
-				if (isAjax) {
-					if (log.debug())
-						log.debug('Session data missing for AJAX API call, blocking!')
-					handleNoPermission(req, res);
-				} else {
-					redirect(res, '../login.html');
-				}
-			}
-		} else {
-			// the user already exists, check if they have permission for this page
-			var email = session.user.email;
-			var role = session.user.role;
-			
-			if (log.trace())
-				log.trace('Checking permissions of user %s (%s) for page %s, dir %s ...', email, role, page, dir);
-			
-			var pageBlacklist = blacklist.pages[role];
-			var dirBlacklist = blacklist.dirs[role];
-			
-			if (dir != null && dir != '') {
-				if (log.trace())
-					log.trace('Directory present, checking access to directory %s ...', dir);
-				
-				if (dir in dirBlacklist) {
-					handleNoPermission(req, res);
-					return;
-				}
-			} else if (page in pageBlacklist) {
-				if (log.trace())
-					log.trace('Directory not present, checking access to page %s ...', page);
-				
-				handleNoPermission(req, res);
-				return;
-			}
-			
-			if (log.trace())
-				log.trace('User %s has permission for page %s!', email, page);
+	var opts = {
+		utils: utils,
+		sensors: sensors,
+		subtitle: TITLES[page]
+	};
+	
+	return opts;
+}
 
-			next();
-		}
+function prepPage(page) {
+	return function(req, res) {
+		res.render(page, getPageOpts(req, res));
 	}
 }
 
-exports.init = function () {
+//=====================================================
+// INITIALIZATION
+//=====================================================
+
+function initServer(sessionStore, parseCookie) {
 	log.info('Initializing web server ...');
+	
+	var sess = session({ 
+		unset: 'destroy',
+		store: sessionStore,
+		cookie: { maxAge: 1000*60*60*24 },	// the cookie will last for 1 day
+		resave: true,
+		saveUninitialized: true
+	});
 	
 	app.set('view engine', 'ejs');
 	
-	app.use(session({ 
-		unset: 'destroy',
-		secret: config.session.secret,
-		store: new SessionStore({ maxAge: config.session.maxIdleTime }),
-		resave: false,
-		saveUninitialized: true,
-		cookie: { secure: false }
-	}));
-	
+	app.use(parseCookie);
 	app.use(API_PATH + '/', bodyParser.urlencoded({ extended: false }));
 	app.use(API_PATH + '/', bodyParser.json());
-	
-	app.use(excludeDirs(['/js', '/css', '/lib', '/login'], excludeFiles(['/login.html', '/resetpassword.html'], accessControl)));
-	
+		
 	app.get('/', prepPage('index'));
 	app.get('/index.html', prepPage('index'));
-	app.get('/login.html', prepPage('login'));
-	app.get('/resetpassword.html', prepPage('resetpassword'));
 	
 	initApi();
 	
@@ -122,6 +99,34 @@ exports.init = function () {
 	log.info('================================================');
 	log.info('Server running at http://localhost:%d', config.server.port);
 	log.info('Serving API at: %s', API_PATH);
-	log.info('Max session idle time: %d', config.session.maxIdleTime);
 	log.info('================================================');
+	
+	return server;
+}
+
+exports.init = function (opts) {
+	if (opts.sensors == null) throw new Error('Sensors missing when initializing the server!');
+	
+	sensors = opts.sensors;
+	
+	var sessionStore = new SessionStore();
+	var parseCookie = cookieParser(config.session.secret);
+	
+	var server = initServer(sessionStore, parseCookie);
+	
+	var ws = WebSocketWrapper({
+		server: server,
+		sessionStore: sessionStore,
+		parseCookie: parseCookie,
+		webSocketPath: WS_PATH,
+	});
+	
+	sensors.onValueReceived(function (val) {
+		ws.distribute(JSON.stringify({
+			type: 'reading',
+			content: val
+		}));
+	});
+	
+	log.info('Server initialized!');
 }

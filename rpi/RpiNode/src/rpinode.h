@@ -31,8 +31,10 @@ private:
 	static TNodejsDHT11Sensor* NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args);
 
 	TDHT11Sensor* Sensor;
+	const TStr TempReadingId;
+	const TStr HumReadingId;
 
-	TNodejsDHT11Sensor(TDHT11Sensor* Sensor);
+	TNodejsDHT11Sensor(TDHT11Sensor* Sensor, const TStr& TempReadingId, const TStr& HumReadingId);
 	~TNodejsDHT11Sensor();
 
 private:	// JS functions
@@ -41,7 +43,7 @@ private:	// JS functions
 
 	class TReadTask: public TNodeTask {
 	private:
-		TDHT11Sensor* Sensor;
+		TNodejsDHT11Sensor* JsSensor;
 	public:
 		TReadTask(const v8::FunctionCallbackInfo<v8::Value>& Args);
 
