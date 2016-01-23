@@ -1,5 +1,6 @@
 var express = require('express');
 var session = require('express-session');
+var favicon = require('express-favicon');
 var ejs = require('ejs');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
@@ -93,6 +94,7 @@ function initServer(sessionStore, parseCookie) {
 	initApi();
 	
 	app.use(UI_PATH , express.static(path.join(__dirname, '../ui')));
+	app.use(favicon(path.join(__dirname, '../ui/img/favicon.ico')));
 	
 	var server = app.listen(config.server.port);
 	
