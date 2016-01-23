@@ -11,7 +11,7 @@ var sensors = {
 				return;
 			}
 			
-			log.info('result: %s', JSON.stringify(result));
+			log.info('result: %s', JSON.stringify(vals));
 		}
 	},
 	'YL-40': {
@@ -33,7 +33,7 @@ var sensors = {
 				return;
 			}
 			
-			log.info('Got output from ADC: %s', JSON.stringify(result));
+			log.info('Got output from ADC: %s', JSON.stringify(vals));
 		}
 	}
 };
