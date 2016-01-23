@@ -56,7 +56,7 @@ exports.init = function () {
 	log.info('Initializing sensors ...');
 	
 	for (var sensorId in sensors) {
-		sensors[sensorId].init();
+		sensors[sensorId].sensor.init();
 	}
 	
 	log.info('Sensors initialized!');
