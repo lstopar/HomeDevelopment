@@ -110,12 +110,14 @@ public:
 	~TYL40Adc();
 
 	void Init();
-	int Read(const int& InputN);
+	uint Read(const int& InputN);
 	void SetOutput(const int& OutputN, const int& Level);
 
 private:
 	void SetInput(const int& InputN);
 	void SendCommand(const uchar* Command);
+
+	void CleanUp();
 };
 
 

@@ -251,8 +251,7 @@ TYL40Adc::TYL40Adc():
 	Notify(TNotify::StdNotify) {}
 
 TYL40Adc::~TYL40Adc() {
-	close(FileDesc);
-	FileDesc = -1;
+	CleanUp();
 }
 
 void TYL40Adc::Init() {
@@ -263,19 +262,24 @@ void TYL40Adc::Init() {
 		return;
 	}
 
-	FileDesc = open("/dev/i2c-1", O_RDWR);
-	if (FileDesc < 0) {
-		FileDesc = -1;
-		throw TExcept::New("Failed to open I2C device file!");
+	try {
+		FileDesc = open("/dev/i2c-1", O_RDWR);
+		if (FileDesc < 0) {
+			FileDesc = -1;
+			throw TExcept::New("Failed to open I2C device file!");
+		}
+
+		const int Code = ioctl(FileDesc, I2C_SLAVE, I2C_ADDRESS);
+		EAssertR(Code == 0, "Error while selecting I2C device, code: " + TInt::GetStr(Code) + "!");
+
+		Notify->OnNotify(TNotifyType::ntInfo, "YL-40 initialized!");
+	} catch (const PExcept& Except) {
+		CleanUp();
+		throw Except;
 	}
-
-	const int Code = ioctl(FileDesc, I2C_SLAVE, I2C_ADDRESS);
-	EAssertR(Code == 0, "Error while selecting I2C device!");
-
-	Notify->OnNotify(TNotifyType::ntInfo, "YL-40 initialized!");
 }
 
-int TYL40Adc::Read(const int& InputN) {
+uint TYL40Adc::Read(const int& InputN) {
 	TLock Lock(CriticalSection);
 
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading YL-40 input %d ...", InputN);
@@ -287,16 +291,16 @@ int TYL40Adc::Read(const int& InputN) {
 		Notify->OnNotify(TNotifyType::ntInfo, "Reading ...");
 		Read = read(FileDesc, &Val, 1);
 		EAssertR(Read == 1, "Failed to read YL-40!");
-		printf("0x%02x\n", Val);
 		usleep(PROCESSING_DELAY);
 	}
 
-	return (int) Val;
+	return (uint) Val;
 }
 
 void TYL40Adc::SetOutput(const int& OutputN, const int& Level) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading YL-40 output %d to level %d ...", OutputN, Level);
 	EAssertR(0 <= OutputN && OutputN <= 3, "Invalid output channel: " + TInt::GetStr(OutputN));
+
 	const uchar Command[2] = { uchar(ANALOG_OUTPUT | uchar(OutputN)), (uchar) Level };
 	SendCommand(Command);
 }
@@ -304,12 +308,8 @@ void TYL40Adc::SetOutput(const int& OutputN, const int& Level) {
 void TYL40Adc::SetInput(const int& InputN) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading YL-40 input %d ...", InputN);
 	EAssertR(0 <= InputN && InputN <= 3, "Invalid input channel: " + TInt::GetStr(InputN));
-	uchar Command[2] = { uchar(InputN), 0x01u };
-//	uchar Command[2] = { uchar(0x40 | ((InputN + 1) & 0x03)), uchar(TRnd().GetUniDevInt(256)) };
-//	write(FileDesc, &Command, 2);
-//	usleep(PROCESSING_DELAY);
-//	EAssertR(Written == 2, "Failed to send a command to the YL-40 sensor: written " + TInt::GetStr(Written) +" bytes!");
 
+	uchar Command[2] = { uchar(InputN), 0x01u };
 	SendCommand(Command);
 }
 
@@ -320,4 +320,11 @@ void TYL40Adc::SendCommand(const uchar* Command) {
 	const int Written = write(FileDesc, Command, 2);
 	EAssertR(Written == 2, "Failed to send a command to the YL-40 sensor: written " + TInt::GetStr(Written) +" bytes!");
 	usleep(PROCESSING_DELAY);
+}
+
+void TYL40Adc::CleanUp() {
+	if (FileDesc >= 0) {
+		close(FileDesc);
+		FileDesc = -1;
+	}
 }
