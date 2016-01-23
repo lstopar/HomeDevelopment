@@ -1,3 +1,7 @@
+html, body {
+	height: 100%;
+}
+
 .thumbnail-img-wrapper {
     display: inline-block;
     width: 100%;
@@ -44,7 +48,8 @@
 #page-wrapper {
     padding: 0 15px;
     min-height: 568px;
-    background-color: #fff;
+    min-height: calc(100% - 52px);
+    /*background-color: #fff;*/
 }
 
 @media(min-width:768px) {
@@ -53,7 +58,7 @@
         margin: 0 0 0 250px;
         width: calc(100% - 250px);
         padding: 30px 30px;
-        border-left: 1px solid #e7e7e7;
+        border-left: 1px solid rgba(0,0,0,0.6);
     }
 }
 
@@ -125,11 +130,11 @@
 }
 
 .sidebar ul li {
-    border-bottom: 1px solid #e7e7e7;
+    /*border-bottom: 1px solid #e7e7e7;*/
 }
 
 .sidebar ul li a.active {
-    background-color: #eee;
+    /*background-color: #eee;*/
 }
 
 .sidebar .arrow {
