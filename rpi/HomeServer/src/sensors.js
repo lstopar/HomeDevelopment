@@ -1,5 +1,5 @@
 var config = require('../config.js');
-var rpi = require(config.rpilib);
+var rpi = require('../' + config.rpilib);
 
 var sensors = {
 	'DHT11': {
