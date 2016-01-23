@@ -86,13 +86,14 @@ function setValue(sensorId, value) {
 function readSensors() {
 	for (var sensorId in sensors) {
 		(function () {
+			var localSensorId = sensorId;
 			var config = sensors[sensorId];
 			var sensor = config.sensor;
 			var transform = config.transform;
 			
 			sensor.read(function (e, vals) {
 				if (e != null) {
-					log.error(e, 'Sensor %s had an error while reading!', sensorId);
+					log.error(e, 'Sensor %s had an error while reading!', localSensorId);
 					return;
 				}
 				
