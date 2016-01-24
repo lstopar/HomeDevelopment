@@ -91,6 +91,7 @@ void TNodejsDHT11Sensor::TReadTask::Run() {
 			Success = true;
 			break;
 		} catch (const PExcept& Except) {
+			printf("Failed to read DHT11, retrying in 2 seconds ...\n");
 			// sleep for 2 seconds before reading again
 			TSysProc::Sleep(TDHT11Sensor::MIN_SAMPLING_PERIOD);
 		}
