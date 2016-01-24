@@ -286,7 +286,6 @@ uint TYL40Adc::Read(const int& InputN) {
 	uchar Val;
 	int Read;
 	for (int ReadN = 0; ReadN < 2; ReadN++) {
-		Notify->OnNotify(TNotifyType::ntInfo, "Reading ...");
 		Read = read(FileDesc, &Val, 1);
 		EAssertR(Read == 1, "Failed to read YL-40!");
 		usleep(PROCESSING_DELAY);
