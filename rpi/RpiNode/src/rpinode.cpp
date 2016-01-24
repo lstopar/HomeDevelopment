@@ -202,7 +202,7 @@ void TNodeJsYL40Adc::TReadTask::Run() {
 	try {
 		const TIntStrKdV& InputNumNmKdV = Adc->InputNumNmKdV;
 
-		Notify->OnNotifyFmt(TNotifyType::ntInfo, "YL-40 will read %d inputs ...", InputNumNmKdV.Len());
+		Adc->Notify->OnNotifyFmt(TNotifyType::ntInfo, "YL-40 will read %d inputs ...", InputNumNmKdV.Len());
 		ValV.Gen(InputNumNmKdV.Len());
 		for (int InputN = 0; InputN < InputNumNmKdV.Len(); InputN++) {
 			int Val = Adc->Adc->Read(InputNumNmKdV[InputN].Key);
