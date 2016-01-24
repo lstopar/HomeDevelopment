@@ -113,7 +113,7 @@ void TDHT11Sensor::Read() {
 	int PinState;
 	for (uint8_t i = 0; i < MAX_TIME; i++) {
 		Counter = 0;
-		int PinState = digitalRead(Pin);
+		PinState = digitalRead(Pin);
 
 		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Pin state is high: %s", TBool(PinState == HIGH).GetStr().CStr());
 		while (PinState == LastState){
