@@ -34,9 +34,9 @@ public:
 // DATA: GPIO4
 class TDHT11Sensor {
 public:
-	static const uint64 MIN_SAMPLING_PERIOD;
+	static constexpr uint64 MIN_SAMPLING_PERIOD = 2000;
 private:
-	static const int DHT_PULSES;
+	static constexpr int DHT_PULSES = 41;
 
 	volatile uint32_t* MmioGpio;
 	const int Pin;

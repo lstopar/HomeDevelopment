@@ -91,7 +91,7 @@ void TNodejsDHT11Sensor::TReadTask::Run() {
 			Success = true;
 			break;
 		} catch (const PExcept& Except) {
-			// sleep for 2 seconts
+			// sleep for 2 seconds before reading again
 			TSysProc::Sleep(TDHT11Sensor::MIN_SAMPLING_PERIOD);
 		}
 	}

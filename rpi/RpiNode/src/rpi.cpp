@@ -27,9 +27,6 @@ void TRPiUtil::Sleep(const uint32& Millis) {
 
 /////////////////////////////////////////
 // DHT11 - Digital temperature and humidity sensor
-const uint64 TDHT11Sensor::MIN_SAMPLING_PERIOD = 2000;
-const int TDHT11Sensor::DHT_PULSES = 41;
-
 TDHT11Sensor::TDHT11Sensor(const int& _Pin):
 		MmioGpio(nullptr),
 		Pin(_Pin),
