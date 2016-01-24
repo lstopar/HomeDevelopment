@@ -33,6 +33,7 @@
 									<listOptionValue builtIn="false" value="/home/lstopar/.node-gyp/0.12.7/deps/v8/include"/>
 									<listOptionValue builtIn="false" value="/home/lstopar/.node-gyp/0.12.7/src"/>
 									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/sys"/>
+									<listOptionValue builtIn="false" value="/usr/local/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1373173093" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -44,6 +45,7 @@
 									<listOptionValue builtIn="false" value="/home/lstopar/.node-gyp/0.12.7/deps/v8/include"/>
 									<listOptionValue builtIn="false" value="/home/lstopar/.node-gyp/0.12.7/src"/>
 									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/sys"/>
+									<listOptionValue builtIn="false" value="/usr/local/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.500313276" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -61,6 +63,7 @@
 									<listOptionValue builtIn="false" value="/home/lstopar/.node-gyp/0.12.7/deps/v8/include"/>
 									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu/sys"/>
 									<listOptionValue builtIn="false" value="/usr/include"/>
+									<listOptionValue builtIn="false" value="/usr/local/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1419260865" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>

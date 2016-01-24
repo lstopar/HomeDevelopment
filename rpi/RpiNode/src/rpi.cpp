@@ -131,7 +131,7 @@ void TDHT11Sensor::Read() {
 		}
 
 		// Record pulse widths for the expected result bits.
-		for (int i=0; i < DHT_PULSES*2; i+=2) {
+		for (int i = 0; i < DHT_PULSES*2; i += 2) {
 			// Count how long pin is low and store in pulseCounts[i]
 			while (!Input()) {
 				if (++pulseCounts[i] >= DHT_MAXCOUNT) {
@@ -159,7 +159,7 @@ void TDHT11Sensor::Read() {
 		for (int i=2; i < DHT_PULSES*2; i+=2) {
 		  threshold += pulseCounts[i];
 		}
-		threshold /= DHT_PULSES-1;
+		threshold /= DHT_PULSES - 1;
 
 		// Interpret each high pulse as a 0 or 1 by comparing it to the 50us reference.
 		// If the count is less than 50us it must be a ~28us 0 pulse, and if it's higher

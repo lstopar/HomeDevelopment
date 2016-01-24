@@ -30,6 +30,8 @@ public:
 private:
 	static TNodejsDHT11Sensor* NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args);
 
+	static constexpr int RETRIES = 4;
+
 	TDHT11Sensor* Sensor;
 	const TStr TempReadingId;
 	const TStr HumReadingId;

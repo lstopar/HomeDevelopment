@@ -83,10 +83,21 @@ v8::Local<v8::Value> TNodejsDHT11Sensor::TReadTask::WrapResult() {
 }
 
 void TNodejsDHT11Sensor::TReadTask::Run() {
-	try {
-		JsSensor->Sensor->Read();
-	} catch (const PExcept& Except) {
-		SetExcept(Except);
+	int RetryN = 0;
+	bool Success = false;
+	while (RetryN++ < TNodejsDHT11Sensor::RETRIES) {
+		try {
+			JsSensor->Sensor->Read();
+			Success = true;
+			break;
+		} catch (const PExcept& Except) {
+			// sleep for 2 seconts
+			TSysProc::Sleep(TDHT11Sensor::MIN_SAMPLING_PERIOD);
+		}
+	}
+
+	if (!Success) {
+		SetExcept(TExcept::New("Failed to read DHT11 after " + TInt::GetStr(TNodejsDHT11Sensor::RETRIES) + " retries!"));
 	}
 }
 
