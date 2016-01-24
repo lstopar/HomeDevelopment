@@ -47,7 +47,7 @@ void TDHT11Sensor::Init() {
 	try {
 		TLock Lock(CriticalSection);
 
-		EAssertR(wiringPiSetup() != -1, "Failed to initialize DHT11!");
+		EAssertR(wiringPiSetup() == 0, "Failed to initialize DHT11!");
 
 //		if (MmioGpio == nullptr) {
 //			Notify->OnNotify(TNotifyType::ntInfo, "Mapping virtual address space for the DHT11 sensor ...");
@@ -115,23 +115,22 @@ void TDHT11Sensor::Read() {
 		while (digitalRead(Pin) == LastState){
 			Counter++;
 			delayMicroseconds(1);
-			if (Counter == 255)
-				break;
+			if (Counter == 255) { break; }
 		}
 		LastState = digitalRead(Pin);
-		if (Counter == 255)
-			break;
+		if (Counter == 255) { break; }
+
 		// top 3 transistions are ignored
 		if ((i >= 4) && (i % 2 == 0)) {
 			Data[j / 8] <<= 1;
-			if (Counter>16)
+			if (Counter > 16)
 				Data[j / 8] |= 1;
 			j++;
 		}
 	}
 
 	// verify the checksum
-	EAssertR(j >= 40, "DHT11: not enough bits received!");
+	EAssertR(j >= 40, "DHT11: not enough bits received: " + TUInt::GetStr(j) + "!");
 	EAssertR(Data[4] == ((Data[0] + Data[1] + Data[2] + Data[3]) & 0xFF), "DHT11: Checksum failed!");
 	EAssertR(Data[0] != 0 || Data[2] != 0, "Data is zero!");
 
