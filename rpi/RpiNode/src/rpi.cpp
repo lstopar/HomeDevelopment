@@ -110,14 +110,21 @@ void TDHT11Sensor::Read() {
 	pinMode(Pin, INPUT);
 
 	uint8_t j = 0;
+	int PinState;
 	for (uint8_t i = 0; i < MAX_TIME; i++) {
 		Counter = 0;
-		while (digitalRead(Pin) == LastState){
+		int PinState = digitalRead(Pin);
+
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Pin state is high: %s", TBool(PinState == HIGH).GetStr().CStr());
+		while (PinState == LastState){
 			Counter++;
 			delayMicroseconds(1);
 			if (Counter == 255) { break; }
 		}
 		LastState = digitalRead(Pin);
+
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Last state is high: %s", TBool(LastState == HIGH).GetStr().CStr());
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Counter: %s", TInt::GetStr(Counter));
 		if (Counter == 255) { break; }
 
 		// top 3 transistions are ignored
