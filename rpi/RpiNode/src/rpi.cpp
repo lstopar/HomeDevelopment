@@ -27,14 +27,14 @@ void TRPiUtil::Sleep(const uint32& Millis) {
 
 /////////////////////////////////////////
 // DHT11 - Digital temperature and humidity sensor
-TDHT11Sensor::TDHT11Sensor(const int& _Pin):
+TDHT11Sensor::TDHT11Sensor(const int& _Pin, const PNotify& _Notify):
 		MmioGpio(nullptr),
 		Pin(_Pin),
 		Temp(0),
 		Hum(0),
 		CriticalSection(),
 		PrevReadTm(0),
-		Notify(TNotify::StdNotify) {}
+		Notify(_Notify) {}
 
 TDHT11Sensor::~TDHT11Sensor() {
 	CleanUp();
@@ -243,10 +243,10 @@ void TDHT11Sensor::CleanUp() {
 
 /////////////////////////////////////////
 // YL-40 - ADC
-TYL40Adc::TYL40Adc():
+TYL40Adc::TYL40Adc(const PNotify& _Notify):
 	FileDesc(-1),
 	CriticalSection(),
-	Notify(TNotify::StdNotify) {}
+	Notify(_Notify) {}
 
 TYL40Adc::~TYL40Adc() {
 	CleanUp();

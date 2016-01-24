@@ -36,7 +36,10 @@ private:
 	const TStr TempReadingId;
 	const TStr HumReadingId;
 
-	TNodejsDHT11Sensor(TDHT11Sensor* Sensor, const TStr& TempReadingId, const TStr& HumReadingId);
+	PNotify Notify;
+
+	TNodejsDHT11Sensor(TDHT11Sensor* Sensor, const TStr& TempReadingId, const TStr& HumReadingId,
+			const PNotify& Notify);
 	~TNodejsDHT11Sensor();
 
 private:	// JS functions
@@ -70,7 +73,9 @@ private:
 	TYL40Adc* Adc;
 	TIntStrKdV InputNumNmKdV;
 
-	TNodeJsYL40Adc(TYL40Adc* Adc, const TIntStrKdV& InputNumNmKdV);
+	PNotify Notify;
+
+	TNodeJsYL40Adc(TYL40Adc* Adc, const TIntStrKdV& InputNumNmKdV, const PNotify& Notify);
 	~TNodeJsYL40Adc();
 
 private:

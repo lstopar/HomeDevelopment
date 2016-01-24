@@ -29,15 +29,19 @@ TNodejsDHT11Sensor* TNodejsDHT11Sensor::NewFromArgs(const v8::FunctionCallbackIn
 	const int Pin = ParamJson->GetObjInt("pin");
 	const TStr& TempId = ParamJson->GetObjStr("temperatureId");
 	const TStr& HumId = ParamJson->GetObjStr("humidityId");
+	const bool Verbose = ParamJson->GetObjBool("verbose", false);
 
-	return new TNodejsDHT11Sensor(new TDHT11Sensor(Pin), TempId, HumId);
+	const PNotify Notify = Verbose ? TNotify::StdNotify : TNotify::NullNotify;
+
+	return new TNodejsDHT11Sensor(new TDHT11Sensor(Pin, Notify), TempId, HumId, Notify);
 }
 
 TNodejsDHT11Sensor::TNodejsDHT11Sensor(TDHT11Sensor* _Sensor, const TStr& _TempReadingId,
-		const TStr& _HumReadingId):
+		const TStr& _HumReadingId, const PNotify& _Notify):
 			Sensor(_Sensor),
 			TempReadingId(_TempReadingId),
-			HumReadingId(_HumReadingId) {}
+			HumReadingId(_HumReadingId),
+			Notify(_Notify) {}
 
 TNodejsDHT11Sensor::~TNodejsDHT11Sensor() {
 	if (Sensor != nullptr) {
@@ -91,7 +95,7 @@ void TNodejsDHT11Sensor::TReadTask::Run() {
 			Success = true;
 			break;
 		} catch (const PExcept& Except) {
-			printf("Failed to read DHT11: %s, attempt %d out of %d in 2 seconds ...\n", Except->GetMsgStr().CStr(), (RetryN+1), TNodejsDHT11Sensor::MX_RETRIES);
+			JsSensor->Notify->OnNotifyFmt(TNotifyType::ntInfo, "Failed to read DHT11: %s, attempt %d out of %d in 2 seconds ...", Except->GetMsgStr().CStr(), (RetryN+1), TNodejsDHT11Sensor::MX_RETRIES);
 			// sleep for 2 seconds before reading again
 			TSysProc::Sleep(TDHT11Sensor::MIN_SAMPLING_PERIOD);
 		}
@@ -125,8 +129,9 @@ TNodeJsYL40Adc* TNodeJsYL40Adc::NewFromArgs(const v8::FunctionCallbackInfo<v8::V
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
-	PJsonVal ArgJson = TNodeJsUtil::GetArgJson(Args, 0);
-	PJsonVal InputJsonV = ArgJson->GetObjKey("inputs");
+	PJsonVal ParamJson = TNodeJsUtil::GetArgJson(Args, 0);
+	PJsonVal InputJsonV = ParamJson->GetObjKey("inputs");
+	const bool Verbose = ParamJson->GetObjBool("verbose", false);
 
 	TIntStrKdV InputNumNmKdV(InputJsonV->GetArrVals());
 	for (int InputN = 0; InputN < InputJsonV->GetArrVals(); InputN++) {
@@ -135,12 +140,15 @@ TNodeJsYL40Adc* TNodeJsYL40Adc::NewFromArgs(const v8::FunctionCallbackInfo<v8::V
 		InputNumNmKdV[InputN].Dat = InputJson->GetObjStr("id");
 	}
 
-	return new TNodeJsYL40Adc(new TYL40Adc(), InputNumNmKdV);
+	const PNotify Notify = Verbose ? TNotify::StdNotify : TNotify::NullNotify;
+
+	return new TNodeJsYL40Adc(new TYL40Adc(Notify), InputNumNmKdV, Notify);
 }
 
-TNodeJsYL40Adc::TNodeJsYL40Adc(TYL40Adc* _Adc, const TIntStrKdV& _InputNumNmKdV):
+TNodeJsYL40Adc::TNodeJsYL40Adc(TYL40Adc* _Adc, const TIntStrKdV& _InputNumNmKdV, const PNotify& _Notify):
 		Adc(_Adc),
-		InputNumNmKdV(_InputNumNmKdV) {}
+		InputNumNmKdV(_InputNumNmKdV),
+		Notify(_Notify) {}
 
 TNodeJsYL40Adc::~TNodeJsYL40Adc() {
 	delete Adc;

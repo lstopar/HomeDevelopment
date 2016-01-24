@@ -32,7 +32,8 @@ var sensors = config.mode == 'debug' ? {} : {
 		sensor: new rpi.DHT11({
 			pin: 4,
 			temperatureId: SENSOR_IDS.LR_TEMPERATURE,
-			humidityId: SENSOR_IDS.LR_HUMIDITY
+			humidityId: SENSOR_IDS.LR_HUMIDITY,
+			verbose: true
 		}),
 	},
 	'YL-40': {
@@ -42,7 +43,8 @@ var sensors = config.mode == 'debug' ? {} : {
 			    	id: SENSOR_IDS.LR_LUMINOSITY,
 			    	number: 0
 			    }
-			]
+			],
+			verbose: true
 		}),
 		transform: function (vals) {
 			vals[SENSOR_IDS.LR_LUMINOSITY] = (255 - vals[SENSOR_IDS.LR_LUMINOSITY]) / 255;

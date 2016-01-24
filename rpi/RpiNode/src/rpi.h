@@ -50,7 +50,7 @@ private:
 	PNotify Notify;
 
 public:
-	TDHT11Sensor(const int& Pin);
+	TDHT11Sensor(const int& Pin, const PNotify& Notify);
 	~TDHT11Sensor();
 
 	void Init();
@@ -107,7 +107,7 @@ private:
 	PNotify Notify;
 
 public:
-	TYL40Adc();
+	TYL40Adc(const PNotify& Notify);
 	~TYL40Adc();
 
 	void Init();
