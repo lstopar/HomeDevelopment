@@ -10,7 +10,6 @@
 
 #include "base.h"
 #include "threads.h"
-#include <wiringPi.h>
 //#include <fcntl.h>
 #include <sys/mman.h>
 
@@ -35,11 +34,10 @@ public:
 // DATA: GPIO4
 class TDHT11Sensor {
 private:
-	static constexpr uint64 MIN_SAMPLING_PERIOD = 2000;
-//	static const int DHT_PULSES;
-	static constexpr uint MAX_TIME = 85;
+	static const uint64 MIN_SAMPLING_PERIOD;
+	static const int DHT_PULSES;
 
-//	volatile uint32_t* MmioGpio;
+	volatile uint32_t* MmioGpio;
 	const int Pin;
 
 	float Temp;
@@ -61,18 +59,18 @@ public:
 	const float& GetHum() const { return Hum; }
 
 private:
-//	void SetLow();
-//	void SetHigh();
-//
-//	void SetMaxPriority();
-//	void SetDefaultPriority();
-//
-//	uint32_t Input();
-//
-//	void SetInput();
-//	void SetOutput();
+	void SetLow();
+	void SetHigh();
 
-//	void CleanUp();
+	void SetMaxPriority();
+	void SetDefaultPriority();
+
+	uint32_t Input();
+
+	void SetInput();
+	void SetOutput();
+
+	void CleanUp();
 };
 
 /////////////////////////////////////////

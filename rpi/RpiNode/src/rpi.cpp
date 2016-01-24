@@ -27,11 +27,11 @@ void TRPiUtil::Sleep(const uint32& Millis) {
 
 /////////////////////////////////////////
 // DHT11 - Digital temperature and humidity sensor
-//const uint64 TDHT11Sensor::MIN_SAMPLING_PERIOD = ;
-//const int TDHT11Sensor::DHT_PULSES = 41;
+const uint64 TDHT11Sensor::MIN_SAMPLING_PERIOD = 2000;
+const int TDHT11Sensor::DHT_PULSES = 41;
 
 TDHT11Sensor::TDHT11Sensor(const int& _Pin):
-//		MmioGpio(nullptr),
+		MmioGpio(nullptr),
 		Pin(_Pin),
 		Temp(0),
 		Hum(0),
@@ -40,46 +40,44 @@ TDHT11Sensor::TDHT11Sensor(const int& _Pin):
 		Notify(TNotify::StdNotify) {}
 
 TDHT11Sensor::~TDHT11Sensor() {
-//	CleanUp();
+	CleanUp();
 }
 
 void TDHT11Sensor::Init() {
 	try {
 		TLock Lock(CriticalSection);
 
-		EAssertR(wiringPiSetup() == 0, "Failed to initialize DHT11!");
+		if (MmioGpio == nullptr) {
+			Notify->OnNotify(TNotifyType::ntInfo, "Mapping virtual address space for the DHT11 sensor ...");
 
-//		if (MmioGpio == nullptr) {
-//			Notify->OnNotify(TNotifyType::ntInfo, "Mapping virtual address space for the DHT11 sensor ...");
-//
-//			FILE *FPtr = fopen("/proc/device-tree/soc/ranges", "rb");
-//			EAssertR(FPtr != nullptr, "Failed to open devices file!");
-//			fseek(FPtr, 4, SEEK_SET);
-//			unsigned char Buff[4];
-//			EAssertR(fread(Buff, 1, sizeof(Buff), FPtr) == sizeof(Buff), "Failed to read from devices file!");
-//
-//			uint32_t peri_base = Buff[0] << 24 | Buff[1] << 16 | Buff[2] << 8 | Buff[3] << 0;
-//			uint32_t gpio_base = peri_base + GPIO_BASE_OFFSET;
-//			fclose(FPtr);
-//
-//			int FileDesc = open("/dev/mem", O_RDWR | O_SYNC);
-//			EAssertR(FileDesc != -1, "Error opening /dev/mem. Probably not running as root.");
-//
-//			// Map GPIO memory to location in process space.
-//			MmioGpio = (uint32_t*) mmap(nullptr, GPIO_LENGTH, PROT_READ | PROT_WRITE, MAP_SHARED, FileDesc, gpio_base);
-//			close(FileDesc);
-//
-//			if (MmioGpio == MAP_FAILED) {
-//				// Don't save the result if the memory mapping failed.
-//				MmioGpio = nullptr;
-//				throw TExcept::New("mmap failed!");
-//			}
-//
-//			Notify->OnNotify(TNotifyType::ntInfo, "Done");
-//		}
+			FILE *FPtr = fopen("/proc/device-tree/soc/ranges", "rb");
+			EAssertR(FPtr != nullptr, "Failed to open devices file!");
+			fseek(FPtr, 4, SEEK_SET);
+			unsigned char Buff[4];
+			EAssertR(fread(Buff, 1, sizeof(Buff), FPtr) == sizeof(Buff), "Failed to read from devices file!");
+
+			uint32_t peri_base = Buff[0] << 24 | Buff[1] << 16 | Buff[2] << 8 | Buff[3] << 0;
+			uint32_t gpio_base = peri_base + GPIO_BASE_OFFSET;
+			fclose(FPtr);
+
+			int FileDesc = open("/dev/mem", O_RDWR | O_SYNC);
+			EAssertR(FileDesc != -1, "Error opening /dev/mem. Probably not running as root.");
+
+			// Map GPIO memory to location in process space.
+			MmioGpio = (uint32_t*) mmap(nullptr, GPIO_LENGTH, PROT_READ | PROT_WRITE, MAP_SHARED, FileDesc, gpio_base);
+			close(FileDesc);
+
+			if (MmioGpio == MAP_FAILED) {
+				// Don't save the result if the memory mapping failed.
+				MmioGpio = nullptr;
+				throw TExcept::New("mmap failed!");
+			}
+
+			Notify->OnNotify(TNotifyType::ntInfo, "Done");
+		}
 	} catch (const PExcept& Except) {
 		Notify->OnNotifyFmt(TNotifyType::ntErr, "Failed to map virtual address space, error: %s!", Except->GetMsgStr().CStr());
-//		CleanUp();
+		CleanUp();
 		throw Except;
 	}
 }
@@ -95,205 +93,156 @@ void TDHT11Sensor::Read() {
 		return;
 	}
 
-	uint8_t LastState = HIGH;
-	uint8_t Counter = 0;
-
-	uint8_t Data[5] = {0, 0, 0, 0, 0};
-
-	pinMode(Pin, OUTPUT);
-	digitalWrite(Pin, LOW);
-	delay(18);
-
-	digitalWrite(Pin, HIGH);
-	delayMicroseconds(40);
-
-	pinMode(Pin, INPUT);
-
-	uint8_t j = 0;
-	int PinState;
-	for (uint8_t i = 0; i < MAX_TIME; i++) {
-		Counter = 0;
-		PinState = digitalRead(Pin);
-
-		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Pin state is high: %s", TBool(PinState == HIGH).GetStr().CStr());
-		while (PinState == LastState){
-			Counter++;
-			delayMicroseconds(1);
-			if (Counter == 255) { break; }
-		}
-		LastState = digitalRead(Pin);
-
-		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Last state is high: %s", TBool(LastState == HIGH).GetStr().CStr());
-		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Counter: %s", TInt::GetStr(Counter).CStr());
-		if (Counter == 255) { break; }
-
-		// top 3 transistions are ignored
-		if ((i >= 4) && (i % 2 == 0)) {
-			Data[j / 8] <<= 1;
-			if (Counter > 16)
-				Data[j / 8] |= 1;
-			j++;
-		}
-	}
-
-	// verify the checksum
-	EAssertR(j >= 40, "DHT11: not enough bits received: " + TUInt::GetStr(j) + "!");
-	EAssertR(Data[4] == ((Data[0] + Data[1] + Data[2] + Data[3]) & 0xFF), "DHT11: Checksum failed!");
-	EAssertR(Data[0] != 0 || Data[2] != 0, "Data is zero!");
-
-	Temp = (float) (Data[2] + Data[3] / 10);
-	Hum = (float) (Data[0] + Data[1] / 10);
-
-
 	// Validate humidity and temperature arguments and set them to zero.
-//	Temp = 0.0f;
-//	Hum = 0.0f;
+	Temp = 0.0f;
+	Hum = 0.0f;
 
-//	try {
-//		// Store the count that each DHT bit pulse is low and high.
-//		// Make sure array is initialized to start at zero.
-//		int pulseCounts[DHT_PULSES*2] = {0};
-//
-//		SetOutput();
-//		SetMaxPriority();
-//
-//		// Set pin high for ~500 milliseconds.
-//		SetHigh();
-//		TRPiUtil::Sleep(500);
-//
-//		// The next calls are timing critical and care should be taken
-//		// to ensure no unnecssary work is done below.
-//
-//		// Set pin low for ~20 milliseconds.
-//		SetLow();//pi_2_mmio_set_low(pin);
-//		TRPiUtil::BusyWait(20);
-//
-//		// Set pin at input.
-//		SetInput();
-//		// Need a very short delay before reading pins or else value is sometimes still low.
-//		for (volatile int i = 0; i < 50; ++i) {}
-//
-//		// Wait for DHT to pull pin low.
-//		uint32_t count = 0;
-//		while (Input()) {
-//			if (++count >= DHT_MAXCOUNT) {
-//				// Timeout waiting for response.
-//				throw TExcept::New("DHT11 timed out!");
-//			}
-//		}
-//
-//		// Record pulse widths for the expected result bits.
-//		for (int i=0; i < DHT_PULSES*2; i+=2) {
-//			// Count how long pin is low and store in pulseCounts[i]
-//			while (!Input()) {
-//				if (++pulseCounts[i] >= DHT_MAXCOUNT) {
-//					// Timeout waiting for response.
-//					throw TExcept::New("DHT11 timed out!");
-//				}
-//			}
-//			// Count how long pin is high and store in pulseCounts[i+1]
-//			while (Input()) {
-//				if (++pulseCounts[i+1] >= DHT_MAXCOUNT) {
-//					// Timeout waiting for response.
-//					throw TExcept::New("DHT11 timed out!");
-//				}
-//			}
-//		}
-//
-//		// Done with timing critical code, now interpret the results.
-//
-//		// Drop back to normal priority.
-//		SetDefaultPriority();
-//
-//		// Compute the average low pulse width to use as a 50 microsecond reference threshold.
-//		// Ignore the first two readings because they are a constant 80 microsecond pulse.
-//		int threshold = 0;
-//		for (int i=2; i < DHT_PULSES*2; i+=2) {
-//		  threshold += pulseCounts[i];
-//		}
-//		threshold /= DHT_PULSES-1;
-//
-//		// Interpret each high pulse as a 0 or 1 by comparing it to the 50us reference.
-//		// If the count is less than 50us it must be a ~28us 0 pulse, and if it's higher
-//		// then it must be a ~70us 1 pulse.
-//		uint8_t data[5] = {0};
-//		for (int i=3; i < DHT_PULSES*2; i+=2) {
-//		  int index = (i-3)/16;
-//		  data[index] <<= 1;
-//		  if (pulseCounts[i] >= threshold) {
-//			// One bit for long pulse.
-//			data[index] |= 1;
-//		  }
-//		  // Else zero bit for short pulse.
-//		}
-//
-//		// Useful debug info:
-//		//printf("Data: 0x%x 0x%x 0x%x 0x%x 0x%x\n", data[0], data[1], data[2], data[3], data[4]);
-//
-//		// Verify checksum of received data.
-//		EAssertR(data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF), "Checksum error!");
-//		// Get humidity and temp for DHT11 sensor.
-//		Temp = (float) data[2];
-//		Hum = (float) data[0];
-//
-//		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Read values temperature: %.3f, humidity: %.3f", Temp, Hum);
-//	} catch (const PExcept& Except) {
-//		SetDefaultPriority();
-//		throw Except;
-//	}
+	try {
+		// Store the count that each DHT bit pulse is low and high.
+		// Make sure array is initialized to start at zero.
+		int pulseCounts[DHT_PULSES*2] = {0};
+
+		SetOutput();
+		SetMaxPriority();
+
+		// Set pin high for ~500 milliseconds.
+		SetHigh();
+		TRPiUtil::Sleep(500);
+
+		// The next calls are timing critical and care should be taken
+		// to ensure no unnecssary work is done below.
+
+		// Set pin low for ~20 milliseconds.
+		SetLow();//pi_2_mmio_set_low(pin);
+		TRPiUtil::BusyWait(20);
+
+		// Set pin at input.
+		SetInput();
+		// Need a very short delay before reading pins or else value is sometimes still low.
+		for (volatile int i = 0; i < 50; ++i) {}
+
+		// Wait for DHT to pull pin low.
+		uint32_t count = 0;
+		while (Input()) {
+			if (++count >= DHT_MAXCOUNT) {
+				// Timeout waiting for response.
+				throw TExcept::New("DHT11 timed out!");
+			}
+		}
+
+		// Record pulse widths for the expected result bits.
+		for (int i=0; i < DHT_PULSES*2; i+=2) {
+			// Count how long pin is low and store in pulseCounts[i]
+			while (!Input()) {
+				if (++pulseCounts[i] >= DHT_MAXCOUNT) {
+					// Timeout waiting for response.
+					throw TExcept::New("DHT11 timed out!");
+				}
+			}
+			// Count how long pin is high and store in pulseCounts[i+1]
+			while (Input()) {
+				if (++pulseCounts[i+1] >= DHT_MAXCOUNT) {
+					// Timeout waiting for response.
+					throw TExcept::New("DHT11 timed out!");
+				}
+			}
+		}
+
+		// Done with timing critical code, now interpret the results.
+
+		// Drop back to normal priority.
+		SetDefaultPriority();
+
+		// Compute the average low pulse width to use as a 50 microsecond reference threshold.
+		// Ignore the first two readings because they are a constant 80 microsecond pulse.
+		int threshold = 0;
+		for (int i=2; i < DHT_PULSES*2; i+=2) {
+		  threshold += pulseCounts[i];
+		}
+		threshold /= DHT_PULSES-1;
+
+		// Interpret each high pulse as a 0 or 1 by comparing it to the 50us reference.
+		// If the count is less than 50us it must be a ~28us 0 pulse, and if it's higher
+		// then it must be a ~70us 1 pulse.
+		uint8_t data[5] = {0};
+		for (int i=3; i < DHT_PULSES*2; i+=2) {
+		  int index = (i-3)/16;
+		  data[index] <<= 1;
+		  if (pulseCounts[i] >= threshold) {
+			// One bit for long pulse.
+			data[index] |= 1;
+		  }
+		  // Else zero bit for short pulse.
+		}
+
+		// Useful debug info:
+		//printf("Data: 0x%x 0x%x 0x%x 0x%x 0x%x\n", data[0], data[1], data[2], data[3], data[4]);
+
+		// Verify checksum of received data.
+		EAssertR(data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF), "Checksum error!");
+		// Get humidity and temp for DHT11 sensor.
+		Temp = (float) data[2];
+		Hum = (float) data[0];
+
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Read values temperature: %.3f, humidity: %.3f", Temp, Hum);
+	} catch (const PExcept& Except) {
+		SetDefaultPriority();
+		throw Except;
+	}
 	PrevReadTm = TTm::GetCurUniMSecs();
 }
 
-//void TDHT11Sensor::SetLow() {
-//	*(MmioGpio+10) = 1 << Pin;
-//}
-//
-//void TDHT11Sensor::SetHigh() {
-//	*(MmioGpio+7) = 1 << Pin;
-//}
-//
-//void TDHT11Sensor::SetMaxPriority() {
-//	struct sched_param sched;
-//	memset(&sched, 0, sizeof(sched));
-//	// Use FIFO scheduler with highest priority for the lowest chance of the kernel context switching.
-//	sched.sched_priority = sched_get_priority_max(SCHED_FIFO);
-//	sched_setscheduler(0, SCHED_FIFO, &sched);
-//}
-//
-//void TDHT11Sensor::SetDefaultPriority() {
-//	struct sched_param sched;
-//	memset(&sched, 0, sizeof(sched));
-//	// Go back to default scheduler with default 0 priority.
-//	sched.sched_priority = 0;
-//	sched_setscheduler(0, SCHED_OTHER, &sched);
-//}
+void TDHT11Sensor::SetLow() {
+	*(MmioGpio+10) = 1 << Pin;
+}
 
-//uint32_t TDHT11Sensor::Input() {
-//	return *(MmioGpio+13) & (1 << Pin);
-//}
-//
-//void TDHT11Sensor::SetInput() {
-//	// Set GPIO register to 000 for specified GPIO number.
-//	*(MmioGpio+((Pin)/10)) &= ~(7<<(((Pin)%10)*3));
-//}
-//
-//void TDHT11Sensor::SetOutput() {
-//	// First set to 000 using input function.
-//	SetInput();
-//	// Next set bit 0 to 1 to set output.
-//	*(MmioGpio+((Pin)/10)) |=  (1<<(((Pin)%10)*3));
-//}
+void TDHT11Sensor::SetHigh() {
+	*(MmioGpio+7) = 1 << Pin;
+}
 
-//void TDHT11Sensor::CleanUp() {
-//	TLock Lock(CriticalSection);
-//
-//	if (MmioGpio != nullptr) {
-//		Notify->OnNotify(TNotifyType::ntInfo, "Unmapping virtual address space for the DHT11 sensor ...");
-//		int ErrCode = munmap((void*) MmioGpio, GPIO_LENGTH);
-//		EAssertR(ErrCode == 0, "Failed to unmap virtual address space for the DHT11 sensor!");
-//		MmioGpio = nullptr;
-//	}
-//}
+void TDHT11Sensor::SetMaxPriority() {
+	struct sched_param sched;
+	memset(&sched, 0, sizeof(sched));
+	// Use FIFO scheduler with highest priority for the lowest chance of the kernel context switching.
+	sched.sched_priority = sched_get_priority_max(SCHED_FIFO);
+	sched_setscheduler(0, SCHED_FIFO, &sched);
+}
+
+void TDHT11Sensor::SetDefaultPriority() {
+	struct sched_param sched;
+	memset(&sched, 0, sizeof(sched));
+	// Go back to default scheduler with default 0 priority.
+	sched.sched_priority = 0;
+	sched_setscheduler(0, SCHED_OTHER, &sched);
+}
+
+uint32_t TDHT11Sensor::Input() {
+	return *(MmioGpio+13) & (1 << Pin);
+}
+
+void TDHT11Sensor::SetInput() {
+	// Set GPIO register to 000 for specified GPIO number.
+	*(MmioGpio+((Pin)/10)) &= ~(7<<(((Pin)%10)*3));
+}
+
+void TDHT11Sensor::SetOutput() {
+	// First set to 000 using input function.
+	SetInput();
+	// Next set bit 0 to 1 to set output.
+	*(MmioGpio+((Pin)/10)) |=  (1<<(((Pin)%10)*3));
+}
+
+void TDHT11Sensor::CleanUp() {
+	TLock Lock(CriticalSection);
+
+	if (MmioGpio != nullptr) {
+		Notify->OnNotify(TNotifyType::ntInfo, "Unmapping virtual address space for the DHT11 sensor ...");
+		int ErrCode = munmap((void*) MmioGpio, GPIO_LENGTH);
+		EAssertR(ErrCode == 0, "Failed to unmap virtual address space for the DHT11 sensor!");
+		MmioGpio = nullptr;
+	}
+}
+
 
 /////////////////////////////////////////
 // YL-40 - ADC
