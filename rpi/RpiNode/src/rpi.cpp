@@ -124,7 +124,7 @@ void TDHT11Sensor::Read() {
 		LastState = digitalRead(Pin);
 
 		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Last state is high: %s", TBool(LastState == HIGH).GetStr().CStr());
-		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Counter: %s", TInt::GetStr(Counter));
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Counter: %s", TInt::GetStr(Counter).CStr());
 		if (Counter == 255) { break; }
 
 		// top 3 transistions are ignored
