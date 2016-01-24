@@ -17,6 +17,6 @@
 			}
 		}
 	},
-	"samplingInterval": 10000,
+	"samplingInterval": 15000,
 	"mode": "debug"
 }
