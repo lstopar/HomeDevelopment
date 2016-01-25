@@ -1,67 +1,68 @@
+var path = require('path');
+var fs = require('fs');
+
 var config = require('../config.js');
 var rpi = require('../' + config.rpilib);
 
 //=======================================================
-// INITIALIZATION
+// VARIABLES
 //=======================================================
 
-var SENSORS_CONFIG = {
-	LR_TEMPERATURE: {
-		id: 'lr-temp',
-		type: 'temperature'
-	},
-	LR_HUMIDITY: {
-		id: 'lr-hum',
-		type: 'humidity'
-	},
-	LR_LUMINOSITY: {
-		id: 'lr-lum',
-		type: 'luminocity'
-	}
-};
-
-var SENSOR_IDS = {};
-var SENSOR_TYPES = {};
-for (var sensorId in SENSORS_CONFIG) {
-	SENSOR_IDS[sensorId] = SENSORS_CONFIG[sensorId].id;
-	SENSOR_TYPES[SENSORS_CONFIG[sensorId].id] = SENSORS_CONFIG[sensorId].type;
-}
-
-var sensors = config.mode == 'debug' ? {} : {
-	'DHT11': {
-		sensor: new rpi.DHT11({
-			pin: 4,
-			temperatureId: SENSOR_IDS.LR_TEMPERATURE,
-			humidityId: SENSOR_IDS.LR_HUMIDITY,
-			verbose: true
-		}),
-	},
-	'YL-40': {
-		sensor: new rpi.YL40Adc({
-			inputs: [
-			    {
-			    	id: SENSOR_IDS.LR_LUMINOSITY,
-			    	number: 0
-			    }
-			],
-			verbose: true
-		}),
-		transform: function (vals) {
-			vals[SENSOR_IDS.LR_LUMINOSITY] = (255 - vals[SENSOR_IDS.LR_LUMINOSITY]) / 255;
-			return vals;
-		}
-	}
-};
+var devices = {};
+var sensors = {};
+var values = {};
 
 var callbacks = {
 	onValueReceived: function () {}
 };
 
-var values = {};
+//=======================================================
+// INITIALIZATION
+//=======================================================
 
-for (var sensorId in sensors) {
-	if (sensors[sensorId].transform == null) {
-		sensors[sensorId].transform = function (vals) { return vals; }
+function createDevice(type, devConfig) {
+	switch (type) {
+	case 'DHT11':
+		return new rpi.DHT11(devConfig);
+	case 'YL-40':
+		return new rpi.YL40Adc(devConfig);
+	default:
+		throw new Error('Invalid device type: ' + type);
+	}
+}
+
+function initSensors() {
+	log.info('Reading devices configuration ...');
+	var devicesConf = require(path.join(__dirname, '../devices', config.devices));
+	
+	if (log.info())
+		log.info('Using device configuration:\n%s', JSON.stringify(devicesConf, null, '\t'));
+
+	for (var deviceN = 0; deviceN < devicesConf.length; deviceN++) {
+		log.info('Initializing device %d ...', deviceN);
+		var deviceConf = devicesConf[deviceN];
+		
+		var type = deviceConf.type;
+		var conf = deviceConf.configuration;
+		var deviceSensors = deviceConf.sensors;
+		var transform = deviceConf.transform;
+		
+		for (var sensorN = 0; sensorN < deviceSensors.length; sensorN++) {
+			var devSensor = deviceSensors[sensorN];
+			
+			if (devSensor.id == null) throw new Error('Sensor ID is not defined!');
+			if (devSensor.name == null) throw new Error('Sensor name is not defined!');
+			
+			sensors[devSensor.id] = devSensor;
+		}
+		
+		if (config.mode != 'debug') {
+			devices.push({
+				device: createDevice(type, conf),
+				type: type,
+				transform: transform
+			});
+		}
 	}
 }
 
@@ -78,35 +79,33 @@ function setValue(sensorId, value) {
 		callbacks.onValueReceived({
 			id: sensorId,
 			value: value,
-			type: SENSOR_TYPES[sensorId]
+			type: sensors[sensorId].type
 		});
 	} catch (e) {
 		log.error(e, 'Exception while setting value of sensor: %s', sensorId);
 	}
 }
 
-function readSensors() {
-	for (var sensorId in sensors) {
+function readDevices() {
+	for (var deviceN = 0; deviceN < devices.length; deviceN++) {
 		(function () {
-			var localSensorId = sensorId;
-			var config = sensors[sensorId];
-			var sensor = config.sensor;
-			var transform = config.transform;
+			var deviceConf = devices[deviceN];
+			var device = deviceConf.device;
+			var transform = deviceConf.transform;
 			
-			sensor.read(function (e, vals) {
+			device.read(function (e, vals) {
 				if (e != null) {
-					log.error(e, 'Sensor %s had an error while reading!', localSensorId);
+					log.error(e, 'Device %d of type %s had an error while reading!', localSensorId, deviceConf.type);
 					return;
 				}
 				
-				var transformed = transform(vals);
+				var trans = transform != null ? transform(vals) : vals;
 				
 				if (log.debug())
-					log.debug('Read values: %s', JSON.stringify(transformed));
+					log.debug('Read values: %s', JSON.stringify(trans));
 				
-				for (var readingId in transformed) {
-					setValue(readingId, transformed[readingId]);
-				}
+				for (var sensorId in trans)
+					setValue(sensorId, trans[sensorId]);
 			});
 		})();
 	}
@@ -116,16 +115,16 @@ function readAll() {
 	if (log.debug())
 		log.debug('Reading all devices ...');
 	
-	readSensors();
+	readDevices();
 }
 
 function mockReadAll() {
 	if (log.debug())
 		log.debug('Reading all devices ...');
 	
-	for (var readingId in SENSOR_IDS) {
+	for (var sensorId in sensors) {
 		var value = Math.random()*100;
-		setValue(SENSOR_IDS[readingId], Math.random()*100);
+		setValue(sensorId, value);
 	}
 }
 
@@ -133,39 +132,44 @@ function mockReadAll() {
 // EXPORTS
 //=======================================================
 
-for (var readingId in SENSOR_IDS) {
-	exports[readingId] = SENSOR_IDS[readingId];
-}
-
-exports.read = config.mode != 'debug' ? readAll : mockReadAll;
+//for (var readingId in SENSOR_IDS) {
+//	exports[readingId] = SENSOR_IDS[readingId];
+//}
 
 exports.getValue = function (sensorId) {
 	return sensorId in values ? values[sensorId] : 0;
-}
+};
 
-exports.onValueReceived = function (callback) {
-	callbacks.onValueReceived = callback;
-}
+exports.getSensors = function () {
+	var result = [];
+	for (var sensorId in sensors) {
+		result.push(sensors[sensorId]);
+	}
+	return result;
+};
 
 exports.init = function () {
 	if (config.samplingInterval == null) throw new Error("The sampling interval is not set!");
 	
+	initSensors();
+	
 	if (config.mode != 'debug') {
-		log.info('Initializing sensors ...');
+		log.info('Initializing devices ...');
 		
-		for (var sensorId in sensors) {
-			sensors[sensorId].sensor.init();
+		for (var deviceN = 0; deviceN < devices.length; deviceN++) {
+			devices[deviceN].device.init();
 		}
 		
 		log.info('Starting sampling sensors ...');
-		
 		readAll();
 		setInterval(function () {
-			readAll();
+			try {
+				readAll();
+			} catch (e) {
+				log.error(e, 'Exception while reading all devices!');
+			}
 		}, config.samplingInterval);
 	} else {
-		log.info('Initializing mock sensors ...');
-		
 		mockReadAll();
 		setInterval(function () {
 			mockReadAll();
@@ -173,4 +177,8 @@ exports.init = function () {
 	}
 	
 	log.info('Sensors initialized!');
+}
+
+exports.onValueReceived = function (callback) {
+	callbacks.onValueReceived = callback;
 }

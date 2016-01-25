@@ -1,7 +1,7 @@
 {
 	"rpilib": "../RpiNode/build/Release/rpinode.node",
 	"server": {
-		"port": 8888
+		"port": 80
 	},
 	"session": {
 		"secret": "enigma",
@@ -17,6 +17,7 @@
 			}
 		}
 	},
-	"samplingInterval": 15000,
-	"mode": "debug"
+	"samplingInterval": 10000,
+	"devices": "devices.js",
+	"mode": "release"
 }

@@ -35,6 +35,7 @@ public:
 class TDHT11Sensor {
 public:
 	static constexpr uint64 MIN_SAMPLING_PERIOD = 2000;
+	static constexpr uint64 SAMPLING_TM = 1000;
 private:
 	static constexpr int DHT_PULSES = 41;
 

@@ -29,18 +29,20 @@ TNodejsDHT11Sensor* TNodejsDHT11Sensor::NewFromArgs(const v8::FunctionCallbackIn
 	const int Pin = ParamJson->GetObjInt("pin");
 	const TStr& TempId = ParamJson->GetObjStr("temperatureId");
 	const TStr& HumId = ParamJson->GetObjStr("humidityId");
+	const uint64 MxSampleTm = ParamJson->GetObjUInt64("timeout", 10000);
 	const bool Verbose = ParamJson->GetObjBool("verbose", false);
 
 	const PNotify Notify = Verbose ? TNotify::StdNotify : TNotify::NullNotify;
 
-	return new TNodejsDHT11Sensor(new TDHT11Sensor(Pin, Notify), TempId, HumId, Notify);
+	return new TNodejsDHT11Sensor(new TDHT11Sensor(Pin, Notify), TempId, HumId, MxSampleTm, Notify);
 }
 
 TNodejsDHT11Sensor::TNodejsDHT11Sensor(TDHT11Sensor* _Sensor, const TStr& _TempReadingId,
-		const TStr& _HumReadingId, const PNotify& _Notify):
+		const TStr& _HumReadingId, const uint64& _MxSampleTm, const PNotify& _Notify):
 			Sensor(_Sensor),
 			TempReadingId(_TempReadingId),
 			HumReadingId(_HumReadingId),
+			MxSampleTm(_MxSampleTm),
 			Notify(_Notify) {}
 
 TNodejsDHT11Sensor::~TNodejsDHT11Sensor() {
@@ -87,22 +89,34 @@ v8::Local<v8::Value> TNodejsDHT11Sensor::TReadTask::WrapResult() {
 }
 
 void TNodejsDHT11Sensor::TReadTask::Run() {
+	const uint64 StartTm = TTm::GetCurUniMSecs();
+
 	int RetryN = 0;
 	bool Success = false;
-	while (RetryN++ < TNodejsDHT11Sensor::MX_RETRIES) {
+	while (true) {
+		RetryN++;
+
 		try {
 			JsSensor->Sensor->Read();
 			Success = true;
 			break;
 		} catch (const PExcept& Except) {
-			JsSensor->Notify->OnNotifyFmt(TNotifyType::ntInfo, "Failed to read DHT11: %s, attempt %d out of %d in 2 seconds ...", Except->GetMsgStr().CStr(), (RetryN+1), TNodejsDHT11Sensor::MX_RETRIES);
+			const uint64 TimeExpired = TTm::GetCurUniMSecs() - StartTm;
+			const int64 TimeLeft = int64(JsSensor->MxSampleTm) - int64(TimeExpired);
+
+			JsSensor->Notify->OnNotifyFmt(TNotifyType::ntInfo, "Failed to read DHT11: %s, time left %ld ...", Except->GetMsgStr().CStr(), (RetryN+1));
+
+			if (TimeLeft - int64(TDHT11Sensor::SAMPLING_TM) <= 0) { break; }
+
 			// sleep for 2 seconds before reading again
+			JsSensor->Notify->OnNotifyFmt(TNotifyType::ntInfo, "Attempt %d in 2 seconds ...", (RetryN+1));
 			TSysProc::Sleep(TDHT11Sensor::MIN_SAMPLING_PERIOD);
 		}
 	}
 
+
 	if (!Success) {
-		SetExcept(TExcept::New("Failed to read DHT11 after " + TInt::GetStr(TNodejsDHT11Sensor::MX_RETRIES) + " retries!"));
+		SetExcept(TExcept::New("Failed to read DHT11 after " + TUInt64::GetStr(JsSensor->MxSampleTm)));
 	}
 }
 

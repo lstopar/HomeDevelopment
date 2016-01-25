@@ -34,66 +34,31 @@
     	<div class="tab-content">
     		<div id="tab-home" role="tabpanel" class="tab-pane fade active">
     			<div class="row">
-					<div class="col-sm-5 col-md-3">
-						<div id="thumb-<%= sensors.LR_TEMPERATURE %>" class="thumbnail">
-							<%
-							var val = sensors.getValue(sensors.LR_TEMPERATURE);
+    				<%
+    				var sensorV = sensors.getSensors();
+    				for (var sensorN = 0; sensorN < sensorV.length; sensorN++) { %>
+    					<div class="col-sm-5 col-md-3">
+    						<%
+							var sensor = sensorV[sensorN];
+							var val = sensors.getValue(sensor.id);
 							%>
-							<div class="img-thumbnail thumbnail-img-wrapper">
-								<div class="wrapper1">
-									<img id="img-<%= sensors.LR_TEMPERATURE %>" src="img/temperature.png" alt="Temperature" />
+							<div id="thumb-<%= sensor.id %>" class="thumbnail">
+								<div class="img-thumbnail thumbnail-img-wrapper">
+									<div class="wrapper1">
+										<img id="img-<%= sensor.id %>" src="<%= utils.getSensorImg(sensor); %>" alt="<%= sensor.name %>" />
+									</div>
 								</div>
-							</div>
-							<div class="caption">
-								<h4>Living room temperature - <span id="span-val-<%= sensors.LR_TEMPERATURE %>"><%= val.toFixed(); %></span>&#x2103;</h4>
-								<p>...</p>
-								<p>
-									<a href="#" class="btn btn-primary" role="button">Button</a>
-									<a href="#" class="btn btn-default" role="button">Button</a>
-								</p>
-      						</div>
-    					</div>
-  					</div>
-  					<div class="col-sm-5 col-md-3">
-						<div id="thumb-<%= sensors.LR_HUMIDITY %>" class="thumbnail">
-							<%
-							var val = sensors.getValue(sensors.LR_HUMIDITY);
-							%>
-							<div class="img-thumbnail thumbnail-img-wrapper">
-								<div class="wrapper1">
-									<img id="img-<%= sensors.LR_HUMIDITY %>" src="img/humidity.png" alt="Humidity" />
-								</div>
-							</div>
-							<div class="caption">
-								<h4>Living room humidity - <span id="span-val-<%= sensors.LR_HUMIDITY %>"><%= val.toFixed(); %></span>%</h4>
-								<p>...</p>
-								<p>
-									<a href="#" class="btn btn-primary" role="button">Button</a>
-									<a href="#" class="btn btn-default" role="button">Button</a>
-								</p>
-      						</div>
-    					</div>
-  					</div>
-  					<div class="col-sm-5 col-md-3">
-						<div id="thumb-<%= sensors.LR_LUMINOSITY %>" class="thumbnail">
-							<%
-							var val = sensors.getValue(sensors.LR_LUMINOSITY);
-							%>
-							<div class="img-thumbnail thumbnail-img-wrapper">
-								<div class="wrapper1">
-									<img id="img-<%= sensors.LR_LUMINOSITY %>" src="img/luminosity.png" alt="Luminosity" />
-								</div>
-							</div>
-							<div class="caption">
-								<h4>Living room luminosity - <span id="span-val-<%= sensors.LR_LUMINOSITY %>"><%= (100*val).toFixed(); %></span>%</h4>
-								<p>...</p>
-								<p>
-									<a href="#" class="btn btn-primary" role="button">Button</a>
-									<a href="#" class="btn btn-default" role="button">Button</a>
-								</p>
-      						</div>
-    					</div>
-  					</div>
+								<div class="caption">
+									<h4><%= sensor.name %>: <span class="pull-right"><span id="span-val-<%= sensor.id %>"><%= utils.formatVal(sensor, val); %></span><%= sensor.unit %><span></span></h4>
+									<p><%= sensor.description %></p>
+									<p>
+										<a href="#" class="btn btn-primary" role="button">Button</a>
+										<a href="#" class="btn btn-default" role="button">Button</a>
+									</p>
+	      						</div>
+	    					</div>
+	  					</div>
+    				<% } %>
 				</div>
     		</div>
     		<div id="tab-torrents" role="tabpanel" class="tab-pane fade">

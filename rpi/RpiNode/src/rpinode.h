@@ -30,16 +30,16 @@ public:
 private:
 	static TNodejsDHT11Sensor* NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args);
 
-	static constexpr int MX_RETRIES = 4;
-
 	TDHT11Sensor* Sensor;
 	const TStr TempReadingId;
 	const TStr HumReadingId;
 
+	const uint64 MxSampleTm;
+
 	PNotify Notify;
 
 	TNodejsDHT11Sensor(TDHT11Sensor* Sensor, const TStr& TempReadingId, const TStr& HumReadingId,
-			const PNotify& Notify);
+			const uint64& MxSampleTm, const PNotify& Notify);
 	~TNodejsDHT11Sensor();
 
 private:	// JS functions
