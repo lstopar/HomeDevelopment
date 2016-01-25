@@ -47,6 +47,7 @@ module.exports = exports = [
 		},
 		"transform": function (vals) {
 			vals['lr-lum'] = (255 - vals['lr-lum']) / 2.55;
+			return vals;
 		}
 	}
 ]
