@@ -8,7 +8,7 @@ var rpi = require('../' + config.rpilib);
 // VARIABLES
 //=======================================================
 
-var devices = {};
+var devices = [];
 var sensors = {};
 var values = {};
 
