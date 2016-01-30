@@ -85,6 +85,7 @@ function initServer(sessionStore, parseCookie) {
 	app.set('view engine', 'ejs');
 	
 	app.use(parseCookie);
+	app.use(sess);
 	app.use(API_PATH + '/', bodyParser.urlencoded({ extended: false }));
 	app.use(API_PATH + '/', bodyParser.json());
 		
@@ -121,6 +122,10 @@ exports.init = function (opts) {
 		sessionStore: sessionStore,
 		parseCookie: parseCookie,
 		webSocketPath: WS_PATH,
+		onConnected: function (wsId, sessionId, session) {
+			if (log.debug())
+				log.debug('New web socket connected %d', wsId);
+		}
 	});
 	
 	sensors.onValueReceived(function (val) {
