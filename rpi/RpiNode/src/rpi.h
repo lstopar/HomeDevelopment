@@ -10,9 +10,9 @@
 
 #include "base.h"
 #include "threads.h"
-//#include <fcntl.h>
-#include <sys/mman.h>
 
+#include <wiringPi.h>
+#include <sys/mman.h>
 #include <linux/i2c-dev.h>
 
 #define GPIO_BASE_OFFSET 0x200000
