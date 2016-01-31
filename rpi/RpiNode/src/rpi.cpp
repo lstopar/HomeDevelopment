@@ -60,7 +60,7 @@ void TDHT11Sensor::Init() {
 	try {
 		TLock Lock(CriticalSection);
 
-		EAssertR(wiringPiSetup() >= 0, "Failed to initialize GPIO!");
+		EAssertR(wiringPiSetupGpio() >= 0, "Failed to initialize GPIO!");
 
 //		if (MmioGpio == nullptr) {
 //			Notify->OnNotify(TNotifyType::ntInfo, "Mapping virtual address space for the DHT11 sensor ...");
