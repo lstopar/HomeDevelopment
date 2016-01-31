@@ -11,16 +11,30 @@
 #include "base.h"
 #include "threads.h"
 
+
+=======
+#include <wiringPi.h>
+#include <sys/mman.h>
+>>>>>>> abcc397ef2f199d76c8e5f35dae11ec1159151d7
+
 #include <wiringPi.h>
 #include <sys/mman.h>
 #include <linux/i2c-dev.h>
 
-#define GPIO_BASE_OFFSET 0x200000
-#define GPIO_LENGTH 4096
-#define DHT_MAXCOUNT 32000
+enum TGpioLayout {
+	glWiringPi,
+	glBcmGpio
+};
 
-class TRPiUtil {
+class TRpiUtil {
+private:
+	static TCriticalSection CriticalSection;
 public:
+	static void InitGpio(const TGpioLayout& PinLayout=TGpioLayout::glBcmGpio);
+
+	static void SetMaxPriority();
+	static void SetDefaultPriority();
+
 	static void BusyWait(const uint32_t& Millis);
 	static void Sleep(const uint32& millis);
 };
@@ -37,9 +51,9 @@ public:
 	static constexpr uint64 MIN_SAMPLING_PERIOD = 2000;
 	static constexpr uint64 SAMPLING_TM = 1000;
 private:
+	static constexpr uint32 DHT_MAXCOUNT = 32000;
 	static constexpr int DHT_PULSES = 41;
 
-	volatile uint32_t* MmioGpio;
 	const int Pin;
 
 	float Temp;
@@ -52,27 +66,12 @@ private:
 
 public:
 	TDHT11Sensor(const int& Pin, const PNotify& Notify);
-	~TDHT11Sensor();
 
-	void Init();
+	void Init() {}
 	void Read();
 
 	const float& GetTemp() const { return Temp; }
 	const float& GetHum() const { return Hum; }
-
-private:
-	void SetLow();
-	void SetHigh();
-
-	void SetMaxPriority();
-	void SetDefaultPriority();
-
-	uint32_t Input();
-
-	void SetInput();
-	void SetOutput();
-
-	void CleanUp();
 };
 
 /////////////////////////////////////////
