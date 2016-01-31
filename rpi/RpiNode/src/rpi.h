@@ -11,14 +11,9 @@
 #include "base.h"
 #include "threads.h"
 #include <wiringPi.h>
-//#include <fcntl.h>
 #include <sys/mman.h>
 
 #include <linux/i2c-dev.h>
-
-//#define GPIO_BASE_OFFSET 0x200000
-//#define GPIO_LENGTH 4096
-//#define DHT_MAXCOUNT 32000
 
 enum TGpioLayout {
 	glWiringPi,
@@ -71,17 +66,6 @@ public:
 
 	const float& GetTemp() const { return Temp; }
 	const float& GetHum() const { return Hum; }
-
-private:
-//	void SetLow();
-//	void SetHigh();
-//
-//	uint32_t Input();
-//
-//	void SetInput();
-//	void SetOutput();
-
-//	void CleanUp();
 };
 
 /////////////////////////////////////////
