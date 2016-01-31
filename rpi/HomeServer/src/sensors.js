@@ -95,7 +95,7 @@ function readDevices() {
 			
 			device.read(function (e, vals) {
 				if (e != null) {
-					log.error(e, 'Device %d of type %s had an error while reading!', localSensorId, deviceConf.type);
+					log.error(e, 'Device of type %s had an error while reading!', deviceConf.type);
 					return;
 				}
 				

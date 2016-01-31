@@ -60,34 +60,36 @@ void TDHT11Sensor::Init() {
 	try {
 		TLock Lock(CriticalSection);
 
-		if (MmioGpio == nullptr) {
-			Notify->OnNotify(TNotifyType::ntInfo, "Mapping virtual address space for the DHT11 sensor ...");
+		EAssertR(wiringPiSetup() >= 0, "Failed to initialize GPIO!");
 
-			FILE *FPtr = fopen("/proc/device-tree/soc/ranges", "rb");
-			EAssertR(FPtr != nullptr, "Failed to open devices file!");
-			fseek(FPtr, 4, SEEK_SET);
-			unsigned char Buff[4];
-			EAssertR(fread(Buff, 1, sizeof(Buff), FPtr) == sizeof(Buff), "Failed to read from devices file!");
-
-			uint32_t peri_base = Buff[0] << 24 | Buff[1] << 16 | Buff[2] << 8 | Buff[3] << 0;
-			uint32_t gpio_base = peri_base + GPIO_BASE_OFFSET;
-			fclose(FPtr);
-
-			int FileDesc = open("/dev/mem", O_RDWR | O_SYNC);
-			EAssertR(FileDesc != -1, "Error opening /dev/mem. Probably not running as root.");
-
-			// Map GPIO memory to location in process space.
-			MmioGpio = (uint32_t*) mmap(nullptr, GPIO_LENGTH, PROT_READ | PROT_WRITE, MAP_SHARED, FileDesc, gpio_base);
-			close(FileDesc);
-
-			if (MmioGpio == MAP_FAILED) {
-				// Don't save the result if the memory mapping failed.
-				MmioGpio = nullptr;
-				throw TExcept::New("mmap failed!");
-			}
-
-			Notify->OnNotify(TNotifyType::ntInfo, "Done");
-		}
+//		if (MmioGpio == nullptr) {
+//			Notify->OnNotify(TNotifyType::ntInfo, "Mapping virtual address space for the DHT11 sensor ...");
+//
+//			FILE *FPtr = fopen("/proc/device-tree/soc/ranges", "rb");
+//			EAssertR(FPtr != nullptr, "Failed to open devices file!");
+//			fseek(FPtr, 4, SEEK_SET);
+//			unsigned char Buff[4];
+//			EAssertR(fread(Buff, 1, sizeof(Buff), FPtr) == sizeof(Buff), "Failed to read from devices file!");
+//
+//			uint32_t peri_base = Buff[0] << 24 | Buff[1] << 16 | Buff[2] << 8 | Buff[3] << 0;
+//			uint32_t gpio_base = peri_base + GPIO_BASE_OFFSET;
+//			fclose(FPtr);
+//
+//			int FileDesc = open("/dev/mem", O_RDWR | O_SYNC);
+//			EAssertR(FileDesc != -1, "Error opening /dev/mem. Probably not running as root.");
+//
+//			// Map GPIO memory to location in process space.
+//			MmioGpio = (uint32_t*) mmap(nullptr, GPIO_LENGTH, PROT_READ | PROT_WRITE, MAP_SHARED, FileDesc, gpio_base);
+//			close(FileDesc);
+//
+//			if (MmioGpio == MAP_FAILED) {
+//				// Don't save the result if the memory mapping failed.
+//				MmioGpio = nullptr;
+//				throw TExcept::New("mmap failed!");
+//			}
+//
+//			Notify->OnNotify(TNotifyType::ntInfo, "Done");
+//		}
 	} catch (const PExcept& Except) {
 		Notify->OnNotifyFmt(TNotifyType::ntErr, "Failed to map virtual address space, error: %s!", Except->GetMsgStr().CStr());
 		CleanUp();
