@@ -14,6 +14,14 @@
 #include "rpi.h"
 #include "nodeutil.h"
 
+class TNodeJsRpiBase: public node::ObjectWrap {
+	friend class TNodeJsUtil;
+public:
+	static void Init(v8::Handle<v8::Object> Exports);
+
+	JsDeclareFunction(init);
+};
+
 /////////////////////////////////////////
 // DHT11 - Digital temperature and humidity sensor
 //

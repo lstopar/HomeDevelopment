@@ -1,5 +1,30 @@
 #include "rpinode.h"
 
+void TNodeJsRpiBase::Init(v8::Handle<v8::Object> Exports) {
+	NODE_SET_METHOD(Exports, "init", _init);
+}
+
+void TNodeJsRpiBase::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	PJsonVal ArgJson = Args.Length() > 0 ? TNodeJsUtil::GetArgJson(Args, 1) : TJsonVal::NewObj();
+
+	const TStr PinLayoutStr = ArgJson->GetObjStr("pinLayout", "bcmGpio");
+
+	TGpioLayout PinLayout;
+	if (PinLayoutStr == "bcmGpio") {
+		PinLayout = TGpioLayout::glBcmGpio;
+	} else if (PinLayoutStr == "wiringPi") {
+		PinLayout = TGpioLayout::glWiringPi;
+	} else {
+		throw TExcept::New("Invalid pin layout: " + PinLayoutStr);
+	}
+
+	TRpiUtil::InitGpio(PinLayout);
+	Args.GetReturnValue().Set(v8::Undefined(Isolate));
+}
+
 /////////////////////////////////////////
 // DHT11 - Digital temperature and humidity sensor
 void TNodejsDHT11Sensor::Init(v8::Handle<v8::Object> Exports) {
@@ -231,6 +256,7 @@ void TNodeJsYL40Adc::TReadTask::Run() {
 //////////////////////////////////////////////
 // module initialization
 void Init(v8::Handle<v8::Object> Exports) {
+	TNodeJsRpiBase::Init(Exports);
 	TNodejsDHT11Sensor::Init(Exports);
 	TNodeJsYL40Adc::Init(Exports);
 }

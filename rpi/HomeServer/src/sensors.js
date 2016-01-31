@@ -95,7 +95,7 @@ function readDevices() {
 			
 			device.read(function (e, vals) {
 				if (e != null) {
-					log.error(e, 'Device %d of type %s had an error while reading!', localSensorId, deviceConf.type);
+					log.error(e, 'Device of type %s had an error while reading!', deviceConf.type);
 					return;
 				}
 				
@@ -151,6 +151,8 @@ exports.getSensors = function () {
 exports.init = function () {
 	if (config.samplingInterval == null) throw new Error("The sampling interval is not set!");
 	
+	log.info('Initializing Rpi');
+	rpi.init();
 	initSensors();
 	
 	if (config.mode != 'debug') {
