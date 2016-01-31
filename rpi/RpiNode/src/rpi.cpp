@@ -2,6 +2,26 @@
 
 /////////////////////////////////////////
 // Utilities
+TCriticalSection TRpiUtil::CriticalSection;
+
+void TRpiUtil::InitGpio(const TGpioLayout& PinLayout) {
+	TLock Lock(CriticalSection);
+
+	int RetVal;
+	switch (PinLayout) {
+	case glBcmGpio:
+		RetVal = wiringPiSetupGpio();
+		break;
+	case glWiringPi:
+		RetVal = wiringPiSetup();
+		break;
+	default:
+		throw TExcept::New("Invalid pin layout type: " + TInt::GetStr(PinLayout));
+	}
+
+	EAssertR(RetVal >= 0, "Failed to initialize GPIO!");
+}
+
 void TRpiUtil::SetMaxPriority() {
 	struct sched_param sched;
 	memset(&sched, 0, sizeof(sched));
@@ -44,58 +64,12 @@ void TRpiUtil::Sleep(const uint32& Millis) {
 /////////////////////////////////////////
 // DHT11 - Digital temperature and humidity sensor
 TDHT11Sensor::TDHT11Sensor(const int& _Pin, const PNotify& _Notify):
-		MmioGpio(nullptr),
 		Pin(_Pin),
 		Temp(0),
 		Hum(0),
 		CriticalSection(),
 		PrevReadTm(0),
 		Notify(_Notify) {}
-
-TDHT11Sensor::~TDHT11Sensor() {
-	CleanUp();
-}
-
-void TDHT11Sensor::Init() {
-	try {
-		TLock Lock(CriticalSection);
-
-		EAssertR(wiringPiSetupGpio() >= 0, "Failed to initialize GPIO!");
-
-//		if (MmioGpio == nullptr) {
-//			Notify->OnNotify(TNotifyType::ntInfo, "Mapping virtual address space for the DHT11 sensor ...");
-//
-//			FILE *FPtr = fopen("/proc/device-tree/soc/ranges", "rb");
-//			EAssertR(FPtr != nullptr, "Failed to open devices file!");
-//			fseek(FPtr, 4, SEEK_SET);
-//			unsigned char Buff[4];
-//			EAssertR(fread(Buff, 1, sizeof(Buff), FPtr) == sizeof(Buff), "Failed to read from devices file!");
-//
-//			uint32_t peri_base = Buff[0] << 24 | Buff[1] << 16 | Buff[2] << 8 | Buff[3] << 0;
-//			uint32_t gpio_base = peri_base + GPIO_BASE_OFFSET;
-//			fclose(FPtr);
-//
-//			int FileDesc = open("/dev/mem", O_RDWR | O_SYNC);
-//			EAssertR(FileDesc != -1, "Error opening /dev/mem. Probably not running as root.");
-//
-//			// Map GPIO memory to location in process space.
-//			MmioGpio = (uint32_t*) mmap(nullptr, GPIO_LENGTH, PROT_READ | PROT_WRITE, MAP_SHARED, FileDesc, gpio_base);
-//			close(FileDesc);
-//
-//			if (MmioGpio == MAP_FAILED) {
-//				// Don't save the result if the memory mapping failed.
-//				MmioGpio = nullptr;
-//				throw TExcept::New("mmap failed!");
-//			}
-//
-//			Notify->OnNotify(TNotifyType::ntInfo, "Done");
-//		}
-	} catch (const PExcept& Except) {
-		Notify->OnNotifyFmt(TNotifyType::ntErr, "Failed to map virtual address space, error: %s!", Except->GetMsgStr().CStr());
-		CleanUp();
-		throw Except;
-	}
-}
 
 void TDHT11Sensor::Read() {
 	TLock Lock(CriticalSection);
@@ -115,15 +89,13 @@ void TDHT11Sensor::Read() {
 	try {
 		// Store the count that each DHT bit pulse is low and high.
 		// Make sure array is initialized to start at zero.
-		int pulseCounts[DHT_PULSES*2] = {0};
+		uint32 pulseCounts[DHT_PULSES*2] = {0};
 
 		pinMode(Pin, OUTPUT);
-//		SetOutput();
 		TRpiUtil::SetMaxPriority();
 
 		// Set pin high for ~500 milliseconds.
 		digitalWrite(Pin, HIGH);
-//		SetHigh();
 		TRpiUtil::Sleep(500);
 
 		// The next calls are timing critical and care should be taken
@@ -131,12 +103,10 @@ void TDHT11Sensor::Read() {
 
 		// Set pin low for ~20 milliseconds.
 		digitalWrite(Pin, LOW);
-//		SetLow();//pi_2_mmio_set_low(pin);
 		TRpiUtil::BusyWait(20);
 
 		// Set pin at input.
 		pinMode(Pin, INPUT);
-//		SetInput();
 		// Need a very short delay before reading pins or else value is sometimes still low.
 		for (volatile int i = 0; i < 50; ++i) {}
 
@@ -174,7 +144,7 @@ void TDHT11Sensor::Read() {
 
 		// Compute the average low pulse width to use as a 50 microsecond reference threshold.
 		// Ignore the first two readings because they are a constant 80 microsecond pulse.
-		int threshold = 0;
+		uint32 threshold = 0;
 		for (int i=2; i < DHT_PULSES*2; i+=2) {
 		  threshold += pulseCounts[i];
 		}
@@ -193,9 +163,6 @@ void TDHT11Sensor::Read() {
 		  }
 		  // Else zero bit for short pulse.
 		}
-
-		// Useful debug info:
-		//printf("Data: 0x%x 0x%x 0x%x 0x%x 0x%x\n", data[0], data[1], data[2], data[3], data[4]);
 
 		// Verify checksum of received data.
 		EAssertR(data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF), "Checksum error!");
@@ -234,17 +201,6 @@ void TDHT11Sensor::Read() {
 //	// Next set bit 0 to 1 to set output.
 //	*(MmioGpio+((Pin)/10)) |=  (1<<(((Pin)%10)*3));
 //}
-
-void TDHT11Sensor::CleanUp() {
-	TLock Lock(CriticalSection);
-
-	if (MmioGpio != nullptr) {
-		Notify->OnNotify(TNotifyType::ntInfo, "Unmapping virtual address space for the DHT11 sensor ...");
-		int ErrCode = munmap((void*) MmioGpio, GPIO_LENGTH);
-		EAssertR(ErrCode == 0, "Failed to unmap virtual address space for the DHT11 sensor!");
-		MmioGpio = nullptr;
-	}
-}
 
 
 /////////////////////////////////////////

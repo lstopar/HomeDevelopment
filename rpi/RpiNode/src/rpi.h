@@ -16,12 +16,21 @@
 
 #include <linux/i2c-dev.h>
 
-#define GPIO_BASE_OFFSET 0x200000
-#define GPIO_LENGTH 4096
-#define DHT_MAXCOUNT 32000
+//#define GPIO_BASE_OFFSET 0x200000
+//#define GPIO_LENGTH 4096
+//#define DHT_MAXCOUNT 32000
+
+enum TGpioLayout {
+	glWiringPi,
+	glBcmGpio
+};
 
 class TRpiUtil {
+private:
+	static TCriticalSection CriticalSection;
 public:
+	static void InitGpio(const TGpioLayout& PinLayout=TGpioLayout::glBcmGpio);
+
 	static void SetMaxPriority();
 	static void SetDefaultPriority();
 
@@ -41,9 +50,9 @@ public:
 	static constexpr uint64 MIN_SAMPLING_PERIOD = 2000;
 	static constexpr uint64 SAMPLING_TM = 1000;
 private:
+	static constexpr uint32 DHT_MAXCOUNT = 32000;
 	static constexpr int DHT_PULSES = 41;
 
-	volatile uint32_t* MmioGpio;
 	const int Pin;
 
 	float Temp;
@@ -56,9 +65,8 @@ private:
 
 public:
 	TDHT11Sensor(const int& Pin, const PNotify& Notify);
-	~TDHT11Sensor();
 
-	void Init();
+	void Init() {}
 	void Read();
 
 	const float& GetTemp() const { return Temp; }
@@ -73,7 +81,7 @@ private:
 //	void SetInput();
 //	void SetOutput();
 
-	void CleanUp();
+//	void CleanUp();
 };
 
 /////////////////////////////////////////
