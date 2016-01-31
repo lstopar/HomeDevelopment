@@ -249,8 +249,8 @@ void TYL40Adc::SendCommand(const uchar* Command, const int& CommandLen) {
 	TLock Lock(CriticalSection);
 	EAssert(FileDesc >= 0);
 
-	const int Written = write(FileDesc, Command, 2);
-	EAssertR(Written == 2, "Failed to send a command to the YL-40 sensor: written " + TInt::GetStr(Written) +" bytes!");
+	const int Written = write(FileDesc, Command, CommandLen);
+	EAssertR(Written == CommandLen, "Failed to send a command to the YL-40 sensor: written " + TInt::GetStr(Written) +" bytes!");
 	usleep(PROCESSING_DELAY);
 }
 
