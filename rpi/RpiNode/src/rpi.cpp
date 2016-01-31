@@ -202,13 +202,6 @@ void TYL40Adc::Init() {
 			FileDesc = -1;
 			throw TExcept::New("Failed to setup I2C device!");
 		}
-//
-//
-//		FileDesc = open("/dev/i2c-1", O_RDWR);
-//
-//
-//		const int Code = ioctl(FileDesc, I2C_SLAVE, I2C_ADDRESS);
-//		EAssertR(Code == 0, "Error while selecting I2C device, code: " + TInt::GetStr(Code) + "!");
 
 		Notify->OnNotify(TNotifyType::ntInfo, "YL-40 initialized!");
 	} catch (const PExcept& Except) {
@@ -220,19 +213,20 @@ void TYL40Adc::Init() {
 uint TYL40Adc::Read(const int& InputN) {
 	TLock Lock(CriticalSection);
 
+	EAssert(FileDesc >= 0);
+
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading YL-40 input %d ...", InputN);
 	SetInput(InputN);
 
-	uint Val;
-//	int Read;
+	uchar Val;
+	int Read;
 	for (int ReadN = 0; ReadN < 2; ReadN++) {
-		Val = (uint) wiringPiI2CRead(FileDesc);
-//		Read = read(FileDesc, &Val, 1);
-//		EAssertR(Read == 1, "Failed to read YL-40!");
+		Read = read(FileDesc, &Val, 1);
+		EAssertR(Read == 1, "Failed to read YL-40!");
 		usleep(PROCESSING_DELAY);
 	}
 
-	return Val;
+	return (uint) Val;
 }
 
 void TYL40Adc::SetOutput(const int& OutputN, const int& Level) {
@@ -255,12 +249,8 @@ void TYL40Adc::SendCommand(const uchar* Command, const int& CommandLen) {
 	TLock Lock(CriticalSection);
 	EAssert(FileDesc >= 0);
 
-	for (int ByteN = 0; ByteN < CommandLen; ByteN++) {
-		wiringPiI2CWrite(FileDesc, (int) Command[ByteN]);
-	}
-
-//	const int Written = write(FileDesc, Command, 2);
-//	EAssertR(Written == 2, "Failed to send a command to the YL-40 sensor: written " + TInt::GetStr(Written) +" bytes!");
+	const int Written = write(FileDesc, Command, 2);
+	EAssertR(Written == 2, "Failed to send a command to the YL-40 sensor: written " + TInt::GetStr(Written) +" bytes!");
 	usleep(PROCESSING_DELAY);
 }
 
