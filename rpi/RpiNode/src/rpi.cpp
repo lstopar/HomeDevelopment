@@ -2,7 +2,23 @@
 
 /////////////////////////////////////////
 // Utilities
-void TRPiUtil::BusyWait(const uint32_t& Millis) {
+void TRpiUtil::SetMaxPriority() {
+	struct sched_param sched;
+	memset(&sched, 0, sizeof(sched));
+	// Use FIFO scheduler with highest priority for the lowest chance of the kernel context switching.
+	sched.sched_priority = sched_get_priority_max(SCHED_FIFO);
+	sched_setscheduler(0, SCHED_FIFO, &sched);
+}
+
+void TRpiUtil::SetDefaultPriority() {
+	struct sched_param sched;
+	memset(&sched, 0, sizeof(sched));
+	// Go back to default scheduler with default 0 priority.
+	sched.sched_priority = 0;
+	sched_setscheduler(0, SCHED_OTHER, &sched);
+}
+
+void TRpiUtil::BusyWait(const uint32_t& Millis) {
 	// Set delay time period.
 	struct timeval deltatime;
 	deltatime.tv_sec = Millis / 1000;
@@ -18,7 +34,7 @@ void TRPiUtil::BusyWait(const uint32_t& Millis) {
 	}
 }
 
-void TRPiUtil::Sleep(const uint32& Millis) {
+void TRpiUtil::Sleep(const uint32& Millis) {
 	struct timespec sleep;
 	sleep.tv_sec = Millis / 1000;
 	sleep.tv_nsec = (Millis % 1000) * 1000000L;
@@ -91,36 +107,40 @@ void TDHT11Sensor::Read() {
 	}
 
 	// Validate humidity and temperature arguments and set them to zero.
-	Temp = 0.0f;
-	Hum = 0.0f;
+//	Temp = 0.0f;
+//	Hum = 0.0f;
 
 	try {
 		// Store the count that each DHT bit pulse is low and high.
 		// Make sure array is initialized to start at zero.
 		int pulseCounts[DHT_PULSES*2] = {0};
 
-		SetOutput();
-		SetMaxPriority();
+		pinMode(Pin, OUTPUT);
+//		SetOutput();
+		TRpiUtil::SetMaxPriority();
 
 		// Set pin high for ~500 milliseconds.
-		SetHigh();
-		TRPiUtil::Sleep(500);
+		digitalWrite(Pin, HIGH);
+//		SetHigh();
+		TRpiUtil::Sleep(500);
 
 		// The next calls are timing critical and care should be taken
 		// to ensure no unnecssary work is done below.
 
 		// Set pin low for ~20 milliseconds.
-		SetLow();//pi_2_mmio_set_low(pin);
-		TRPiUtil::BusyWait(20);
+		digitalWrite(Pin, LOW);
+//		SetLow();//pi_2_mmio_set_low(pin);
+		TRpiUtil::BusyWait(20);
 
 		// Set pin at input.
-		SetInput();
+		pinMode(Pin, INPUT);
+//		SetInput();
 		// Need a very short delay before reading pins or else value is sometimes still low.
 		for (volatile int i = 0; i < 50; ++i) {}
 
 		// Wait for DHT to pull pin low.
 		uint32_t count = 0;
-		while (Input()) {
+		while (digitalRead(Pin)) {
 			if (++count >= DHT_MAXCOUNT) {
 				// Timeout waiting for response.
 				throw TExcept::New("DHT11 timed out!");
@@ -130,14 +150,14 @@ void TDHT11Sensor::Read() {
 		// Record pulse widths for the expected result bits.
 		for (int i = 0; i < DHT_PULSES*2; i += 2) {
 			// Count how long pin is low and store in pulseCounts[i]
-			while (!Input()) {
+			while (!digitalRead(Pin)) {
 				if (++pulseCounts[i] >= DHT_MAXCOUNT) {
 					// Timeout waiting for response.
 					throw TExcept::New("DHT11 timed out!");
 				}
 			}
 			// Count how long pin is high and store in pulseCounts[i+1]
-			while (Input()) {
+			while (digitalRead(Pin)) {
 				if (++pulseCounts[i+1] >= DHT_MAXCOUNT) {
 					// Timeout waiting for response.
 					throw TExcept::New("DHT11 timed out!");
@@ -148,7 +168,7 @@ void TDHT11Sensor::Read() {
 		// Done with timing critical code, now interpret the results.
 
 		// Drop back to normal priority.
-		SetDefaultPriority();
+		TRpiUtil::SetDefaultPriority();
 
 		// Compute the average low pulse width to use as a 50 microsecond reference threshold.
 		// Ignore the first two readings because they are a constant 80 microsecond pulse.
@@ -183,51 +203,35 @@ void TDHT11Sensor::Read() {
 
 		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Read values temperature: %.3f, humidity: %.3f", Temp, Hum);
 	} catch (const PExcept& Except) {
-		SetDefaultPriority();
+		TRpiUtil::SetDefaultPriority();
 		throw Except;
 	}
 	PrevReadTm = TTm::GetCurUniMSecs();
 }
 
-void TDHT11Sensor::SetLow() {
-	*(MmioGpio+10) = 1 << Pin;
-}
-
-void TDHT11Sensor::SetHigh() {
-	*(MmioGpio+7) = 1 << Pin;
-}
-
-void TDHT11Sensor::SetMaxPriority() {
-	struct sched_param sched;
-	memset(&sched, 0, sizeof(sched));
-	// Use FIFO scheduler with highest priority for the lowest chance of the kernel context switching.
-	sched.sched_priority = sched_get_priority_max(SCHED_FIFO);
-	sched_setscheduler(0, SCHED_FIFO, &sched);
-}
-
-void TDHT11Sensor::SetDefaultPriority() {
-	struct sched_param sched;
-	memset(&sched, 0, sizeof(sched));
-	// Go back to default scheduler with default 0 priority.
-	sched.sched_priority = 0;
-	sched_setscheduler(0, SCHED_OTHER, &sched);
-}
-
-uint32_t TDHT11Sensor::Input() {
-	return *(MmioGpio+13) & (1 << Pin);
-}
-
-void TDHT11Sensor::SetInput() {
-	// Set GPIO register to 000 for specified GPIO number.
-	*(MmioGpio+((Pin)/10)) &= ~(7<<(((Pin)%10)*3));
-}
-
-void TDHT11Sensor::SetOutput() {
-	// First set to 000 using input function.
-	SetInput();
-	// Next set bit 0 to 1 to set output.
-	*(MmioGpio+((Pin)/10)) |=  (1<<(((Pin)%10)*3));
-}
+//void TDHT11Sensor::SetLow() {
+//	*(MmioGpio+10) = 1 << Pin;
+//}
+//
+//void TDHT11Sensor::SetHigh() {
+//	*(MmioGpio+7) = 1 << Pin;
+//}
+//
+//uint32_t TDHT11Sensor::Input() {
+//	return *(MmioGpio+13) & (1 << Pin);
+//}
+//
+//void TDHT11Sensor::SetInput() {
+//	// Set GPIO register to 000 for specified GPIO number.
+//	*(MmioGpio+((Pin)/10)) &= ~(7<<(((Pin)%10)*3));
+//}
+//
+//void TDHT11Sensor::SetOutput() {
+//	// First set to 000 using input function.
+//	SetInput();
+//	// Next set bit 0 to 1 to set output.
+//	*(MmioGpio+((Pin)/10)) |=  (1<<(((Pin)%10)*3));
+//}
 
 void TDHT11Sensor::CleanUp() {
 	TLock Lock(CriticalSection);

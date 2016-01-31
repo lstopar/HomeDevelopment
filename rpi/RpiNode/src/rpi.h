@@ -10,6 +10,7 @@
 
 #include "base.h"
 #include "threads.h"
+#include <wiringPi.h>
 //#include <fcntl.h>
 #include <sys/mman.h>
 
@@ -19,8 +20,11 @@
 #define GPIO_LENGTH 4096
 #define DHT_MAXCOUNT 32000
 
-class TRPiUtil {
+class TRpiUtil {
 public:
+	static void SetMaxPriority();
+	static void SetDefaultPriority();
+
 	static void BusyWait(const uint32_t& Millis);
 	static void Sleep(const uint32& millis);
 };
@@ -61,16 +65,13 @@ public:
 	const float& GetHum() const { return Hum; }
 
 private:
-	void SetLow();
-	void SetHigh();
-
-	void SetMaxPriority();
-	void SetDefaultPriority();
-
-	uint32_t Input();
-
-	void SetInput();
-	void SetOutput();
+//	void SetLow();
+//	void SetHigh();
+//
+//	uint32_t Input();
+//
+//	void SetInput();
+//	void SetOutput();
 
 	void CleanUp();
 };
