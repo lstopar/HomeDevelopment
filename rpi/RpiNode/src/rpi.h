@@ -11,15 +11,12 @@
 #include "base.h"
 #include "threads.h"
 
-
-=======
 #include <wiringPi.h>
-#include <sys/mman.h>
->>>>>>> abcc397ef2f199d76c8e5f35dae11ec1159151d7
+#include <wiringPiI2C.h>
 
-#include <wiringPi.h>
-#include <sys/mman.h>
-#include <linux/i2c-dev.h>
+//#include <sys/mman.h>
+
+//#include <linux/i2c-dev.h>
 
 enum TGpioLayout {
 	glWiringPi,
@@ -99,7 +96,6 @@ private:
 	static constexpr uchar MODE_READ = 0x01;
 	static constexpr uchar MODE_WRITE = 0x00;
 
-
 	static constexpr uint64 PROCESSING_DELAY = 2000;
 
 	int FileDesc;
@@ -116,7 +112,7 @@ public:
 
 private:
 	void SetInput(const int& InputN);
-	void SendCommand(const uchar* Command);
+	void SendCommand(const uchar* Command, const int& CommandLen);
 
 	void CleanUp();
 };

@@ -178,15 +178,17 @@ void TDHT11Sensor::Read() {
 /////////////////////////////////////////
 // YL-40 - ADC
 TYL40Adc::TYL40Adc(const PNotify& _Notify):
-	FileDesc(-1),
-	CriticalSection(),
-	Notify(_Notify) {}
+		FileDesc(-1),
+		CriticalSection(),
+		Notify(_Notify) {}
 
 TYL40Adc::~TYL40Adc() {
 	CleanUp();
 }
 
 void TYL40Adc::Init() {
+	TLock Lock(CriticalSection);
+
 	Notify->OnNotify(TNotifyType::ntInfo, "Initializing YL-40 ...");
 
 	if (FileDesc >= 0) {
@@ -195,14 +197,11 @@ void TYL40Adc::Init() {
 	}
 
 	try {
-		FileDesc = open("/dev/i2c-1", O_RDWR);
+		FileDesc = wiringPiI2CSetup(I2C_ADDRESS);
 		if (FileDesc < 0) {
 			FileDesc = -1;
-			throw TExcept::New("Failed to open I2C device file!");
+			throw TExcept::New("Failed to setup I2C device!");
 		}
-
-		const int Code = ioctl(FileDesc, I2C_SLAVE, I2C_ADDRESS);
-		EAssertR(Code == 0, "Error while selecting I2C device, code: " + TInt::GetStr(Code) + "!");
 
 		Notify->OnNotify(TNotifyType::ntInfo, "YL-40 initialized!");
 	} catch (const PExcept& Except) {
@@ -213,6 +212,8 @@ void TYL40Adc::Init() {
 
 uint TYL40Adc::Read(const int& InputN) {
 	TLock Lock(CriticalSection);
+
+	EAssert(FileDesc >= 0);
 
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading YL-40 input %d ...", InputN);
 	SetInput(InputN);
@@ -233,7 +234,7 @@ void TYL40Adc::SetOutput(const int& OutputN, const int& Level) {
 	EAssertR(0 <= OutputN && OutputN <= 3, "Invalid output channel: " + TInt::GetStr(OutputN));
 
 	const uchar Command[2] = { uchar(ANALOG_OUTPUT | uchar(OutputN)), (uchar) Level };
-	SendCommand(Command);
+	SendCommand(Command, 2);
 }
 
 void TYL40Adc::SetInput(const int& InputN) {
@@ -241,10 +242,10 @@ void TYL40Adc::SetInput(const int& InputN) {
 	EAssertR(0 <= InputN && InputN <= 3, "Invalid input channel: " + TInt::GetStr(InputN));
 
 	uchar Command[2] = { uchar(InputN), 0x01u };
-	SendCommand(Command);
+	SendCommand(Command, 2);
 }
 
-void TYL40Adc::SendCommand(const uchar* Command) {
+void TYL40Adc::SendCommand(const uchar* Command, const int& CommandLen) {
 	TLock Lock(CriticalSection);
 	EAssert(FileDesc >= 0);
 
