@@ -2,13 +2,17 @@
 
 /////////////////////////////////////////
 // Utilities
+TGpioLayout TRpiUtil::PinLayout = TGpioLayout::glUnset;
 TCriticalSection TRpiUtil::CriticalSection;
 
-void TRpiUtil::InitGpio(const TGpioLayout& PinLayout) {
+void TRpiUtil::InitGpio(const TGpioLayout& Layout) {
 	TLock Lock(CriticalSection);
 
 	int RetVal;
-	switch (PinLayout) {
+	switch (Layout) {
+	case glUnset:
+		throw TExcept::New("Cannot set pin layout to unset!");
+		break;
 	case glBcmGpio:
 		RetVal = wiringPiSetupGpio();
 		break;
@@ -16,10 +20,26 @@ void TRpiUtil::InitGpio(const TGpioLayout& PinLayout) {
 		RetVal = wiringPiSetup();
 		break;
 	default:
-		throw TExcept::New("Invalid pin layout type: " + TInt::GetStr(PinLayout));
+		throw TExcept::New("Invalid pin layout type: " + TInt::GetStr(Layout));
 	}
 
 	EAssertR(RetVal >= 0, "Failed to initialize GPIO!");
+	PinLayout = Layout;
+}
+
+void TRpiUtil::SetPinMode(const int& Pin, const int& Mode) {
+	EAssert(IsValidMode(Pin, Mode));
+	pinMode(Pin, Mode);
+}
+
+void TRpiUtil::DigitalWrite(const int& Pin, const bool& High) {
+	// TODO check if this is an output Pin
+	digitalWrite(Pin, High ? 1 : 0);
+}
+
+bool TRpiUtil::DigitalRead(const int& Pin) {
+	// TODO check if the pin is an input Pin
+	return digitalRead(Pin) == 1;
 }
 
 void TRpiUtil::SetMaxPriority() {
@@ -61,6 +81,19 @@ void TRpiUtil::Sleep(const uint32& Millis) {
 	while (clock_nanosleep(CLOCK_MONOTONIC, 0, &sleep, &sleep) && errno == EINTR);
 }
 
+bool TRpiUtil::IsValidMode(const int& Pin, const int& Mode) {
+	if (Mode == INPUT || Mode == OUTPUT) { return true; }
+	if (Mode == PWM_OUTPUT) {
+		return (PinLayout == TGpioLayout::glBcmGpio && Pin == 18) ||
+				(PinLayout == TGpioLayout::glWiringPi && Pin == 1);
+	}
+	if (Mode == GPIO_CLOCK) {
+		return (PinLayout == TGpioLayout::glBcmGpio && Pin == 4) ||
+				(PinLayout == TGpioLayout::glWiringPi && Pin == 7);
+	}
+	return false;
+}
+
 /////////////////////////////////////////
 // DHT11 - Digital temperature and humidity sensor
 TDHT11Sensor::TDHT11Sensor(const int& _Pin, const PNotify& _Notify):
@@ -87,28 +120,28 @@ void TDHT11Sensor::Read() {
 		// Make sure array is initialized to start at zero.
 		uint32 pulseCounts[DHT_PULSES*2] = {0};
 
-		pinMode(Pin, OUTPUT);
+		TRpiUtil::SetPinMode(Pin, OUTPUT);
 		TRpiUtil::SetMaxPriority();
 
 		// Set pin high for ~500 milliseconds.
-		digitalWrite(Pin, HIGH);
+		TRpiUtil::DigitalWrite(Pin, true);
 		TRpiUtil::Sleep(500);
 
 		// The next calls are timing critical and care should be taken
 		// to ensure no unnecssary work is done below.
 
 		// Set pin low for ~20 milliseconds.
-		digitalWrite(Pin, LOW);
+		TRpiUtil::DigitalWrite(Pin, false);
 		TRpiUtil::BusyWait(20);
 
 		// Set pin at input.
-		pinMode(Pin, INPUT);
+		TRpiUtil::SetPinMode(Pin, INPUT);
 		// Need a very short delay before reading pins or else value is sometimes still low.
 		for (volatile int i = 0; i < 50; ++i) {}
 
 		// Wait for DHT to pull pin low.
 		uint32_t count = 0;
-		while (digitalRead(Pin)) {
+		while (TRpiUtil::DigitalRead(Pin)) {
 			if (++count >= DHT_MAXCOUNT) {
 				// Timeout waiting for response.
 				throw TExcept::New("DHT11 timed out!");
@@ -118,14 +151,14 @@ void TDHT11Sensor::Read() {
 		// Record pulse widths for the expected result bits.
 		for (int i = 0; i < DHT_PULSES*2; i += 2) {
 			// Count how long pin is low and store in pulseCounts[i]
-			while (!digitalRead(Pin)) {
+			while (!TRpiUtil::DigitalRead(Pin)) {
 				if (++pulseCounts[i] >= DHT_MAXCOUNT) {
 					// Timeout waiting for response.
 					throw TExcept::New("DHT11 timed out!");
 				}
 			}
 			// Count how long pin is high and store in pulseCounts[i+1]
-			while (digitalRead(Pin)) {
+			while (TRpiUtil::DigitalRead(Pin)) {
 				if (++pulseCounts[i+1] >= DHT_MAXCOUNT) {
 					// Timeout waiting for response.
 					throw TExcept::New("DHT11 timed out!");
@@ -259,4 +292,34 @@ void TYL40Adc::CleanUp() {
 		close(FileDesc);
 		FileDesc = -1;
 	}
+}
+
+/////////////////////////////////////////
+// RF24 Radio transmitter
+TRf24Radio::TRf24Radio(const uint8& PinCe, const uint8_t& PinCs,
+		const uint32& SpiSpeed, const PNotify& _Notify):
+		Radio(PinCe, PinCs, SpiSpeed),
+		Notify(_Notify) {}
+
+void TRf24Radio::Init() {
+	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
+
+	EAssertR(Radio.begin(), "Failed to start RF24 radio!");
+	Radio.setRetries(RETRY_DELAY, RETRY_COUNT);
+	Radio.setChannel(COMM_CHANNEL);
+	Radio.setPALevel(POWER_LEVEL);
+
+	// TODO set pipes!!!
+
+	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
+
+	Radio.printDetails();
+}
+
+bool TRf24Radio::Send(const uchar* Buff, const uint8& BuffLen) {
+	TLock Lock(CriticalSection);
+	Radio.stopListening();
+	bool Success = Radio.write(Buff, BuffLen);
+	Radio.startListening();
+	return Success;
 }

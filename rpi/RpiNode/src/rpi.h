@@ -14,26 +14,33 @@
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 
-//#include <sys/mman.h>
+#include "RF24.h"
 
-//#include <linux/i2c-dev.h>
 
 enum TGpioLayout {
+	glUnset,
 	glWiringPi,
 	glBcmGpio
 };
 
 class TRpiUtil {
 private:
+	static TGpioLayout PinLayout;
 	static TCriticalSection CriticalSection;
 public:
 	static void InitGpio(const TGpioLayout& PinLayout=TGpioLayout::glBcmGpio);
+	static void SetPinMode(const int& Pin, const int& Mode);
+	static void DigitalWrite(const int& Pin, const bool& High);
+	static bool DigitalRead(const int& Pin);
 
 	static void SetMaxPriority();
 	static void SetDefaultPriority();
 
 	static void BusyWait(const uint32_t& Millis);
 	static void Sleep(const uint32& millis);
+
+private:
+	static bool IsValidMode(const int& Pin, const int& Mode);
 };
 
 /////////////////////////////////////////
@@ -115,6 +122,28 @@ private:
 	void SendCommand(const uchar* Command, const int& CommandLen);
 
 	void CleanUp();
+};
+
+/////////////////////////////////////////
+// RF24 Radio transmitter
+class TRf24Radio {
+private:
+	static constexpr uint8 RETRY_DELAY = 15;
+	static constexpr uint8 RETRY_COUNT = 15;
+	static constexpr uint8 COMM_CHANNEL = 0;
+	static constexpr rf24_pa_dbm_e POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_HIGH;
+
+	RF24 Radio;
+	// TODO define pipes???
+	TCriticalSection CriticalSection;
+	PNotify Notify;
+
+public:
+	TRf24Radio(const uint8& PinCe, const uint8_t& PinCs, const uint32& SpiSpeed,
+			const PNotify& Notify);
+
+	void Init();
+	bool Send(const uchar* Buff, const uint8& BuffLen);
 };
 
 

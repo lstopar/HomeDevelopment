@@ -1,6 +1,7 @@
 {
 	'variables': {
-		'QMINER_PATH%': '../../../lib/qminer'
+		'QMINER_PATH%': '../../../lib/qminer',
+		'RF24_PATH%': 'lib/RF24/librf24-rpi/librf24-bcm'
 	},
     'target_defaults': {
         'default_configuration': 'Release',
@@ -99,12 +100,14 @@
                 '<(QMINER_PATH)/src/nodejs/',
                 '<(QMINER_PATH)/src/glib/base/',
                 '<(QMINER_PATH)/src/glib/mine/',
-                '<(QMINER_PATH)/src/glib/misc/'
+                '<(QMINER_PATH)/src/glib/misc/',
+                '<(RF24_PATH)/'
             ],
             'defines': [
             ],
             'dependencies': [
-                'glib'
+                'glib',
+                'rf24'
             ]
         },
         {
@@ -119,6 +122,32 @@
             'defines': [
             ],
             'dependencies': [
+            ]
+        },
+        {
+            # RF24 radio library
+            'target_name': 'rf24',
+            'type': 'static_library',
+            'sources': [
+                '<(RF24_PATH)/RF24.h',
+                '<(RF24_PATH)/RF24.cpp'
+            ],
+            'include_dirs': [
+                '<(RF24_PATH)/'
+            ],
+            'defines': [
+            ],
+            'conditions': [
+	            # operating system specific parameters
+	            ["target_arch=='arm'", {
+	              	'cflags_cc': [
+	                	'-Ofast',
+	                	'-mfpu=vfp',
+						'-mfloat-abi=hard',
+						'-march=armv6zk',
+						'-mtune=arm1176jzf-s'
+					]
+	            }]
             ]
         },
         {

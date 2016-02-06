@@ -20,6 +20,7 @@ public:
 	static void Init(v8::Handle<v8::Object> Exports);
 
 	JsDeclareFunction(init);
+	JsDeclareFunction(pinMode);
 };
 
 /////////////////////////////////////////

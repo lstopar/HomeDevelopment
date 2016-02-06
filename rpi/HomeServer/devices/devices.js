@@ -24,7 +24,7 @@ module.exports = exports = [
 			"timeout": 10000,
 			"verbose": true
 		}
-	},
+	}/*,
 	{
 		"type": "YL-40",
 		"sensors": [
@@ -49,5 +49,5 @@ module.exports = exports = [
 			vals['lr-lum'] = (255 - vals['lr-lum']) / 2.55;
 			return vals;
 		}
-	}
+	}*/
 ]
