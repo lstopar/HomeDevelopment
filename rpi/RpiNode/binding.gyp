@@ -63,9 +63,33 @@
             'sources': [
                 'test.cpp'
             ],
+            'include_dirs': [
+                'lib/'
+            ],
             'include_dirs': [],
             'defines': [],
-            'dependencies': []
+            'dependencies': [ 'rf24' ]
+        },
+        {
+            # RF24 library
+            'target_name': 'rf24',
+            'type': 'static_library',
+            'sources': [
+                'lib/librf24-bcm/RF24.h',
+                'lib/librf24-bcm/RF24.cpp'
+            ],
+            'include_dirs': [
+                'lib/'
+            ],
+            'defines': [
+            ],
+            'cflags': [
+            	'-Ofast',
+            	'-mfpu=vfp',
+            	'-mfloat-abi=hard',
+            	'-march=armv7-a',
+            	'-mtune=arm1176jzf-s'
+            ]
         },
         {
             # glib library
