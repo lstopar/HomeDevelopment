@@ -65,151 +65,133 @@ RF24 radio(RPI_V2_GPIO_P1_22, RPI_V2_GPIO_P1_24, BCM2835_SPI_SPEED_8MHZ);
 // Radio pipe addresses for the 2 nodes to communicate.
 const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
+const int PAYLOAD_SIZE = 8;
+const int CHANNEL = 0x4C;
 
-
-const int min_payload_size = 4;
-const int max_payload_size = 32;
-const int payload_size_increments_by = 1;
-int next_payload_size = min_payload_size;
-
-char receive_payload[max_payload_size+1]; // +1 to allow room for a terminating NULL char
+char receive_payload[PAYLOAD_SIZE+1]; // +1 to allow room for a terminating NULL char
 
 int main(int argc, char** argv){
 
-  bool role_ping_out = 1, role_pong_back = 0;
-  bool role = 0;
+	bool role_ping_out = 1, role_pong_back = 0;
+	bool role = 0;
 
-  // Print preamble:
-  cout << "RF24/examples/pingpair_dyn/\n";
+	// Print preamble:
+	cout << "RF24/examples/pingpair_dyn/\n";
 
-  // Setup and configure rf radio
-  radio.begin();
-  radio.enableDynamicPayloads();
-  radio.setRetries(15,15);
-  radio.setDataRate(RF24_2MBPS);
-  radio.setChannel(0x4c);
-  radio.printDetails();
+	// Setup and configure rf radio
+	radio.begin();
+	radio.setAutoAck(true);
+	radio.setRetries(15,15);
+	radio.setChannel(CHANNEL);
+	radio.setDataRate(RF24_2MBPS);
+	radio.setPayloadSize(PAYLOAD_SIZE);
+	radio.printDetails();
 
 
-/********* Role chooser ***********/
 
-  printf("\n ************ Role Setup ***********\n");
-  string input = "";
-  char myChar = {0};
-  cout << "Choose a role: Enter 0 for receiver, 1 for transmitter (CTRL+C to exit) \n>";
-  getline(cin,input);
+	/********* Role chooser ***********/
 
-  if(input.length() == 1) {
-	myChar = input[0];
-	if(myChar == '0'){
-		cout << "Role: Pong Back, awaiting transmission " << endl << endl;
-	}else{  cout << "Role: Ping Out, starting transmission " << endl << endl;
+	printf("\n ************ Role Setup ***********\n");
+	string input = "";
+	char myChar = {0};
+	cout << "Choose a role: Enter 0 for receiver, 1 for transmitter (CTRL+C to exit) \n>";
+	getline(cin,input);
+
+	if(input.length() == 1) {
+		myChar = input[0];
+		if(myChar == '0'){
+			cout << "Role: Pong Back, awaiting transmission " << endl << endl;
+	} else {  cout << "Role: Ping Out, starting transmission " << endl << endl;
 		role = role_ping_out;
+		}
 	}
-  }
-/***********************************/
+	/***********************************/
 
     if ( role == role_ping_out )    {
-      radio.openWritingPipe(pipes[0]);
-      radio.openReadingPipe(1,pipes[1]);
+    	radio.openWritingPipe(pipes[0]);
+    	radio.openReadingPipe(1,pipes[1]);
     } else {
-      radio.openWritingPipe(pipes[1]);
-      radio.openReadingPipe(1,pipes[0]);
-      radio.startListening();
+    	radio.openWritingPipe(pipes[1]);
+    	radio.openReadingPipe(1,pipes[0]);
+    	radio.startListening();
     }
 
 
-// forever loop
-	while (1)
-	{
+    // forever loop
+	while (1) {
+		if (role == role_ping_out) {
+			// The payload will always be the same, what will change is how much of it we send.
+			static char send_payload[] = "ABCDEFGH";
 
-if (role == role_ping_out)
-  {
-    // The payload will always be the same, what will change is how much of it we send.
-    static char send_payload[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ789012";
+			// First, stop listening so we can talk.
+			radio.stopListening();
 
-    // First, stop listening so we can talk.
-    radio.stopListening();
+			// Take the time, and send it.  This will block until complete
+			printf("Sending packet ...\n");
+			radio.write( send_payload, PAYLOAD_SIZE );
 
-    // Take the time, and send it.  This will block until complete
-    printf("Now sending length %i...",next_payload_size);
-    radio.write( send_payload, next_payload_size );
+			// Now, continue listening
+			radio.startListening();
 
-    // Now, continue listening
-    radio.startListening();
+			// Wait here until we get a response, or timeout
+			unsigned long started_waiting_at = millis();
+			bool timeout = false;
+			while ( ! radio.available() && ! timeout ) {
+				if (millis() - started_waiting_at > 500 ) {
+					timeout = true;
+				}
+			}
 
-    // Wait here until we get a response, or timeout
-    unsigned long started_waiting_at = millis();
-    bool timeout = false;
-    while ( ! radio.available() && ! timeout )
-      if (millis() - started_waiting_at > 500 )
-        timeout = true;
+			// Describe the results
+			if ( timeout ) {
+				printf("Failed, response timed out.\n\r");
+			}
+			else {
+			  // Grab the response, compare, and send to debugging spew
+			  char received[PAYLOAD_SIZE + 1];
+			  radio.read(received, PAYLOAD_SIZE);
 
-    // Describe the results
-    if ( timeout )
-    {
-      printf("Failed, response timed out.\n\r");
-    }
-    else
-    {
-      // Grab the response, compare, and send to debugging spew
-      uint8_t len = radio.getDynamicPayloadSize();
-      radio.read( receive_payload, len );
+			  // Put a zero at the end for easy printing
+			  received[PAYLOAD_SIZE] = 0;
 
-      // Put a zero at the end for easy printing
-      receive_payload[len] = 0;
+			  // Spew it
+			  printf("Got response value=%s\n\r",received);
+			}
+			// Try again 1s later
+			delay(100);
+		  }
 
-      // Spew it
-      printf("Got response size=%i value=%s\n\r",len,receive_payload);
-    }
+		  //
+		  // Pong back role.  Receive each packet, dump it out, and send it back
+		  //
 
-    // Update size for next time.
-    next_payload_size += payload_size_increments_by;
-    if ( next_payload_size > max_payload_size )
-      next_payload_size = min_payload_size;
+		  if ( role == role_pong_back ) {
+			  char received[PAYLOAD_SIZE + 1];
+			  // if there is data ready
+			  if (radio.available()) {
+				  while (radio.available()) {
+					  // Fetch the payload, and see if this was the last one.
+					  radio.read(received, PAYLOAD_SIZE);
 
-    // Try again 1s later
-    delay(100);
-  }
+					  // Put a zero at the end for easy printing
+					  receive_payload[PAYLOAD_SIZE] = 0;
 
-  //
-  // Pong back role.  Receive each packet, dump it out, and send it back
-  //
+					  // Spew it
+					  printf("Got payload value=%s\n\r", received);
+				  }
 
-  if ( role == role_pong_back )
-  {
-    // if there is data ready
-    if ( radio.available() )
-    {
-      // Dump the payloads until we've gotten everything
-      uint8_t len = 0;
+				  // First, stop listening so we can talk
+				  radio.stopListening();
 
-      while (radio.available())
-      {
-        // Fetch the payload, and see if this was the last one.
-	len = radio.getDynamicPayloadSize();
-	printf("Reading payload size %d\n", len);
-	radio.read( receive_payload, len );
+				  // Send the final one back.
+				  radio.write(received, PAYLOAD_SIZE);
+				  printf("Sent response.\n\r");
 
-	// Put a zero at the end for easy printing
-	receive_payload[len] = 0;
-
-	// Spew it
-	printf("Got payload size=%i value=%s\n\r",len,receive_payload);
-      }
-
-      // First, stop listening so we can talk
-      radio.stopListening();
-
-      // Send the final one back.
-      radio.write( receive_payload, len );
-      printf("Sent response.\n\r");
-
-      // Now, resume listening so we catch the next packets.
-      radio.startListening();
-    }
-  }
-}
+				  // Now, resume listening so we catch the next packets.
+				  radio.startListening();
+			  }
+		  }
+	}
 }
 
 
