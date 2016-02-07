@@ -30,7 +30,7 @@ const uint8_t PinCE = RPI_V2_GPIO_P1_22;
 const uint8_t PinCSN = RPI_V2_GPIO_P1_24;
 
 //RF24 radio(9,10);
-RF24 radio("/dev/spidev0.0",8000000 , PinCE);  //spi device, speed and CSN,only CSN is NEEDED in RPI
+RF24 radio("/dev/spidev0.0",8000000 , 25);  //spi device, speed and CSN,only CSN is NEEDED in RPI
 
 
 //
