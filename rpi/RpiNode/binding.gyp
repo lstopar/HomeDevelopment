@@ -66,7 +66,7 @@
                 'lib/librf24-bcm/RF24.cpp'
             ],
             'include_dirs': [
-                'lib/'
+                'lib/librf24-bcm/'
             ],
             'include_dirs': [],
             'defines': [],
@@ -81,7 +81,7 @@
                 'lib/librf24-bcm/RF24.cpp'
             ],
             'include_dirs': [
-                'lib/'
+                'lib/librf24-bcm/'
             ],
             'defines': [
             ],
