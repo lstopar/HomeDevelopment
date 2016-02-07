@@ -26,8 +26,15 @@
 
 // Set up nRF24L01 radio on SPI bus plus pins 9 & 10
 
+const uint8_t PinCE = RPI_V2_GPIO_P1_22;
+const uint8_t PinCSN = RPI_V2_GPIO_P1_24;
+
 //RF24 radio(9,10);
-RF24 radio("/dev/spidev0.0",8000000 , 25);  //spi device, speed and CSN,only CSN is NEEDED in RPI
+RF24 radio("/dev/spidev0.0",8000000 , PinCE);  //spi device, speed and CSN,only CSN is NEEDED in RPI
+
+
+//
+//RF24 radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ);
 
 
 // sets the role of this unit in hardware.  Connect to GND to be the 'pong' receiver
