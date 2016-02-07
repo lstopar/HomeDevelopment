@@ -91,7 +91,6 @@
             'conditions': [
 	            ["target_arch=='arm'", {
 	            	'cflags': [
-		            	'-Ofast',
 		            	'-mfpu=vfp',
 		            	'-mfloat-abi=hard',
 		            	'-march=armv7-a',
