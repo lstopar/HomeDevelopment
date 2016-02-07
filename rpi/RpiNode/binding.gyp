@@ -65,8 +65,7 @@
             ],
             'include_dirs': [],
             'defines': [],
-            'dependencies': [],
-            'libraries': [ '-lrf24-bcm' ]
+            'dependencies': []
         },
         {
             # glib library
