@@ -182,12 +182,13 @@ if (role == role_ping_out)
     if ( radio.available() )
     {
       // Dump the payloads until we've gotten everything
-      uint8_t len;
+      uint8_t len = 0;
 
       while (radio.available())
       {
         // Fetch the payload, and see if this was the last one.
 	len = radio.getDynamicPayloadSize();
+	printf("Reading payload size %d\n", len);
 	radio.read( receive_payload, len );
 
 	// Put a zero at the end for easy printing
