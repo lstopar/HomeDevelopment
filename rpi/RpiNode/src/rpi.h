@@ -14,7 +14,7 @@
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 
-#include "RF24.h"
+//#include "RF24.h"
 
 
 enum TGpioLayout {
@@ -124,27 +124,27 @@ private:
 	void CleanUp();
 };
 
-/////////////////////////////////////////
-// RF24 Radio transmitter
-class TRf24Radio {
-private:
-	static constexpr uint8 RETRY_DELAY = 15;
-	static constexpr uint8 RETRY_COUNT = 15;
-	static constexpr uint8 COMM_CHANNEL = 0;
-	static constexpr rf24_pa_dbm_e POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_HIGH;
-
-	RF24 Radio;
-	// TODO define pipes???
-	TCriticalSection CriticalSection;
-	PNotify Notify;
-
-public:
-	TRf24Radio(const uint8& PinCe, const uint8_t& PinCs, const uint32& SpiSpeed,
-			const PNotify& Notify);
-
-	void Init();
-	bool Send(const uchar* Buff, const uint8& BuffLen);
-};
+///////////////////////////////////////////
+//// RF24 Radio transmitter
+//class TRf24Radio {
+//private:
+//	static constexpr uint8 RETRY_DELAY = 15;
+//	static constexpr uint8 RETRY_COUNT = 15;
+//	static constexpr uint8 COMM_CHANNEL = 0;
+//	static constexpr rf24_pa_dbm_e POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_HIGH;
+//
+//	RF24 Radio;
+//	// TODO define pipes???
+//	TCriticalSection CriticalSection;
+//	PNotify Notify;
+//
+//public:
+//	TRf24Radio(const uint8& PinCe, const uint8_t& PinCs, const uint32& SpiSpeed,
+//			const PNotify& Notify);
+//
+//	void Init();
+//	bool Send(const uchar* Buff, const uint8& BuffLen);
+//};
 
 
 #endif /* SRC_RPI_H_ */

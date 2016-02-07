@@ -294,32 +294,32 @@ void TYL40Adc::CleanUp() {
 	}
 }
 
-/////////////////////////////////////////
-// RF24 Radio transmitter
-TRf24Radio::TRf24Radio(const uint8& PinCe, const uint8_t& PinCs,
-		const uint32& SpiSpeed, const PNotify& _Notify):
-		Radio(PinCe, PinCs, SpiSpeed),
-		Notify(_Notify) {}
-
-void TRf24Radio::Init() {
-	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
-
-	EAssertR(Radio.begin(), "Failed to start RF24 radio!");
-	Radio.setRetries(RETRY_DELAY, RETRY_COUNT);
-	Radio.setChannel(COMM_CHANNEL);
-	Radio.setPALevel(POWER_LEVEL);
-
-	// TODO set pipes!!!
-
-	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
-
-	Radio.printDetails();
-}
-
-bool TRf24Radio::Send(const uchar* Buff, const uint8& BuffLen) {
-	TLock Lock(CriticalSection);
-	Radio.stopListening();
-	bool Success = Radio.write(Buff, BuffLen);
-	Radio.startListening();
-	return Success;
-}
+///////////////////////////////////////////
+//// RF24 Radio transmitter
+//TRf24Radio::TRf24Radio(const uint8& PinCe, const uint8_t& PinCs,
+//		const uint32& SpiSpeed, const PNotify& _Notify):
+//		Radio(PinCe, PinCs, SpiSpeed),
+//		Notify(_Notify) {}
+//
+//void TRf24Radio::Init() {
+//	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
+//
+//	EAssertR(Radio.begin(), "Failed to start RF24 radio!");
+//	Radio.setRetries(RETRY_DELAY, RETRY_COUNT);
+//	Radio.setChannel(COMM_CHANNEL);
+//	Radio.setPALevel(POWER_LEVEL);
+//
+//	// TODO set pipes!!!
+//
+//	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
+//
+//	Radio.printDetails();
+//}
+//
+//bool TRf24Radio::Send(const uchar* Buff, const uint8& BuffLen) {
+//	TLock Lock(CriticalSection);
+//	Radio.stopListening();
+//	bool Success = Radio.write(Buff, BuffLen);
+//	Radio.startListening();
+//	return Success;
+//}
