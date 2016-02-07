@@ -43,67 +43,22 @@ const uint8_t PinCSN = RPI_V2_GPIO_P1_22;
 
 RF24 radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ);
 
-
-// sets the role of this unit in hardware.  Connect to GND to be the 'pong' receiver
-// Leave open to be the 'ping' transmitter
-const int role_pin = 7;
-
-//
-// Topology
-//
-
 // Radio pipe addresses for the 2 nodes to communicate.
 const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
-//
-// Role management
-//
-// Set up role.  This sketch uses the same software for all the nodes
-// in this system.  Doing so greatly simplifies testing.  The hardware itself specifies
-// which node it is.
-//
-// This is done through the role_pin
-//
-
-// The various roles supported by this sketch
-typedef enum { role_ping_out = 1, role_pong_back } role_e;
-
-// The debug-friendly names of those roles
-const char* role_friendly_name[] = { "invalid", "Ping out", "Pong back"};
-
-// The role of the current running sketch
-const role_e role = role_ping_out;
-
-
 int main(int argc, char** argv) {
 	printf("RF24/examples/pingtest/\n");
-	printf("ROLE: %s\n",role_friendly_name[role]);
 
 	//
 	// Setup and configure rf radio
 	//
 	radio.begin();
-
-	// optionally, increase the delay between retries & # of retries
 	radio.setRetries(15,15);
-
-	// optionally, reduce the payload size.  seems to
-	// improve reliability
-	//  radio.setPayloadSize(8);
 	radio.setChannel(0x4c);
 	radio.setPALevel(RF24_PA_LOW);
-
 	radio.openWritingPipe(pipes[0]);
 	radio.openReadingPipe(1,pipes[1]);
-
-	//
-	// Start listening
-	//
 	radio.startListening();
-
-	//
-	// Dump the configuration of the rf unit for debugging
-	//
 	radio.printDetails();
 	//
 	// Ping out role.  Repeatedly send the current time
