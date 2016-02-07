@@ -40,7 +40,7 @@
 
 const uint8_t CHANNEL = 0x4c;
 
-const uint8_t PinCE = RPI_V2_GPIO_P1_22;
+const uint8_t PinCE = RPI_V2_GPIO_P1_15;
 const uint8_t PinCSN = RPI_V2_GPIO_P1_24;
 
 RF24 radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ);
