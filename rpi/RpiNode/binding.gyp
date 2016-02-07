@@ -61,7 +61,9 @@
             'target_name': 'test',
             'type': 'executable',
             'sources': [
-                'test.cpp'
+                'test.cpp',
+                'lib/librf24-bcm/RF24.h',
+                'lib/librf24-bcm/RF24.cpp'
             ],
             'include_dirs': [
                 'lib/'
