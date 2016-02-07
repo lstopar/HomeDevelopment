@@ -33,7 +33,7 @@
         'conditions': [
             # operating system specific parameters
             ['OS == "linux"', {
-                'libraries': [ '-lrt', '-luuid', '-fopenmp', '-lwiringPi', '-lrf24' ],
+                'libraries': [ '-lrt', '-luuid', '-fopenmp', '-lwiringPi', '-lrf24-bcm' ],
                 # GCC flags
                 'cflags_cc!': [ '-fno-rtti', '-fno-exceptions' ],
                 'cflags_cc': [ '-std=c++0x', '-frtti', '-fexceptions' ],
