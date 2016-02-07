@@ -68,6 +68,8 @@ const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 const int PAYLOAD_SIZE = 8;
 const int CHANNEL = 0x4C;
 
+char received[PAYLOAD_SIZE + 1];
+
 int main(int argc, char** argv){
 
 	bool role_ping_out = 1, role_pong_back = 0;
@@ -146,7 +148,6 @@ int main(int argc, char** argv){
 			}
 			else {
 			  // Grab the response, compare, and send to debugging spew
-			  char received[PAYLOAD_SIZE + 1];
 			  radio.read(received, PAYLOAD_SIZE);
 
 			  // Put a zero at the end for easy printing
@@ -156,7 +157,7 @@ int main(int argc, char** argv){
 			  printf("Got response value=%s\n\r",received);
 			}
 			// Try again 1s later
-			delay(100);
+			delay(1000);
 		  }
 
 		  //
@@ -164,7 +165,7 @@ int main(int argc, char** argv){
 		  //
 
 		  if ( role == role_pong_back ) {
-			  char received[PAYLOAD_SIZE + 1];
+
 			  // if there is data ready
 			  if (radio.available()) {
 				  while (radio.available()) {
