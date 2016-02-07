@@ -38,12 +38,13 @@
 // Setup for GPIO 22 CE and CE1 CSN with SPI Speed @ 8Mhz
 //RF24 radio(RPI_V2_GPIO_P1_15, RPI_V2_GPIO_P1_26, BCM2835_SPI_SPEED_8MHZ);
 
-const uint8_t CHANNEL = 0x4c;
+const uint8_t CHANNEL = 0x01;
 
 const uint8_t PinCE = RPI_V2_GPIO_P1_15;
 const uint8_t PinCSN = RPI_V2_GPIO_P1_24;
 
-RF24 radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ);
+//RF24 radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ);
+RF24 radio(22,0,BCM2835_SPI_SPEED_8MHZ);
 
 
 // sets the role of this unit in hardware.  Connect to GND to be the 'pong' receiver
@@ -55,7 +56,7 @@ const int role_pin = 7;
 //
 
 // Radio pipe addresses for the 2 nodes to communicate.
-const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
+const uint64_t pipes[2] = { /*0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL*/0xABCDABCD71LL, 0x544d52687CLL };
 
 //
 // Role management
