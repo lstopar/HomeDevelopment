@@ -93,7 +93,11 @@
             	'src/threads.h',
             	'src/threads.cpp',
                 '<(QMINER_PATH)/src/nodejs/nodeutil.h',
-                '<(QMINER_PATH)/src/nodejs/nodeutil.cpp'
+                '<(QMINER_PATH)/src/nodejs/nodeutil.cpp',
+                '<(RF24_PATH)/RF24.h',
+                '<(RF24_PATH)/RF24.cpp',
+                '<(RF24_PATH)/bcm2835.h',
+                '<(RF24_PATH)/bcm2835.c'
             ],
             'include_dirs': [
                 'src/',
@@ -115,13 +119,19 @@
             'target_name': 'test',
             'type': 'executable',
             'sources': [
-                'test.cpp'
+                'test.cpp',
+                '<(RF24_PATH)/RF24.h',
+                '<(RF24_PATH)/RF24.cpp',
+                '<(RF24_PATH)/bcm2835.h',
+                '<(RF24_PATH)/bcm2835.c'
             ],
             'include_dirs': [
+            	'<(RF24_PATH)/'
             ],
             'defines': [
             ],
             'dependencies': [
+            	'rf24'
             ]
         },
         {
