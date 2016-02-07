@@ -1,7 +1,6 @@
 {
 	'variables': {
-		'QMINER_PATH%': '../../../lib/qminer',
-		'RF24_PATH%': 'lib/RF24/librf24-rpi/librf24-bcm'
+		'QMINER_PATH%': '../../../lib/qminer'
 	},
     'target_defaults': {
         'default_configuration': 'Release',
@@ -34,7 +33,7 @@
         'conditions': [
             # operating system specific parameters
             ['OS == "linux"', {
-                'libraries': [ '-lrt', '-luuid', '-fopenmp', '-lwiringPi' ],
+                'libraries': [ '-lrt', '-luuid', '-fopenmp', '-lwiringPi', '-lrf24' ],
                 # GCC flags
                 'cflags_cc!': [ '-fno-rtti', '-fno-exceptions' ],
                 'cflags_cc': [ '-std=c++0x', '-frtti', '-fexceptions' ],
@@ -94,24 +93,18 @@
             	'src/threads.cpp',
                 '<(QMINER_PATH)/src/nodejs/nodeutil.h',
                 '<(QMINER_PATH)/src/nodejs/nodeutil.cpp',
-                '<(RF24_PATH)/RF24.h',
-                '<(RF24_PATH)/RF24.cpp',
-                '<(RF24_PATH)/bcm2835.h',
-                '<(RF24_PATH)/bcm2835.c'
             ],
             'include_dirs': [
                 'src/',
                 '<(QMINER_PATH)/src/nodejs/',
                 '<(QMINER_PATH)/src/glib/base/',
                 '<(QMINER_PATH)/src/glib/mine/',
-                '<(QMINER_PATH)/src/glib/misc/',
-                '<(RF24_PATH)/'
+                '<(QMINER_PATH)/src/glib/misc/'
             ],
             'defines': [
             ],
             'dependencies': [
-                'glib',
-                'rf24'
+                'glib'
             ]
         },
         {
@@ -119,45 +112,13 @@
             'target_name': 'test',
             'type': 'executable',
             'sources': [
-                'test.cpp',
-                '<(RF24_PATH)/RF24.h',
-                '<(RF24_PATH)/RF24.cpp',
-                '<(RF24_PATH)/bcm2835.h',
-                '<(RF24_PATH)/bcm2835.c'
+                'test.cpp'\
             ],
-            'include_dirs': [
-            	'<(RF24_PATH)/'
-            ],
+            'include_dirs': [],
             'defines': [
             ],
             'dependencies': [
             	'rf24'
-            ]
-        },
-        {
-            # RF24 radio library
-            'target_name': 'rf24',
-            'type': 'static_library',
-            'sources': [
-                '<(RF24_PATH)/RF24.h',
-                '<(RF24_PATH)/RF24.cpp'
-            ],
-            'include_dirs': [
-                '<(RF24_PATH)/'
-            ],
-            'defines': [
-            ],
-            'conditions': [
-	            # operating system specific parameters
-	            ["target_arch=='arm'", {
-	              	'cflags_cc': [
-	                	'-Ofast',
-	                	'-mfpu=vfp',
-						'-mfloat-abi=hard',
-						'-march=armv6zk',
-						'-mtune=arm1176jzf-s'
-					]
-	            }]
             ]
         },
         {
