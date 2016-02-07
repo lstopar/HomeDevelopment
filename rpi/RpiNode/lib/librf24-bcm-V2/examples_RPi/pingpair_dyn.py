@@ -30,7 +30,7 @@ irq_gpio_pin = None
 #radio = RF24(RPI_BPLUS_GPIO_J8_15, RPI_BPLUS_GPIO_J8_24, BCM2835_SPI_SPEED_8MHZ)
 
 # RPi Alternate, with SPIDEV - Note: Edit RF24/arch/BBB/spi.cpp and  set 'this->device = "/dev/spidev0.0";;' or as listed in /dev
-radio = RF24(22, 0);
+radio = RF24(25, 0);
 
 
 # Setup for connected IRQ pin, GPIO 24 on RPi B+; uncomment to activate
