@@ -107,8 +107,6 @@ int main(int argc, char** argv) {
 	radio.setChannel(CHANNEL);
 	radio.setPALevel(RF24_PA_LOW);
 
-	printf("Channel correct %d", radio.getChannel() == CHANNEL);
-
 	//
 	// Open pipes to other nodes for communication
 	//
