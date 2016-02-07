@@ -41,7 +41,7 @@
 const uint8_t PinCE = RPI_V2_GPIO_P1_22;
 const uint8_t PinCSN = RPI_V2_GPIO_P1_24;
 
-RF24 radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ);
+RF24 radio(PinCSN, PinCE, BCM2835_SPI_SPEED_8MHZ);
 
 
 // sets the role of this unit in hardware.  Connect to GND to be the 'pong' receiver
@@ -90,6 +90,7 @@ int main(int argc, char** argv)
 
   printf("RF24/examples/pingtest/\n");
   printf("ROLE: %s\n",role_friendly_name[role]);
+  printf("Starting ...\n");
 
   //
   // Setup and configure rf radio
