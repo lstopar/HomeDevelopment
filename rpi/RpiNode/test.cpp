@@ -38,8 +38,8 @@
 // Setup for GPIO 22 CE and CE1 CSN with SPI Speed @ 8Mhz
 // CE -> CS0
 // CSN -> GPIO 25	(pin 22)
-const uint8 PinCE = RPI_V2_GPIO_P1_24;
-const uint8 PinCSN = RPI_V2_GPIO_P1_22;
+const uint8_t PinCE = RPI_V2_GPIO_P1_24;
+const uint8_t PinCSN = RPI_V2_GPIO_P1_22;
 
 RF24 radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ);
 
@@ -210,7 +210,7 @@ int main(int argc, char** argv)
 					done = radio.read( &got_time, sizeof(unsigned long) );
 
 					// Spew it
-					printf("Got payload(%d) %lu...\n",sizeof(unsigned long), got_time);
+					printf("Got payload(%ld) %lu...\n",sizeof(unsigned long), got_time);
 
 					// Delay just a little bit to let the other unit
 					// make the transition to receiver
