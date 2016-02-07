@@ -7,7 +7,7 @@
         'configurations': {
             'Debug': {
                 'defines': [
-                    'DEBUG',
+                    'DEBUG'
                 ],
             },
             'Release': {
@@ -33,7 +33,13 @@
         'conditions': [
             # operating system specific parameters
             ['OS == "linux"', {
-                'libraries': [ '-lrt', '-luuid', '-fopenmp', '-lwiringPi', '-lrf24-bcm' ],
+                'libraries': [
+                	'-lrt',
+                	'-luuid',
+                	'-fopenmp',
+                	'-lwiringPi',
+                	'-lrf24-bcm'
+                ],
                 # GCC flags
                 'cflags_cc!': [ '-fno-rtti', '-fno-exceptions' ],
                 'cflags_cc': [ '-std=c++0x', '-frtti', '-fexceptions' ],
@@ -92,7 +98,7 @@
             	'src/threads.h',
             	'src/threads.cpp',
                 '<(QMINER_PATH)/src/nodejs/nodeutil.h',
-                '<(QMINER_PATH)/src/nodejs/nodeutil.cpp',
+                '<(QMINER_PATH)/src/nodejs/nodeutil.cpp'
             ],
             'include_dirs': [
                 'src/',
