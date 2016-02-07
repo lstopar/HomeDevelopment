@@ -22,13 +22,12 @@
         	'-lrt',
         	'-luuid',
         	'-fopenmp',
-        	'-lwiringPi',
-        	'-lrf24-bcm'
+        	'-lwiringPi'
         ],
         # GCC flags
         'cflags_cc!': [ '-fno-rtti', '-fno-exceptions' ],
         'cflags_cc': [ '-std=c++0x', '-frtti', '-fexceptions' ],
-        'cflags': [ '-Wno-deprecated-declarations', '-fopenmp', '-lrf24-bcm' ]
+        'cflags': [ '-Wno-deprecated-declarations', '-fopenmp' ]
     },
     'targets': [
         {
@@ -68,7 +67,6 @@
             'include_dirs': [
                 'lib/librf24-bcm/'
             ],
-            'include_dirs': [],
             'defines': [],
             'dependencies': [ 'rf24' ]
         },
