@@ -18,74 +18,17 @@
         },
         'defines': [
         ],
-        # hack for setting xcode settings based on example from
-        # http://src.chromium.org/svn/trunk/o3d/build/common.gypi
-        'target_conditions': [        
-            ['OS=="mac"', {
-                'xcode_settings': {
-                    'MACOSX_DEPLOYMENT_TARGET': '10.7',
-                    'GCC_ENABLE_CPP_RTTI': 'YES',
-                    'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
-                    'OTHER_CFLAGS': [ '-std=c++11', '-stdlib=libc++' ]
-                },
-            }],
+        'libraries': [
+        	'-lrt',
+        	'-luuid',
+        	'-fopenmp',
+        	'-lwiringPi',
+        	'-lrf24-bcm'
         ],
-        'conditions': [
-            # operating system specific parameters
-            ['OS == "linux"', {
-                'libraries': [
-                	'-lrt',
-                	'-luuid',
-                	'-fopenmp',
-                	'-lwiringPi',
-                	'-lrf24-bcm'
-                ],
-                # GCC flags
-                'cflags_cc!': [ '-fno-rtti', '-fno-exceptions' ],
-                'cflags_cc': [ '-std=c++0x', '-frtti', '-fexceptions' ],
-                'cflags': [ '-Wno-deprecated-declarations', '-fopenmp' ]
-            }],
-            ['OS == "win"', {
-                'msbuild_toolset': 'v120',
-                'msvs_settings': {
-                    'VCCLCompilerTool': {
-                        #'RuntimeTypeInfo': 'true',      # /GR  : this should work but doesn't get picked up
-                        #'ExceptionHandling': 1,         # /EHsc: this should work but doesn't get picked up
-                        'OpenMP': 'true',
-                        "AdditionalOptions": [ "/EHsc /GR" ] # release mode displays D9025 warnings, which is a known issue https://github.com/nodejs/node-gyp/issues/335
-                    },
-                    'VCLinkerTool': {
-                        'SubSystem' : 1, # Console
-                        'AdditionalOptions': [  ]
-                    },
-                },
-            }],
-            ['OS == "mac"', {
-                "default_configuration": "Release",
-                "configurations": {
-                    "Debug": {
-                        "defines": [
-                            "DEBUG",
-                        ],
-                        "xcode_settings": {
-                            "GCC_OPTIMIZATION_LEVEL": "0",
-                            "GCC_GENERATE_DEBUGGING_SYMBOLS": "YES"
-                        }
-                    },
-                    "Release": {
-                        "defines": [
-                            "NDEBUG"
-                        ],
-                        "xcode_settings": {
-                            "GCC_OPTIMIZATION_LEVEL": "3",
-                            "GCC_GENERATE_DEBUGGING_SYMBOLS": "NO",
-                            "DEAD_CODE_STRIPPING": "YES",
-                            "GCC_INLINES_ARE_PRIVATE_EXTERN": "YES"
-                        }
-                    }
-                }
-            }]
-        ]
+        # GCC flags
+        'cflags_cc!': [ '-fno-rtti', '-fno-exceptions' ],
+        'cflags_cc': [ '-std=c++0x', '-frtti', '-fexceptions' ],
+        'cflags': [ '-Wno-deprecated-declarations', '-fopenmp' ]
     },
     'targets': [
         {
