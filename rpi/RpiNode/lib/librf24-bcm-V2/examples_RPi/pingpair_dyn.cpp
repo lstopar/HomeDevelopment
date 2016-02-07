@@ -127,7 +127,7 @@ int main(int argc, char** argv){
 			radio.stopListening();
 
 			// Take the time, and send it.  This will block until complete
-			printf("Now sending length %i...",next_payload_size);
+			printf("Sending packet ...\n");
 			radio.write( send_payload, PAYLOAD_SIZE );
 
 			// Now, continue listening
@@ -144,7 +144,7 @@ int main(int argc, char** argv){
 
 			// Describe the results
 			if ( timeout ) {
-			  printf("Failed, response timed out.\n\r");
+				printf("Failed, response timed out.\n\r");
 			}
 			else {
 			  // Grab the response, compare, and send to debugging spew
