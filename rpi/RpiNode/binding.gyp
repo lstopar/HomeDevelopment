@@ -76,7 +76,9 @@
             'type': 'static_library',
             'sources': [
                 'lib/librf24-bcm/RF24.h',
-                'lib/librf24-bcm/RF24.cpp'
+                'lib/librf24-bcm/RF24.cpp',
+                'lib/librf24-bcm/bcm2835.h',
+                'lib/librf24-bcm/bcm2835.c'
             ],
             'include_dirs': [
                 'lib/librf24-bcm/'
@@ -84,12 +86,19 @@
             'defines': [
             ],
             'cflags': [
-            	'-Ofast',
-            	'-mfpu=vfp',
-            	'-mfloat-abi=hard',
-            	'-march=armv7-a',
-            	'-mtune=arm1176jzf-s'
-            ]
+            	'-Ofast'
+            ],
+            'conditions': [
+	            ["target_arch=='arm'", {
+	            	'cflags': [
+		            	'-Ofast',
+		            	'-mfpu=vfp',
+		            	'-mfloat-abi=hard',
+		            	'-march=armv7-a',
+		            	'-mtune=arm1176jzf-s'
+		            ]
+	            }]
+	         ]
         },
         {
             # glib library
