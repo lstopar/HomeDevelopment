@@ -38,7 +38,10 @@
 // Setup for GPIO 22 CE and CE1 CSN with SPI Speed @ 8Mhz
 // CE -> CS0
 // CSN -> GPIO 25	(pin 22)
-RF24 radio(BCM2835_SPI_CS0, RPI_V2_GPIO_P1_22, BCM2835_SPI_SPEED_8MHZ);
+const uint8 PinCE = RPI_V2_GPIO_P1_24;
+const uint8 PinCSN = RPI_V2_GPIO_P1_22;
+
+RF24 radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ);
 
 
 // sets the role of this unit in hardware.  Connect to GND to be the 'pong' receiver
