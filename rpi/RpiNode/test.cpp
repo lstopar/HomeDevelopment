@@ -51,7 +51,9 @@ const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 int main(int argc, char** argv) {
 	printf("RF24/examples/pingtest/\n");
 
-	if (!radio.begin()) {
+	if (radio.begin()) {
+		printf("Radio started!");
+	} else {
 		printf("Failed to start radio!\n");
 		exit(1);
 	}

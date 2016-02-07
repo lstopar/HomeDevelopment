@@ -413,8 +413,8 @@ void RF24::printDetails(void)
 
 bool RF24::begin(void)
 {
-	debug = false;
-	//debug = true;
+//	debug = false;
+	debug = true;
 
 	// Init BCM2835 chipset for talking with us
 	if (!bcm2835_init())
