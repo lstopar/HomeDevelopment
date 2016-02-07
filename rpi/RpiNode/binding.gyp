@@ -112,7 +112,7 @@
             'target_name': 'test',
             'type': 'executable',
             'sources': [
-                'test.cpp'\
+                'test.cpp'
             ],
             'include_dirs': [
             ],
