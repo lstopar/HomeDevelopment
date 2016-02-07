@@ -120,12 +120,10 @@
             'sources': [
                 'test.cpp'
             ],
-            'include_dirs': [
-            ],
-            'defines': [
-            ],
-            'dependencies': [
-            ]
+            'include_dirs': [],
+            'defines': [],
+            'dependencies': [],
+            'libraries': [ '-lrf24-bcm' ]
         },
         {
             # glib library
