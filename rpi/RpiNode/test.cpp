@@ -72,161 +72,90 @@ typedef enum { role_ping_out = 1, role_pong_back } role_e;
 const char* role_friendly_name[] = { "invalid", "Ping out", "Pong back"};
 
 // The role of the current running sketch
-role_e role;
+const role_e role = role_ping_out;
 
 
-int main(int argc, char** argv)
-{
-  //
-  // Role
-  //
+int main(int argc, char** argv) {
+	printf("RF24/examples/pingtest/\n");
+	printf("ROLE: %s\n",role_friendly_name[role]);
 
-  // set up the role
-  role = role_ping_out;
+	//
+	// Setup and configure rf radio
+	//
+	radio.begin();
 
-  //
-  // Print preamble:
-  //
+	// optionally, increase the delay between retries & # of retries
+	radio.setRetries(15,15);
 
-  printf("RF24/examples/pingtest/\n");
-  printf("ROLE: %s\n",role_friendly_name[role]);
-
-  //
-  // Setup and configure rf radio
-  //
-  radio.begin();
-
-  // optionally, increase the delay between retries & # of retries
-  radio.setRetries(15,15);
-
-  // optionally, reduce the payload size.  seems to
-  // improve reliability
+	// optionally, reduce the payload size.  seems to
+	// improve reliability
 	//  radio.setPayloadSize(8);
 	radio.setChannel(0x4c);
-  radio.setPALevel(RF24_PA_LOW);
+	radio.setPALevel(RF24_PA_LOW);
 
-  //
-  // Open pipes to other nodes for communication
-  //
+	radio.openWritingPipe(pipes[0]);
+	radio.openReadingPipe(1,pipes[1]);
 
-  // This simple sketch opens two pipes for these two nodes to communicate
-  // back and forth.
-  // Open 'our' pipe for writing
-  // Open the 'other' pipe for reading, in position #1 (we can have up to 5 pipes open for reading)
-  if ( role == role_ping_out )
-  {
-    radio.openWritingPipe(pipes[0]);
-    radio.openReadingPipe(1,pipes[1]);
-  }
-  else
-  {
-    radio.openWritingPipe(pipes[1]);
-    radio.openReadingPipe(1,pipes[0]);
-  }
+	//
+	// Start listening
+	//
+	radio.startListening();
 
-  //
-  // Start listening
-  //
-  radio.startListening();
-
-  //
-  // Dump the configuration of the rf unit for debugging
-  //
-  radio.printDetails();
-  //
-  // Ping out role.  Repeatedly send the current time
-  //
+	//
+	// Dump the configuration of the rf unit for debugging
+	//
+	radio.printDetails();
+	//
+	// Ping out role.  Repeatedly send the current time
+	//
 
 	// forever loop
-	while (1)
-	{
-		if (role == role_ping_out)
-		{
-			// First, stop listening so we can talk.
-			radio.stopListening();
+	while (true) {
+		// First, stop listening so we can talk.
+		radio.stopListening();
 
-			// Take the time, and send it.  This will block until complete
-			unsigned long time = millis();
-			printf("Now sending %lu...",time);
-			bool ok = radio.write( &time, sizeof(unsigned long) );
+		// Take the time, and send it.  This will block until complete
+		unsigned long time = millis();
+		printf("Now sending %lu...",time);
+		bool ok = radio.write( &time, sizeof(unsigned long) );
 
-			if (ok)
-				printf("ok...");
-			else
-				printf("failed.\n");
+		if (ok)
+			printf("ok...");
+		else
+			printf("failed.\n");
 
-			// Now, continue listening
-			radio.startListening();
+		// Now, continue listening
+		radio.startListening();
 
-			// Wait here until we get a response, or timeout (250ms)
-			unsigned long started_waiting_at = millis();
-			bool timeout = false;
-			while ( ! radio.available() && ! timeout ) {
-					// by bcatalin » Thu Feb 14, 2013 11:26 am
-					delay(5); //add a small delay to let radio.available to check payload
-				if (millis() - started_waiting_at > 200 )
-					timeout = true;
-			}
-
-
-			// Describe the results
-			if ( timeout )
-			{
-				printf("Failed, response timed out.\n");
-			}
-			else
-			{
-				// Grab the response, compare, and send to debugging spew
-				unsigned long got_time;
-				radio.read( &got_time, sizeof(unsigned long) );
-
-				// Spew it
-				printf("Got response %lu, round-trip delay: %lu\n",got_time,millis()-got_time);
-			}
-
-			// Try again 1s later
-			//    delay(1000);
-			delay(1000);
-
+		// Wait here until we get a response, or timeout (250ms)
+		unsigned long started_waiting_at = millis();
+		bool timeout = false;
+		while ( ! radio.available() && ! timeout ) {
+				// by bcatalin » Thu Feb 14, 2013 11:26 am
+				delay(5); //add a small delay to let radio.available to check payload
+			if (millis() - started_waiting_at > 200 )
+				timeout = true;
 		}
 
-		//
-		// Pong back role.  Receive each packet, dump it out, and send it back
-		//
 
-		if ( role == role_pong_back )
+		// Describe the results
+		if ( timeout )
 		{
-			// if there is data ready
-			//printf("Check available...\n");
-			if ( radio.available() )
-			{
-				// Dump the payloads until we've gotten everything
-				unsigned long got_time;
-				bool done = false;
-
-				while (!done)
-				{
-					// Fetch the payload, and see if this was the last one.
-					done = radio.read( &got_time, sizeof(unsigned long) );
-
-					// Spew it
-					printf("Got payload(%ld) %lu...\n",sizeof(unsigned long), got_time);
-
-					// Delay just a little bit to let the other unit
-					// make the transition to receiver
-					delay(20);
-				}
-
-				// First, stop listening so we can talk
-				radio.stopListening();
-
-				// Send the final one back.
-				radio.write( &got_time, sizeof(unsigned long) );
-
-				// Now, resume listening so we catch the next packets.
-				radio.startListening();
-			}
+			printf("Failed, response timed out.\n");
 		}
+		else
+		{
+			// Grab the response, compare, and send to debugging spew
+			unsigned long got_time;
+			radio.read( &got_time, sizeof(unsigned long) );
+
+			// Spew it
+			printf("Got response %lu, round-trip delay: %lu\n",got_time,millis()-got_time);
+		}
+
+		// Try again 1s later
+		//    delay(1000);
+		delay(1000);
 	} // forever loop
 
   return 0;
