@@ -51,7 +51,11 @@ const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 int main(int argc, char** argv) {
 	printf("RF24/examples/pingtest/\n");
 
-	radio.begin();
+	if (!radio.begin()) {
+		printf("Failed to start radio!\n");
+		exit(1);
+	}
+
 	radio.setRetries(15,15);
 	radio.setChannel(0x4c);
 	radio.setPALevel(RF24_PA_LOW);

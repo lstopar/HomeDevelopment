@@ -587,7 +587,7 @@ bool RF24::write( const void* buf, uint8_t len )
 	
   whatHappened(tx_ok,tx_fail,ack_payload_available);
   
-  //printf("%u%u%u\r\n",tx_ok,tx_fail,ack_payload_available);
+//  printf("%u%u%u\r\n",tx_ok,tx_fail,ack_payload_available);
 
   result = tx_ok;
   if (debug)
