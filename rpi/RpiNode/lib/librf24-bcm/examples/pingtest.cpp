@@ -38,10 +38,12 @@
 // Setup for GPIO 22 CE and CE1 CSN with SPI Speed @ 8Mhz
 //RF24 radio(RPI_V2_GPIO_P1_15, RPI_V2_GPIO_P1_26, BCM2835_SPI_SPEED_8MHZ);
 
+const uint8_t CHANNEL = 0x4c;
+
 const uint8_t PinCE = RPI_V2_GPIO_P1_22;
 const uint8_t PinCSN = RPI_V2_GPIO_P1_24;
 
-RF24 radio(PinCSN, PinCE, BCM2835_SPI_SPEED_8MHZ);
+RF24 radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ);
 
 
 // sets the role of this unit in hardware.  Connect to GND to be the 'pong' receiver
@@ -75,68 +77,69 @@ const char* role_friendly_name[] = { "invalid", "Ping out", "Pong back"};
 role_e role;
 
 
-int main(int argc, char** argv)
-{
-  //
-  // Role
-  //
+int main(int argc, char** argv) {
+	//
+	// Role
+	//
 
-  // set up the role 
-  role = role_ping_out;
+	// set up the role
+	role = role_ping_out;
 
-  //
-  // Print preamble:
-  //
+	//
+	// Print preamble:
+	//
 
-  printf("RF24/examples/pingtest/\n");
-  printf("ROLE: %s\n",role_friendly_name[role]);
-  printf("Starting ...\n");
+	printf("RF24/examples/pingtest/\n");
+	printf("ROLE: %s\n",role_friendly_name[role]);
+	printf("Starting ...\n");
 
-  //
-  // Setup and configure rf radio
-  //
-  radio.begin();
+	//
+	// Setup and configure rf radio
+	//
+	radio.begin();
 
-  // optionally, increase the delay between retries & # of retries
-  radio.setRetries(15,15);
+	// optionally, increase the delay between retries & # of retries
+	radio.setRetries(15,15);
 
-  // optionally, reduce the payload size.  seems to
-  // improve reliability
+	// optionally, reduce the payload size.  seems to
+	// improve reliability
 	//  radio.setPayloadSize(8);
-	radio.setChannel(0x4c);
-  radio.setPALevel(RF24_PA_LOW);
+	radio.setChannel(CHANNEL);
+	radio.setPALevel(RF24_PA_LOW);
 
-  //
-  // Open pipes to other nodes for communication
-  //
+	printf("Channel correct %d", radio.getChannel() == CHANNEL);
 
-  // This simple sketch opens two pipes for these two nodes to communicate
-  // back and forth.
-  // Open 'our' pipe for writing
-  // Open the 'other' pipe for reading, in position #1 (we can have up to 5 pipes open for reading)
-  if ( role == role_ping_out )
-  {
-    radio.openWritingPipe(pipes[0]);
-    radio.openReadingPipe(1,pipes[1]);
-  }
-  else
-  {
-    radio.openWritingPipe(pipes[1]);
-    radio.openReadingPipe(1,pipes[0]);
-  }
+	//
+	// Open pipes to other nodes for communication
+	//
 
-  //
-  // Start listening
-  //
-  radio.startListening();
+	// This simple sketch opens two pipes for these two nodes to communicate
+	// back and forth.
+	// Open 'our' pipe for writing
+	// Open the 'other' pipe for reading, in position #1 (we can have up to 5 pipes open for reading)
+	if ( role == role_ping_out )
+	{
+		radio.openWritingPipe(pipes[0]);
+		radio.openReadingPipe(1,pipes[1]);
+	}
+	else
+	{
+		radio.openWritingPipe(pipes[1]);
+		radio.openReadingPipe(1,pipes[0]);
+	}
 
-  //
-  // Dump the configuration of the rf unit for debugging
-  //
-  radio.printDetails();
-  //
-  // Ping out role.  Repeatedly send the current time
-  //
+	//
+	// Start listening
+	//
+	radio.startListening();
+
+	//
+	// Dump the configuration of the rf unit for debugging
+	//
+	radio.printDetails();
+	//
+	// Ping out role.  Repeatedly send the current time
+	//
 	
 	// forever loop
 	while (1)
