@@ -72,7 +72,11 @@ int main(int argc, char** argv)
   //
   radio.begin();
 
+  printf("Started radio ...\n");
+
   radio.setAutoAck(false);
+
+  printf("Disabled auto ACK ...\n");
 
   // Get into standby mode
   radio.startListening();
