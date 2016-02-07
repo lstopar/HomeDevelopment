@@ -38,8 +38,8 @@
 // Setup for GPIO 22 CE and CE1 CSN with SPI Speed @ 8Mhz
 // CE -> CS0
 // CSN -> GPIO 25	(pin 22)
-const uint8_t PinCE = RPI_V2_GPIO_P1_24;
-const uint8_t PinCSN = RPI_V2_GPIO_P1_22;
+const uint8_t PinCE = RPI_V2_GPIO_P1_22;
+const uint8_t PinCSN = RPI_V2_GPIO_P1_24;
 
 RF24 radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ);
 
@@ -49,9 +49,6 @@ const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 int main(int argc, char** argv) {
 	printf("RF24/examples/pingtest/\n");
 
-	//
-	// Setup and configure rf radio
-	//
 	radio.begin();
 	radio.setRetries(15,15);
 	radio.setChannel(0x4c);
@@ -60,9 +57,6 @@ int main(int argc, char** argv) {
 	radio.openReadingPipe(1,pipes[1]);
 	radio.startListening();
 	radio.printDetails();
-	//
-	// Ping out role.  Repeatedly send the current time
-	//
 
 	// forever loop
 	while (true) {
