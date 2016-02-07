@@ -172,7 +172,7 @@ int main(int argc, char** argv){
 					  radio.read(received, PAYLOAD_SIZE);
 
 					  // Put a zero at the end for easy printing
-					  receive_payload[PAYLOAD_SIZE] = 0;
+					  received[PAYLOAD_SIZE] = 0;
 
 					  // Spew it
 					  printf("Got payload value=%s\n\r", received);
