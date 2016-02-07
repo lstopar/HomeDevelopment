@@ -114,11 +114,11 @@
             'sources': [
                 'test.cpp'\
             ],
-            'include_dirs': [],
+            'include_dirs': [
+            ],
             'defines': [
             ],
             'dependencies': [
-            	'rf24'
             ]
         },
         {
