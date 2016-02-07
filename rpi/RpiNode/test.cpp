@@ -37,11 +37,11 @@
 
 // Setup for GPIO 22 CE and CE1 CSN with SPI Speed @ 8Mhz
 // CE -> GPIO 25
-// CSN -> SPI0 CS0	(pin 22)
+// CSN -> SPI0 CS0	(pin 22, GPIO 8)
 //const uint8_t PinCE = RPI_V2_GPIO_P1_22;
 //const uint8_t PinCSN = RPI_V2_GPIO_P1_24;
-const uint8_t PinCE = 22;
-const uint8_t PinCSN = 24;
+const uint8_t PinCE = RPI_V2_GPIO_P1_22;
+const uint8_t PinCSN = RPI_V2_GPIO_P1_24;
 
 RF24 radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ);
 
