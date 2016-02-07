@@ -68,8 +68,6 @@ const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 const int PAYLOAD_SIZE = 8;
 const int CHANNEL = 0x4C;
 
-char receive_payload[PAYLOAD_SIZE+1]; // +1 to allow room for a terminating NULL char
-
 int main(int argc, char** argv){
 
 	bool role_ping_out = 1, role_pong_back = 0;
