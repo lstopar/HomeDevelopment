@@ -96,6 +96,11 @@ bool TRpiUtil::IsValidMode(const int& Pin, const int& Mode) {
 
 /////////////////////////////////////////
 // DHT11 - Digital temperature and humidity sensor
+const uint64 TDHT11Sensor::MIN_SAMPLING_PERIOD = 2000;
+const uint64 TDHT11Sensor::SAMPLING_TM = 1000;
+const uint32 TDHT11Sensor::DHT_MAXCOUNT = 32000;
+const int TDHT11Sensor::DHT_PULSES = 41;
+
 TDHT11Sensor::TDHT11Sensor(const int& _Pin, const PNotify& _Notify):
 		Pin(_Pin),
 		Temp(0),
@@ -349,7 +354,6 @@ TRf24Radio::TRf24Radio(const uint8& PinCe, const uint8_t& PinCs,
 void TRf24Radio::Init() {
 	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
 
-	EAssertR(Radio.begin(), "Failed to start RF24 radio!");
 	Radio.begin();
 	Radio.setAutoAck(true);
 	Radio.setRetries(RETRY_DELAY, RETRY_COUNT);

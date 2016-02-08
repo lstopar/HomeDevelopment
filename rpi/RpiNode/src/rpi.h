@@ -52,11 +52,11 @@ private:
 // DATA: GPIO4
 class TDHT11Sensor {
 public:
-	static constexpr uint64 MIN_SAMPLING_PERIOD = 2000;
-	static constexpr uint64 SAMPLING_TM = 1000;
+	static const uint64 MIN_SAMPLING_PERIOD;
+	static const uint64 SAMPLING_TM;
 private:
-	static constexpr uint32 DHT_MAXCOUNT = 32000;
-	static constexpr int DHT_PULSES = 41;
+	static const uint32 DHT_MAXCOUNT;
+	static const int DHT_PULSES;
 
 	const int Pin;
 
