@@ -368,6 +368,7 @@ bool TRf24Radio::Read(TMem& Msg) {
 	if (Radio.available()) {
 		char Payload[PAYLOAD_SIZE];
 		Radio.read(Payload, PAYLOAD_SIZE);
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Read, extracting!");
 
 		for (int i = 0; i < PAYLOAD_SIZE; i++) {
 			Msg[i] = Payload[i];
