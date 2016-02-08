@@ -160,7 +160,7 @@ int main(int argc, char** argv){
 			  printf("Got response %d, value=%s\n\r", ++responseN,received);
 			}
 			// Try again 1s later
-			delay(1000);
+			delay(100);
 		  }
 
 		  //
