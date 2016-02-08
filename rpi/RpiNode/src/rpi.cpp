@@ -354,6 +354,7 @@ void TRf24Radio::Init() {
 
 bool TRf24Radio::Send(const TMem& Buff) {
 	TLock Lock(CriticalSection);
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message ...");
 	Radio.stopListening();
 	bool Success = Radio.write(Buff(), PAYLOAD_SIZE);
 	Radio.startListening();
