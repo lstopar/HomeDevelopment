@@ -133,6 +133,8 @@ public:
 		virtual void OnMsg(const TMem& Msg) = 0;
 	};
 
+	static constexpr int PAYLOAD_SIZE = 8;
+
 private:
 	class TReadThread: public TThread {
 	private:
@@ -153,7 +155,6 @@ private:
 	static constexpr uint8 RETRY_DELAY = 15;
 	static constexpr uint8 RETRY_COUNT = 15;
 	static constexpr uint8 COMM_CHANNEL = 0x4C;
-	static constexpr int PAYLOAD_SIZE = 8;
 
 	static constexpr uint64_t PIPES[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
