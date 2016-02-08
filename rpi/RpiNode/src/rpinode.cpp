@@ -285,7 +285,7 @@ void TNodeJsRf24Radio::Init(v8::Handle<v8::Object> Exports) {
 	Exports->Set(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()), tpl->GetFunction());
 }
 
-TRf24Radio* TNodeJsRf24Radio::NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+TNodeJsRf24Radio* TNodeJsRf24Radio::NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
@@ -306,6 +306,19 @@ TRf24Radio* TNodeJsRf24Radio::NewFromArgs(const v8::FunctionCallbackInfo<v8::Val
 	}
 
 	return new TNodeJsRf24Radio(PinCE, PinCSN, SensorNmIdH, Notify);
+}
+
+TNodeJsRf24Radio::TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TStr, uint8> _ValueNmIdH,
+		const PNotify& Notify):
+	Radio(new TRf24Radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, Notify)),	// TODO make it a reference
+	ValueNmIdH(_ValueNmIdH) {
+
+	int KeyId = ValueNmIdH.FFirstKeyId();
+	while (ValueNmIdH.FNextKeyId(KeyId)) {
+		const uint8& ValId = ValueNmIdH[KeyId];
+		const TStr& ValNm = ValueNmIdH.GetKey(KeyId);
+		ValueIdNmH.AddDat(ValId, ValNm);
+	}
 }
 
 TNodeJsRf24Radio::~TNodeJsRf24Radio() {
