@@ -130,7 +130,7 @@ class TRf24Radio {
 public:
 	class TRf24RadioCallback {
 	public:
-		virtual void OnMsg(const TMem& Msg) = 0;
+		virtual void OnValue(const int& ValId, const int& Val) = 0;
 	};
 
 	static const int PAYLOAD_SIZE;
@@ -160,6 +160,8 @@ private:
 
 	static const char COMMAND_GET;
 	static const char COMMAND_SET;
+	static const char COMMAND_PUSH;
+	static const char COMMAND_PING;
 
 	RF24 Radio;
 	TReadThread ReadThread;
@@ -174,6 +176,7 @@ public:
 			const PNotify& Notify=TNotify::NullNotify);
 
 	void Init();
+	bool Ping(const int& NodeId);
 	bool Set(const int& NodeId, const int& ValId, const int& Val);
 	bool Get(const int& NodeId, const int& ValId);
 
@@ -183,6 +186,8 @@ public:
 
 private:
 	bool Send(const TMem& Buff);
+
+	static void ParseMsg(const TMem& Msg, uint8& NodeId, char& CommandId, int& ValId, int& Val);
 };
 
 

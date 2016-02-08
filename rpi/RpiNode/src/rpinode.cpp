@@ -280,7 +280,8 @@ void TNodeJsRf24Radio::Init(v8::Handle<v8::Object> Exports) {
 	NODE_SET_PROTOTYPE_METHOD(tpl, "init", _init);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "get", _get);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "set", _set);
-	NODE_SET_PROTOTYPE_METHOD(tpl, "onMsg", _onMsg);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "ping", _ping);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "onValue", _onValue);
 
 	Exports->Set(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()), tpl->GetFunction());
 }
@@ -328,7 +329,8 @@ TNodeJsRf24Radio::TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TS
 }
 
 TNodeJsRf24Radio::~TNodeJsRf24Radio() {
-	MsgCallback.Reset();
+	OnPongCallback.Reset();
+	OnValueCallback.Reset();
 }
 
 void TNodeJsRf24Radio::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {
@@ -375,19 +377,42 @@ void TNodeJsRf24Radio::set(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	Args.GetReturnValue().Set(v8::Boolean::New(Isolate, Success));
 }
 
-void TNodeJsRf24Radio::onMsg(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+void TNodeJsRf24Radio::ping(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
+
+	const int NodeId = TNodeJsUtil::GetArgInt32(Args, 0);
+
+	bool Success = JsRadio->Radio.Ping(NodeId);
+
+	Args.GetReturnValue().Set(v8::Boolean::New(Isolate, Success));
+}
+
+void TNodeJsRf24Radio::onValue(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
 	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
 	v8::Local<v8::Function> Cb = TNodeJsUtil::GetArgFun(Args, 0);
 
-	JsRadio->MsgCallback.Reset(Isolate, Cb);
+	JsRadio->OnValueCallback.Reset(Isolate, Cb);
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
-void TNodeJsRf24Radio::OnMsgMainThread(const int& NodeId, const uint8& ValueId, const int& Val) {
-	if (!MsgCallback.IsEmpty()) {
+void TNodeJsRf24Radio::OnPongMainThread(const int& NodeId) {
+	if (!OnPongCallback.IsEmpty()) {
+		v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+		v8::HandleScope HandleScope(Isolate);
+
+		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnPongCallback);
+		TNodeJsUtil::ExecuteVoid(Callback, v8::Integer::New(Isolate, NodeId));
+	}
+}
+
+void TNodeJsRf24Radio::OnMsgMainThread(const uint8& ValueId, const int& Val) {
+	if (!OnValueCallback.IsEmpty()) {
 		v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 		v8::HandleScope HandleScope(Isolate);
 
@@ -397,26 +422,17 @@ void TNodeJsRf24Radio::OnMsgMainThread(const int& NodeId, const uint8& ValueId, 
 		JsonVal->AddToObj("id", ValueNm);
 		JsonVal->AddToObj("value", Val);
 
-		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, MsgCallback);
+		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnValueCallback);
 		TNodeJsUtil::ExecuteVoid(Callback, TNodeJsUtil::ParseJson(Isolate, JsonVal));
 	}
 }
 
-void TNodeJsRf24Radio::OnMsg(const TMem& Msg) {
-	const int NodeId = (int) Msg[0];
-	const uint8 ValueId = (uint8) Msg[1];
-
-	// TODO do this somewhere else!
-	int Val = (int(Msg[2]) << 24) +
-			  (int(Msg[3]) << 16) +
-			  (int(Msg[4]) << 8) +
-			  Msg[5];
-
-	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, NodeId, ValueId, Val), true);
+void TNodeJsRf24Radio::OnValue(const int& ValId, const int& Val) {
+	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, ValId, Val), true);
 }
 
 void TNodeJsRf24Radio::TOnMsgTask::Run(TOnMsgTask& Task) {
-	Task.JsRadio->OnMsgMainThread(Task.NodeId, Task.ValueId, Task.Val);
+	Task.JsRadio->OnMsgMainThread(Task.ValueId, Task.Val);
 }
 
 

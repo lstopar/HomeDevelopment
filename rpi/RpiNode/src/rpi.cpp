@@ -319,6 +319,8 @@ const uint64_t TRf24Radio::PIPES[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
 const char TRf24Radio::COMMAND_GET = 0x00;
 const char TRf24Radio::COMMAND_SET = 0x01;
+const char TRf24Radio::COMMAND_PUSH = 0x02;
+const char TRf24Radio::COMMAND_PING = 0xFF;
 
 void TRf24Radio::TReadThread::Run() {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
@@ -328,12 +330,25 @@ void TRf24Radio::TReadThread::Run() {
 			TMem Msg(PAYLOAD_SIZE);
 			while (Radio->Read(Msg)) {
 				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message!");
-				if (Radio->Callback != nullptr) {
-					try {
-						Radio->Callback->OnMsg(Msg);
-					} catch (const PExcept& Except) {
-						Notify->OnNotifyFmt(TNotifyType::ntErr, "Error when calling read callback: %s", Except->GetMsgStr().CStr());
+
+				if (Radio->Callback == nullptr) { continue; }
+
+				uint8 NodeId;
+				char CommandId;
+				int ValId;
+				int Val;
+				TRf24Radio::ParseMsg(Msg, NodeId, CommandId, ValId, Val);
+
+				try {
+					if (CommandId == COMMAND_PING) {
+						Notify->OnNotify(TNotifyType::ntInfo, "Received ping, ignoring ...");
+					} else if (CommandId == COMMAND_PUSH) {
+						Radio->Callback->OnValue(ValId, Val);
+					} else {
+						Notify->OnNotifyFmt(TNotifyType::ntWarn, "Invalid command ID: %d", CommandId);
 					}
+				} catch (const PExcept& Except) {
+					Notify->OnNotifyFmt(TNotifyType::ntErr, "Error when calling read callback: %s", Except->GetMsgStr().CStr());
 				}
 			}
 
@@ -374,6 +389,20 @@ void TRf24Radio::Init() {
 	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
 
 	ReadThread.Start();
+}
+
+bool TRf24Radio::Ping(const int& NodeId) {
+	TMem Msg;	Msg.Gen(PAYLOAD_SIZE);
+	Msg[0] = (char) NodeId;
+	Msg[1] = COMMAND_PING;
+	Msg[2] = 0xFF;
+	Msg[3] = 0xFF;
+	Msg[4] = 0xFF;
+	Msg[5] = 0xFF;
+	Msg[6] = 0xFF;
+	Msg[7] = 0xFF;
+
+	return Send(Msg);
 }
 
 bool TRf24Radio::Set(const int& NodeId, const int& ValId, const int& Val) {
@@ -434,4 +463,22 @@ bool TRf24Radio::Send(const TMem& Buff) {
 	bool Success = Radio.write(Buff(), PAYLOAD_SIZE);
 	Radio.startListening();
 	return Success;
+}
+
+void TRf24Radio::ParseMsg(const TMem& Msg, uint8& NodeId, char& CommandId,
+		int& ValId, int& Val) {
+	EAssertR(Msg.Len() == PAYLOAD_SIZE, "Invalid message length: " + TInt::GetStr(Msg.Len()));
+	NodeId = Msg[0];
+	CommandId = Msg[1];
+
+	if (CommandId != COMMAND_PING) {
+		ValId = Msg[2];
+
+		if (CommandId == COMMAND_PUSH || CommandId == COMMAND_SET) {
+			Val = int(Msg[3]) << 24 +
+				  int(Msg[4]) << 16 +
+				  int(Msg[5]) << 8 +
+				  int(Msg[6]);
+		}
+	}
 }

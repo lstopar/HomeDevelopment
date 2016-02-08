@@ -123,32 +123,35 @@ private:
 
 	TRf24Radio Radio;
 	THash<TStr, TInt> ValueNmIdH;
-	THash<TInt, TStr> ValueIdNmH;	// TODO
+	THash<TInt, TStr> ValueIdNmH;
 
-	v8::Persistent<v8::Function> MsgCallback;
+	v8::Persistent<v8::Function> OnPongCallback;
+	v8::Persistent<v8::Function> OnValueCallback;
 
 private:
 	JsDeclareFunction(init);
 	JsDeclareFunction(get);
 	JsDeclareFunction(set);
-	JsDeclareFunction(onMsg);
+	JsDeclareFunction(ping);
 
-	void OnMsgMainThread(const int& NodeId, const uint8& ValueId, const int& Val);
+	// callbacks
+	JsDeclareFunction(onValue);
+
+	void OnPongMainThread(const int& NodeId);
+	void OnMsgMainThread(const uint8& ValueId, const int& Val);
 
 public:
-	void OnMsg(const TMem& Msg);
+	void OnPong(const uint8& NodeId);
+	void OnValue(const int& ValId, const int& Val);
 
 	class TOnMsgTask {
 	private:
 		TNodeJsRf24Radio* JsRadio;
-		const int NodeId;
-		const uint8 ValueId;
+		const int ValueId;
 		const int Val;
 	public:
-		TOnMsgTask(TNodeJsRf24Radio* _JsRadio, const int& _NodeId, const uint8& _ValueId,
-				const int& _Val):
+		TOnMsgTask(TNodeJsRf24Radio* _JsRadio, const int& _ValueId, const int& _Val):
 			JsRadio(_JsRadio),
-			NodeId(_NodeId),
 			ValueId(_ValueId),
 			Val(_Val) {}
 
