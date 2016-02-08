@@ -118,6 +118,9 @@ int main(int argc, char** argv){
 
 
     // forever loop
+
+    int responseN = 0;
+
 	while (1) {
 		if (role == role_ping_out) {
 			// The payload will always be the same, what will change is how much of it we send.
@@ -154,7 +157,7 @@ int main(int argc, char** argv){
 			  received[PAYLOAD_SIZE] = 0;
 
 			  // Spew it
-			  printf("Got response value=%s\n\r",received);
+			  printf("Got response %d, value=%s\n\r", ++responseN,received);
 			}
 			// Try again 1s later
 			delay(1000);
