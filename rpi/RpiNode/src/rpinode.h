@@ -152,7 +152,7 @@ public:
 			ValueId(_ValueId),
 			Val(_Val) {}
 
-		void Run(TOnMsgTask& Task);
+		static void Run(TOnMsgTask& Task);
 	};
 };
 
