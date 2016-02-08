@@ -156,7 +156,7 @@ private:
 	static const uint8 RETRY_COUNT;
 	static const uint8 COMM_CHANNEL;
 
-	static const uint64_t PIPES;
+	static const uint64_t PIPES[2];
 
 	RF24 Radio;
 	TReadThread ReadThread;
