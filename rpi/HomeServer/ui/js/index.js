@@ -66,7 +66,9 @@ $(document).ready(function () {
 		step: 1,
 		value: 0
 	}).on('slideStop', function (a, b) {
-		alert('bla');
+		var value = a.value;
+		var id = $(a.target).attr('id').substring(5);
+		alert(id);
 	});
 	
 	initWs();
