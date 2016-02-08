@@ -362,22 +362,26 @@ bool TRf24Radio::Send(const TMem& Buff) {
 }
 
 bool TRf24Radio::Read(TMem& Msg) {
-	TLock Lock(CriticalSection);
+	try {
+		TLock Lock(CriticalSection);
 
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading radio ...");
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading radio ...");
 
-	if (Radio.available()) {
-		char Payload[PAYLOAD_SIZE];
-		Radio.read(Payload, PAYLOAD_SIZE);
-		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Read, extracting!");
+		if (Radio.available()) {
+			char Payload[PAYLOAD_SIZE];
+			Radio.read(Payload, PAYLOAD_SIZE);
+			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Read, extracting!");
 
-		for (int i = 0; i < PAYLOAD_SIZE; i++) {
-			Msg[i] = Payload[i];
+			for (int i = 0; i < PAYLOAD_SIZE; i++) {
+				Msg[i] = Payload[i];
+			}
+
+			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got message!");
+
+			return true;
 		}
-
-		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got message!");
-
-		return true;
+	} catch (...) {
+		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception while reading!");
 	}
 	return false;
 }
