@@ -2,7 +2,7 @@
 
 void TNodeJsRpiBase::Init(v8::Handle<v8::Object> Exports) {
 	NODE_SET_METHOD(Exports, "init", _init);
-	NODE_SET_METHOD(Exports, "pinMode", _pinMode);
+//	NODE_SET_METHOD(Exports, "pinMode", _pinMode);
 }
 
 void TNodeJsRpiBase::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {
@@ -26,16 +26,16 @@ void TNodeJsRpiBase::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
-void TNodeJsRpiBase::pinMode(const v8::FunctionCallbackInfo<v8::Value>& Args) {
-	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
-	v8::HandleScope HandleScope(Isolate);
-
-	const int Pin = TNodeJsUtil::GetArgInt32(Args, 0);
-	const int Mode = TNodeJsUtil::GetArgInt32(Args, 1);
-
-	TRpiUtil::SetPinMode(Pin, Mode);
-	Args.GetReturnValue().Set(v8::Undefined(Isolate));
-}
+//void TNodeJsRpiBase::pinMode(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+//	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+//	v8::HandleScope HandleScope(Isolate);
+//
+//	const int Pin = TNodeJsUtil::GetArgInt32(Args, 0);
+//	const int Mode = TNodeJsUtil::GetArgInt32(Args, 1);
+//
+//	TRpiUtil::SetPinMode(Pin, Mode);
+//	Args.GetReturnValue().Set(v8::Undefined(Isolate));
+//}
 
 /////////////////////////////////////////
 // DHT11 - Digital temperature and humidity sensor

@@ -24,7 +24,32 @@ module.exports = exports = [
 			"timeout": 10000,
 			"verbose": true
 		}
-	}/*,
+	},
+	{
+		type: 'Rf24',
+		nodes: [
+		    {
+		    	id: 1,
+		    	sensors: [
+		    	    {
+		    	    	id: 'light-couch',
+		    	    	internalId: 1,
+		    	    	type: 'dimmer',
+		    	    	unit: '%',
+		    	    	name: 'Dimmer 1',
+		    	    	description: 'Dimmer 1'
+		    	    }          
+		    	]
+		    }    
+		],
+		configuration: {
+			pinCE: 25,
+			pinCSN: 8
+		}
+	}
+	
+	
+	/*,
 	{
 		"type": "YL-40",
 		"sensors": [
