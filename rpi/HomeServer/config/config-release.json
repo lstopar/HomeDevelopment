@@ -1,5 +1,5 @@
 {
-	"rpilib": "../RpiNode/build/Release/rpinode.node",
+	"rpilib": "../RpiNode/build/Debug/rpinode.node",
 	"server": {
 		"port": 80
 	},
