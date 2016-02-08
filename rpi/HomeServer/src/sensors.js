@@ -208,7 +208,7 @@ function pingRadios() {
 			if (log.debug())
 				log.debug('Pinging node %d', nodeId)
 			
-			onNodeConnected(nodeId, radio.radio.ping(nodeId));
+			onNodeConnected(nodeId, radio.radio.ping(parseInt(nodeId)));
 		}
 	} catch (e) {
 		log.error(e, 'Exception while pinging radio nodes!');
