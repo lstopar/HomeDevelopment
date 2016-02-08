@@ -298,7 +298,7 @@ TNodeJsRf24Radio* TNodeJsRf24Radio::NewFromArgs(const v8::FunctionCallbackInfo<v
 	const bool Verbose = ParamJson->GetObjBool("verbose", false);
 	const PNotify Notify = Verbose ? TNotify::StdNotify : TNotify::NullNotify;
 
-	THash<TStr, uint8> SensorNmIdH;
+	THash<TStr, TInt> SensorNmIdH;
 
 	for (int SensorN = 0; SensorN < SensorJsonV->GetArrVals(); SensorN++) {
 		const PJsonVal SensorJson = SensorJsonV->GetArrVal(SensorN);
@@ -308,14 +308,14 @@ TNodeJsRf24Radio* TNodeJsRf24Radio::NewFromArgs(const v8::FunctionCallbackInfo<v
 	return new TNodeJsRf24Radio(PinCE, PinCSN, SensorNmIdH, Notify);
 }
 
-TNodeJsRf24Radio::TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TStr, uint8> _ValueNmIdH,
+TNodeJsRf24Radio::TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TStr, TInt> _ValueNmIdH,
 		const PNotify& Notify):
 	Radio(new TRf24Radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, Notify)),	// TODO make it a reference
 	ValueNmIdH(_ValueNmIdH) {
 
 	int KeyId = ValueNmIdH.FFirstKeyId();
 	while (ValueNmIdH.FNextKeyId(KeyId)) {
-		const uint8& ValId = ValueNmIdH[KeyId];
+		const int& ValId = ValueNmIdH[KeyId];
 		const TStr& ValNm = ValueNmIdH.GetKey(KeyId);
 		ValueIdNmH.AddDat(ValId, ValNm);
 	}
@@ -344,7 +344,7 @@ void TNodeJsRf24Radio::get(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 
 	const TStr ValueNm = TNodeJsUtil::GetArgStr(Args, 0);
 
-	const uint8 ValueId = JsRadio->ValueNmIdH.GetDat(ValueNm);
+	const uint8 ValueId = (uint8) JsRadio->ValueNmIdH.GetDat(ValueNm);
 
 	TMem Msg(TRf24Radio::PAYLOAD_SIZE);
 	Msg[0] = 0;					// TODO id of the node
@@ -381,7 +381,7 @@ void TNodeJsRf24Radio::OnMsgMainThread(const int& NodeId, const uint8& ValueId, 
 		v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 		v8::HandleScope HandleScope(Isolate);
 
-		const TStr ValueNm = ValueIdNmH.GetDat(ValueId);
+		const TStr ValueNm = ValueIdNmH.GetDat((int) ValueId);
 
 		PJsonVal JsonVal = TJsonVal::NewObj();
 		JsonVal->AddToObj("id", ValueNm);

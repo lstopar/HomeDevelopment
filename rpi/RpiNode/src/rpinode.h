@@ -117,13 +117,13 @@ public:
 private:
 	static TNodeJsRf24Radio* NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args);
 
-	TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TStr, uint8> _ValueNmIdH,
+	TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TStr, TInt> _ValueNmIdH,
 			const PNotify& Notify);
 	~TNodeJsRf24Radio();
 
 	TRf24Radio* Radio;
-	THash<TStr, uint8> ValueNmIdH;
-	THash<uint8, TStr> ValueIdNmH;	// TODO
+	THash<TStr, TInt> ValueNmIdH;
+	THash<TInt, TStr> ValueIdNmH;	// TODO
 
 	v8::Persistent<v8::Function> MsgCallback;
 
