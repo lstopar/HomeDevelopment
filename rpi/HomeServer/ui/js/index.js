@@ -72,7 +72,7 @@ $(document).ready(function () {
 			
 			if (msg.type == 'reading') {
 				onReading(msg.content);
-			} else if (type == 'nodeEvent') {
+			} else if (msg.type == 'nodeEvent') {
 				onNodeEvent(msg.content);
 			} else {
 				alert('Unknown message: ' + msgStr.data);
