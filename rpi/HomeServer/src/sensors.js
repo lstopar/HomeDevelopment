@@ -99,8 +99,8 @@ function initSensors() {
 				nodeIdH[nodeId] = true;
 			}
 			
-			for (var nodeId in nodeIdH) {
-				nodeIds.push(nodeId);
+			for (var nid in nodeIdH) {
+				nodeIds.push(parseInt(nid));
 			}
 			
 			log.info('Creating ...');
@@ -181,6 +181,10 @@ function pingRadios() {
 		
 		for (var nodeN = 0; nodeN < nodeIds.length; nodeN++) {
 			var nodeId = nodeIds[nodeN];
+			
+			if (log.debug())
+				log.debug('Pinging node %d', nodeId)
+			
 			if (!radio.radio.ping(nodeId)) {
 				log.warn('Failed to ping radio node %s', nodeId);
 			}
