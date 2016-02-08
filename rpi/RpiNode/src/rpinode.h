@@ -126,6 +126,7 @@ private:
 
 	TRf24Radio* Radio;
 	THash<TStr, uint8> ValueNmIdH;
+	THash<uint8, TStr> ValueIdNmH;	// TODO
 
 	v8::Persistent<v8::Function> MsgCallback;
 

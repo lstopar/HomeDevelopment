@@ -95,6 +95,12 @@ function initSensors() {
 					sensors: radioConf
 				})
 			};
+			
+			radio.radio.onMsg(function (val) {	// TODO move this somewhere, make a common interface
+				if (log.debug()) 
+					log.debug('Received value from the radio: %s', JSON.stringify(val));
+				setValue(val.id, val.value);
+			});
 		}
 	}
 }
@@ -141,6 +147,13 @@ function readDevices() {
 					setValue(sensorId, trans[sensorId]);
 			});
 		})();
+	}
+	
+	if (radio != null) {
+		var radioDevs = radio.sensorH;
+		for (var id in radioDevs) {
+			radio.radio.get(id);
+		}
 	}
 }
 

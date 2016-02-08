@@ -329,13 +329,12 @@ void TNodeJsRf24Radio::get(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 
 	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
 
-	const int NodeId = TNodeJsUtil::GetArgInt32(Args, 0);
-	const TStr ValueNm = TNodeJsUtil::GetArgStr(Args, 1);
+	const TStr ValueNm = TNodeJsUtil::GetArgStr(Args, 0);
 
 	const uint8 ValueId = JsRadio->ValueNmIdH.GetDat(ValueNm);
 
 	TMem Msg(TRf24Radio::PAYLOAD_SIZE);
-	Msg[0] = (uint8) NodeId;	// id of the node
+	Msg[0] = 0;					// TODO id of the node
 	Msg[1] = 0;					// get
 	Msg[2] = ValueId;			// the value we want to get
 
@@ -369,17 +368,14 @@ void TNodeJsRf24Radio::OnMsgMainThread(const int& NodeId, const uint8& ValueId, 
 		v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 		v8::HandleScope HandleScope(Isolate);
 
+		const TStr ValueNm = ValueIdNmH.GetDat(ValueId);
 
-
-		const int ArgC = 3;
-		v8::Handle<v8::Value> ArgV[ArgC] = {
-			v8::Integer::New(Isolate, NodeId),
-			v8::Integer::New(Isolate, ValueId),
-			v8::Integer::New(Isolate, Val)
-		};
+		PJsonVal JsonVal = TJsonVal::NewObj();
+		JsonVal->AddToObj("id", ValueNm);
+		JsonVal->AddToObj("value", Val);
 
 		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, MsgCallback);
-		TNodeJsUtil::ExecuteVoid(Callback, ArgC, ArgV);
+		TNodeJsUtil::ExecuteVoid(Callback, TNodeJsUtil::ParseJson(Isolate, JsonVal));
 	}
 }
 
@@ -387,7 +383,6 @@ void TNodeJsRf24Radio::OnMsg(const TMem& Msg) {
 	const int NodeId = (int) Msg[0];
 	const uint8 ValueId = (uint8) Msg[1];
 
-	int Val = 0;
 	// TODO do this somewhere else!
 	int Val = 0;
 	char* ValPtr = (char*) &Val;
