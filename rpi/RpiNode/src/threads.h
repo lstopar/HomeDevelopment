@@ -103,7 +103,7 @@ public:
     pthread_t GetThreadHandle() const { return ThreadHandle; }
 
 	void Interrupt();
-	void WaitForInterrupt(const int Msecs = INFINITE);
+	void WaitForInterrupt(const int Msecs = TInt::Mx);
 
 	int Join();
 

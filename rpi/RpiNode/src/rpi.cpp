@@ -300,7 +300,7 @@ void TRf24Radio::TReadThread::Run() {
 	try {
 		TMem Msg(PAYLOAD_SIZE);
 		while (Radio->Read(Msg)) {
-			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message: %s", Msg.CStr());
+			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message!");
 			if (Radio->Callback != nullptr) {
 				try {
 					Radio->Callback->OnMsg(Msg);

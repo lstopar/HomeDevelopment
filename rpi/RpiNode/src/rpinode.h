@@ -132,7 +132,7 @@ private:
 
 	void OnMsgMainThread(const int& NodeId, const uint8& ValueId, const int& Val);
 
-protected:
+public:
 	void OnMsg(const TMem& Msg);
 
 	class TOnMsgTask {

@@ -129,7 +129,7 @@ private:
 class TRf24Radio {
 public:
 	class TRf24RadioCallback {
-	protected:
+	public:
 		virtual void OnMsg(const TMem& Msg) = 0;
 	};
 
