@@ -133,7 +133,7 @@ public:
 		virtual void OnMsg(const TMem& Msg) = 0;
 	};
 
-	static constexpr int PAYLOAD_SIZE = 8;
+	static const int PAYLOAD_SIZE;
 
 private:
 	class TReadThread: public TThread {
@@ -151,12 +151,12 @@ private:
 		void Run();
 	};
 
-	static constexpr rf24_pa_dbm_e POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_LOW;
-	static constexpr uint8 RETRY_DELAY = 15;
-	static constexpr uint8 RETRY_COUNT = 15;
-	static constexpr uint8 COMM_CHANNEL = 0x4C;
+	static const rf24_pa_dbm_e POWER_LEVEL;
+	static const uint8 RETRY_DELAY;
+	static const uint8 RETRY_COUNT;
+	static const uint8 COMM_CHANNEL;
 
-	static constexpr uint64_t PIPES[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
+	static const uint64_t PIPES;
 
 	RF24 Radio;
 	TReadThread ReadThread;

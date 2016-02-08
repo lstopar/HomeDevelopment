@@ -296,6 +296,14 @@ void TYL40Adc::CleanUp() {
 
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
+const int TRf24Radio::PAYLOAD_SIZE = 8;
+const rf24_pa_dbm_e TRf24Radio::POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_LOW;
+const uint8 TRf24Radio::RETRY_DELAY = 15;
+const uint8 TRf24Radio::RETRY_COUNT = 15;
+const uint8 TRf24Radio::COMM_CHANNEL = 0x4C;
+
+const uint64_t TRf24Radio::PIPES[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
+
 void TRf24Radio::TReadThread::Run() {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
 
