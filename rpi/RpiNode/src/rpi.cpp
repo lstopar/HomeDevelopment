@@ -363,8 +363,8 @@ void TRf24Radio::Init() {
 	Radio.setCRCLength(RF24_CRC_8);
 	Radio.printDetails();
 
-	Radio.openWritingPipe(PIPES[0]);
-	Radio.openReadingPipe(1,PIPES[1]);
+	Radio.openWritingPipe(0xF0F0F0F0E1LL);
+	Radio.openReadingPipe(1, 0xF0F0F0F0D2LL);
 
 	Radio.startListening();
 
