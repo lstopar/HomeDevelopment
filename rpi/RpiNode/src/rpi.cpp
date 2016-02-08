@@ -210,6 +210,14 @@ void TDHT11Sensor::Read() {
 
 /////////////////////////////////////////
 // YL-40 - ADC
+static constexpr uint32 TYL40Adc::I2C_ADDRESS = 0x48;
+
+static const uchar TYL40Adc::ANALOG_OUTPUT = 0x40;
+static const uchar TYL40Adc::MODE_READ = 0x01;
+static const uchar TYL40Adc::MODE_WRITE = 0x00;
+
+static const uint64 TYL40Adc::PROCESSING_DELAY = 2000;
+
 TYL40Adc::TYL40Adc(const PNotify& _Notify):
 		FileDesc(-1),
 		CriticalSection(),
@@ -336,7 +344,6 @@ TRf24Radio::TRf24Radio(const uint8& PinCe, const uint8_t& PinCs,
 		Notify(_Notify) {
 
 	ReadThread = TReadThread(this);
-	ReadThread.Start();
 }
 
 void TRf24Radio::Init() {
@@ -358,6 +365,8 @@ void TRf24Radio::Init() {
 	Radio.startListening();
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
+
+	ReadThread.Start();
 }
 
 bool TRf24Radio::Send(const TMem& Buff) {
@@ -378,7 +387,7 @@ bool TRf24Radio::Read(TMem& Msg) {
 		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading radio ...");
 
 		if (Radio.available()) {
-			char Payload[PAYLOAD_SIZE];
+			char Payload[PAYLOAD_SIZE+1];	// TODO +1???
 			Radio.read(Payload, PAYLOAD_SIZE);
 			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Read, extracting!");
 

@@ -97,13 +97,13 @@ public:
 // i2cset -y 1 0x48 0x41 0xff
 class TYL40Adc {
 private:
-	static constexpr uint32 I2C_ADDRESS = 0x48;
+	static const uint32 I2C_ADDRESS;
 
-	static constexpr uchar ANALOG_OUTPUT = 0x40;
-	static constexpr uchar MODE_READ = 0x01;
-	static constexpr uchar MODE_WRITE = 0x00;
+	static const uchar ANALOG_OUTPUT;
+	static const uchar MODE_READ;
+	static const uchar MODE_WRITE;
 
-	static constexpr uint64 PROCESSING_DELAY = 2000;
+	static const uint64 PROCESSING_DELAY;
 
 	int FileDesc;
 	TCriticalSection CriticalSection;
