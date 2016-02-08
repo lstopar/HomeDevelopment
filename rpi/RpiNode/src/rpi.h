@@ -14,7 +14,7 @@
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 
-//#include "RF24.h"
+#include "RF24/RF24.h"
 
 
 enum TGpioLayout {
@@ -126,25 +126,55 @@ private:
 
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
-//class TRf24Radio {
-//private:
-//	static constexpr uint8 RETRY_DELAY = 15;
-//	static constexpr uint8 RETRY_COUNT = 15;
-//	static constexpr uint8 COMM_CHANNEL = 0;
-//	static constexpr rf24_pa_dbm_e POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_HIGH;
-//
-//	RF24 Radio;
-//	// TODO define pipes???
-//	TCriticalSection CriticalSection;
-//	PNotify Notify;
-//
-//public:
-//	TRf24Radio(const uint8& PinCe, const uint8_t& PinCs, const uint32& SpiSpeed,
-//			const PNotify& Notify);
-//
-//	void Init();
-//	bool Send(const uchar* Buff, const uint8& BuffLen);
-//};
+class TRf24Radio {
+public:
+	class TRf24RadioCallback {
+	protected:
+		virtual void OnMsg(const int& NodeId, const TStr& Msg) = 0;
+	};
+
+private:
+	class TReadThread: public TThread {
+	private:
+		TRf24Radio* Radio;
+		PNotify Notify;
+	public:
+		TReadThread():
+			Radio(),
+			Notify() {}
+		TReadThread(TRf24Radio* _Radio):
+			Radio(_Radio),
+			Notify(_Radio->Notify) {}
+
+		void Run();
+	};
+
+	static constexpr rf24_pa_dbm_e POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_LOW;
+	static constexpr uint8 RETRY_DELAY = 15;
+	static constexpr uint8 RETRY_COUNT = 15;
+	static constexpr uint8 COMM_CHANNEL = 0x4C;
+	static constexpr int PAYLOAD_SIZE = 8;
+
+	static constexpr uint64_t PIPES[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
+
+	RF24 Radio;
+	TReadThread ReadThread;
+
+	TRf24RadioCallback* Callback;
+
+	TCriticalSection CriticalSection;
+	PNotify Notify;
+
+public:
+	TRf24Radio(const uint8& PinCe, const uint8_t& PinCs, const uint32& SpiSpeed=BCM2835_SPI_SPEED_8MHZ,
+			const PNotify& Notify=TNotify::NullNotify);
+
+	void Init();
+	bool Send(const TMem& Buff);
+	bool Read(TStr& Msg);
+
+	void SetCallback(TRf24RadioCallback* Cb) { Callback = Cb; }
+};
 
 
 #endif /* SRC_RPI_H_ */
