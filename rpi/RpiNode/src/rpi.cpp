@@ -386,12 +386,9 @@ bool TRf24Radio::Read(TMem& Msg) {
 	try {
 		TLock Lock(CriticalSection);
 
-		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading radio ...");
-
 		if (Radio.available()) {
 			char Payload[PAYLOAD_SIZE];
 			Radio.read(Payload, PAYLOAD_SIZE);
-			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Read, extracting!");
 
 			if (Msg.Len() != PAYLOAD_SIZE) { Msg.Gen(PAYLOAD_SIZE); }
 			for (int i = 0; i < PAYLOAD_SIZE; i++) {

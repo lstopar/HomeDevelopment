@@ -119,11 +119,13 @@ function setValue(sensorId, value) {
 		if (log.trace())
 			log.trace('Setting value for sensor "%s" to %d ...', sensorId, value);
 		
+		var type = sensorId in sensors ? sensors[sensorId] : radio.sensorH[sensorId].type;
+		
 		values[sensorId] = value;
 		callbacks.onValueReceived({
 			id: sensorId,
 			value: value,
-			type: sensors[sensorId].type
+			type: type
 		});
 	} catch (e) {
 		log.error(e, 'Exception while setting value of sensor: %s', sensorId);
