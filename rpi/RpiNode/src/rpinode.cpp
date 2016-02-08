@@ -354,17 +354,12 @@ void TNodeJsRf24Radio::onMsg(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
-void TNodeJsRf24Radio::OnMsgMainThread(const int& NodeId, const uint8& ValueId, const TMem& Msg) {
+void TNodeJsRf24Radio::OnMsgMainThread(const int& NodeId, const uint8& ValueId, const int& Val) {
 	if (!MsgCallback.IsEmpty()) {
 		v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 		v8::HandleScope HandleScope(Isolate);
 
-		// TODO do this somewhere else!
-		int Val = 0;
-		char* ValPtr = (char*) &Val;
-		for (int PosN = 0; PosN < 4; PosN++) {
-			*ValPtr = Msg[2 + PosN];
-		}
+
 
 		const int ArgC = 3;
 		v8::Handle<v8::Value> ArgV[ArgC] = {
@@ -378,7 +373,18 @@ void TNodeJsRf24Radio::OnMsgMainThread(const int& NodeId, const uint8& ValueId, 
 	}
 }
 
-void TNodeJsRf24Radio::OnMsg(const int& NodeId, const uint8& ValueId, const TMem& Msg) {
+void TNodeJsRf24Radio::OnMsg(const TMem& Msg) {
+	const int NodeId = (int) Msg[0];
+	const uint8 ValueId = (uint8) Msg[1];
+
+	int Val = 0;
+	// TODO do this somewhere else!
+	int Val = 0;
+	char* ValPtr = (char*) &Val;
+	for (int PosN = 0; PosN < 4; PosN++) {
+		*ValPtr = Msg[2 + PosN];
+	}
+
 	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, NodeId, ValueId, Msg), true);
 }
 

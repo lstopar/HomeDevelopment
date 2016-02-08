@@ -298,7 +298,7 @@ void TYL40Adc::CleanUp() {
 //// RF24 Radio transmitter
 void TRf24Radio::TReadThread::Run() {
 	try {
-		TStr Msg;
+		TMem Msg(PAYLOAD_SIZE);
 		while (Radio->Read(Msg)) {
 			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message: %s", Msg.CStr());
 			if (Radio->Callback != nullptr) {
@@ -356,13 +356,16 @@ bool TRf24Radio::Send(const TMem& Buff) {
 	return Success;
 }
 
-bool TRf24Radio::Read(TStr& Msg) {
+bool TRf24Radio::Read(TMem& Msg) {
 	TLock Lock(CriticalSection);
 	if (Radio.available()) {
-		char Payload[PAYLOAD_SIZE+1];
+		char Payload[PAYLOAD_SIZE];
 		Radio.read(Payload, PAYLOAD_SIZE);
-		Payload[PAYLOAD_SIZE] = 0;
-		Msg = Payload;
+
+		for (int i = 0; i < PAYLOAD_SIZE; i++) {
+			Msg[i] = Payload[i];
+		}
+
 		return true;
 	}
 	return false;
