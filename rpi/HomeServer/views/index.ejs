@@ -33,7 +33,12 @@
 	            		var node = nodes[i];
 	            		var connected = sensors.isOnline(node.id); %>
 	            		<li>
-	            			<%= connected ? 'C' : 'D' %> <%= node.name %>
+	            			<%= node.name %>
+	            			<% if (connected) { %>
+	            				<span id="span-status-node-<%= node.id %>" class="label label-success">Connected</span>
+	            			<% } else { %>
+	            				<span id="span-status-node-<%= node.id %>" class="label label-danger">Disconnected</span>
+	            			<% } %>
 	            		</li>
 	            	<% } %>
 	            </ul>

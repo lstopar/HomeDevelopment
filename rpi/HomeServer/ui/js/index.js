@@ -15,6 +15,24 @@ $(document).ready(function () {
 		}
 	}
 	
+	function onNodeEvent(event) {
+		var nodeId = event.id;
+		var connected = event.connected;
+		
+		var span = $('#span-status-node-' + nodeId);
+		
+		span.removeClass('label-danger');
+		span.removeClass('label-success');
+		
+		if (connected) {
+			span.addClass('label-success');
+			span.html('Connected');
+		} else {
+			span.addClass('label-danger');
+			span.html('Disconnected');
+		}
+	}
+	
 	function getWsUrl() {
 		var result;
 		var loc = window.location;
@@ -54,6 +72,8 @@ $(document).ready(function () {
 			
 			if (msg.type == 'reading') {
 				onReading(msg.content);
+			} else if (type == 'nodeEvent') {
+				onNodeEvent(msg.content);
 			} else {
 				alert('Unknown message: ' + msgStr.data);
 			}
