@@ -36,12 +36,12 @@
             	for (var i = 0; i < nodes.length; i++) {
             		var node = nodes[i];
             		var connected = sensors.isOnline(node.id); %>
-            		<li class="list-group-item" style="margin-top: 2px;">
+            		<li class="list-group-item">
             			<%= node.name %>
             			<% if (connected) { %>
-            				<span id="span-status-node-<%= node.id %>" class="label label-success pull-right">Connected</span>
+            				<span id="span-status-node-<%= node.id %>" class="label label-success pull-right" style="margin-top: 2px;">Connected</span>
             			<% } else { %>
-            				<span id="span-status-node-<%= node.id %>" class="label label-danger pull-right">Disconnected</span>
+            				<span id="span-status-node-<%= node.id %>" class="label label-danger pull-right" style="margin-top: 2px;">Disconnected</span>
             			<% } %>
             		</li>
             	<% } %>
