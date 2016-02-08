@@ -368,7 +368,7 @@ void TNodeJsRf24Radio::set(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	const int Val = ArgVal->GetObjInt("value");
 
 	const int NodeId = 1;
-	const int ValId = ValueNmIdH.GetDat(SensorNm);
+	const int ValId = JsRadio->ValueNmIdH.GetDat(SensorNm);
 
 	bool Success = JsRadio->Radio.Set(NodeId, ValId, Val);
 
@@ -407,7 +407,10 @@ void TNodeJsRf24Radio::OnMsg(const TMem& Msg) {
 	const uint8 ValueId = (uint8) Msg[1];
 
 	// TODO do this somewhere else!
-	int Val = (int) Msg[2];
+	int Val = (int(Msg[2]) << 24) +
+			  (int(Msg[3]) << 16) +
+			  (int(Msg[4]) << 8) +
+			  Msg[5];
 
 	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, NodeId, ValueId, Val), true);
 }
