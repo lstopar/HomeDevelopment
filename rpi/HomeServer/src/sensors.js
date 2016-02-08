@@ -103,10 +103,6 @@ function initSensors() {
 				};
 			}
 			
-			for (var nid in nodeIdH) {
-				nodeIds.push(parseInt(nid));
-			}
-			
 			log.info('Creating ...');
 			radio = {
 				sensorH: radioSensorH,
