@@ -319,17 +319,19 @@ void TNodeJsRf24Radio::get(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
+	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
+
 	const int NodeId = TNodeJsUtil::GetArgInt32(Args, 0);
 	const TStr ValueNm = TNodeJsUtil::GetArgStr(Args, 1);
 
-	const uint8 ValueId = ValueNmIdH.GetDat(ValueNm);
+	const uint8 ValueId = JsRadio->ValueNmIdH.GetDat(ValueNm);
 
 	TMem Msg(TRf24Radio::PAYLOAD_SIZE);
 	Msg[0] = (uint8) NodeId;	// id of the node
 	Msg[1] = 0;					// get
 	Msg[2] = ValueId;			// the value we want to get
 
-	const bool Success = Radio->Send(Msg);
+	const bool Success = JsRadio->Radio->Send(Msg);
 
 	Args.GetReturnValue().Set(v8::Boolean::New(Isolate, Success));
 }
