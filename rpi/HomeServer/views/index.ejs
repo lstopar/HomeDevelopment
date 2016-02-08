@@ -26,18 +26,18 @@
 	                    </a>
 	                </li>
 	            </ul>
-	            <ul id="ul-nodes">
+	            <ul id="ul-nodes" class="list-group">
 	            	<%
 	            	var nodes = sensors.getNodes();
 	            	for (var i = 0; i < nodes.length; i++) {
 	            		var node = nodes[i];
 	            		var connected = sensors.isOnline(node.id); %>
-	            		<li>
+	            		<li class="list-group-item">
 	            			<%= node.name %>
 	            			<% if (connected) { %>
-	            				<span id="span-status-node-<%= node.id %>" class="label label-success">Connected</span>
+	            				<span id="span-status-node-<%= node.id %>" class="label label-success pull-right">Connected</span>
 	            			<% } else { %>
-	            				<span id="span-status-node-<%= node.id %>" class="label label-danger">Disconnected</span>
+	            				<span id="span-status-node-<%= node.id %>" class="label label-danger pull-right">Disconnected</span>
 	            			<% } %>
 	            		</li>
 	            	<% } %>
