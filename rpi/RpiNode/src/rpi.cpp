@@ -297,22 +297,26 @@ void TYL40Adc::CleanUp() {
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
 void TRf24Radio::TReadThread::Run() {
-	try {
-		TMem Msg(PAYLOAD_SIZE);
-		while (Radio->Read(Msg)) {
-			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message!");
-			if (Radio->Callback != nullptr) {
-				try {
-					Radio->Callback->OnMsg(Msg);
-				} catch (const PExcept& Except) {
-					Notify->OnNotifyFmt(TNotifyType::ntErr, "Error when calling read callback: %s", Except->GetMsgStr().CStr());
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
+
+	while (true) {
+		try {
+			TMem Msg(PAYLOAD_SIZE);
+			while (Radio->Read(Msg)) {
+				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message!");
+				if (Radio->Callback != nullptr) {
+					try {
+						Radio->Callback->OnMsg(Msg);
+					} catch (const PExcept& Except) {
+						Notify->OnNotifyFmt(TNotifyType::ntErr, "Error when calling read callback: %s", Except->GetMsgStr().CStr());
+					}
 				}
 			}
-		}
 
-		TSysProc::Sleep(20);
-	} catch (const PExcept& Except) {
-		Notify->OnNotifyFmt(TNotifyType::ntErr, "Error on the read thread: %s", Except->GetMsgStr().CStr());
+			TSysProc::Sleep(20);
+		} catch (const PExcept& Except) {
+			Notify->OnNotifyFmt(TNotifyType::ntErr, "Error on the read thread: %s", Except->GetMsgStr().CStr());
+		}
 	}
 }
 

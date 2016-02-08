@@ -95,6 +95,7 @@ function initSensors() {
 				radio: new rpi.Rf24({
 					pinCE: deviceConf.configuration.pinCE,
 					pinCSN: deviceConf.configuration.pinCSN,
+					verbose: deviceConf.configuration.verbose,
 					sensors: radioConf
 				})
 			};

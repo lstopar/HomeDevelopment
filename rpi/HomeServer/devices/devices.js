@@ -44,7 +44,8 @@ module.exports = exports = [
 		],
 		configuration: {
 			pinCE: 25,
-			pinCSN: 8
+			pinCSN: 8,
+			verbose: true
 		}
 	}
 	
