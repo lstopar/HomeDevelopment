@@ -18,6 +18,7 @@
 		}
 	},
 	"samplingInterval": 10000,
+	"pingInterval": 10000,
 	"devices": "devices.js",
 	"mode": "release"
 }

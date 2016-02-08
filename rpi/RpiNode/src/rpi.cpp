@@ -475,9 +475,9 @@ void TRf24Radio::ParseMsg(const TMem& Msg, uint8& NodeId, char& CommandId,
 		ValId = Msg[2];
 
 		if (CommandId == COMMAND_PUSH || CommandId == COMMAND_SET) {
-			Val = int(Msg[3]) << 24 +
-				  int(Msg[4]) << 16 +
-				  int(Msg[5]) << 8 +
+			Val = (int(Msg[3]) << 24) +
+				  (int(Msg[4]) << 16) +
+				  (int(Msg[5]) << 8) +
 				  int(Msg[6]);
 		}
 	}

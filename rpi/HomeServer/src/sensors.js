@@ -79,6 +79,8 @@ function initSensors() {
 			
 			var radioSensorH = {};
 			var radioConf = [];
+			var nodeIdH = {};
+			var nodeIds = [];
 			
 			for (var nodeN = 0; nodeN < nodes.length; nodeN++) {
 				var node = nodes[nodeN];
@@ -93,11 +95,18 @@ function initSensors() {
 						nodeId: nodeId
 					})
 				}
+				
+				nodeIdH[nodeId] = true;
+			}
+			
+			for (var nodeId in nodeIdH) {
+				nodeIds.push(nodeId);
 			}
 			
 			log.info('Creating ...');
 			radio = {
 				sensorH: radioSensorH,
+				nodeIds: nodeIds,
 				radio: new rpi.Rf24({
 					pinCE: deviceConf.configuration.pinCE,
 					pinCSN: deviceConf.configuration.pinCSN,
@@ -107,7 +116,7 @@ function initSensors() {
 			};
 			
 			log.info('Setting callback ...');
-			radio.radio.onMsg(function (val) {	// TODO move this somewhere, make a common interface
+			radio.radio.onValue(function (val) {	// TODO move this somewhere, make a common interface
 				if (log.debug()) 
 					log.debug('Received value from the radio: %s', JSON.stringify(val));
 				setValue(val.id, val.value);
@@ -163,13 +172,34 @@ function readDevices() {
 	}
 }
 
+function pingRadios() {
+	if (log.debug())
+		log.debug('Pinging radio devices ...');
+	
+	try {
+		var nodeIds = radio.nodeIds;
+		
+		for (var nodeN = 0; nodeN < nodeIds.length; nodeN++) {
+			var nodeId = nodeIds[nodeN];
+			if (!radio.radio.ping(nodeId)) {
+				log.warn('Failed to ping radio node %s', nodeId);
+			}
+		}
+	} catch (e) {
+		log.error(e, 'Exception while pinging radio nodes!');
+	}
+}
+
 function readRadioDevices() {
 	if (radio != null) {
 		var radioDevs = radio.sensorH;
 		for (var id in radioDevs) {
 			if (log.debug())
 				log.debug('Calling get on radio ...');
-			radio.radio.get(id);
+			
+			if (!radio.radio.get(id)) {
+				log.warn('Failed to send message to device %s', id);
+			}
 		}
 	}
 }
@@ -244,6 +274,7 @@ exports.init = function () {
 		if (radio != null) {
 			log.info('Initializing radio ...');
 			radio.radio.init();
+			setInterval(pingRadios, config.pingInterval);
 		}
 		
 		log.info('Starting sampling sensors ...');

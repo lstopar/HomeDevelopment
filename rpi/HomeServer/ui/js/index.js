@@ -60,27 +60,6 @@ $(document).ready(function () {
 		};
 	}
 	
-	$('input[type="range"]').slider({
-		min: 0,
-		max: 100,
-		step: 1,
-		value: 0
-	}).on('slideStop', function (a, b) {
-		var value = a.value;
-		var id = $(a.target).attr('id').substring(6);
-		
-		$.ajax('api/set', {
-			method: 'POST',
-			dataType: 'json',
-			data: {
-				id: id,
-				value: parseInt(value)
-			},
-			success: function () {},
-			error: handleAjaxError()
-		})
-	});
-	
 	initWs();
 	$('.nav-pills a')[0].click();
 });

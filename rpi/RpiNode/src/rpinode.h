@@ -137,11 +137,9 @@ private:
 	// callbacks
 	JsDeclareFunction(onValue);
 
-	void OnPongMainThread(const int& NodeId);
 	void OnMsgMainThread(const uint8& ValueId, const int& Val);
 
 public:
-	void OnPong(const uint8& NodeId);
 	void OnValue(const int& ValId, const int& Val);
 
 	class TOnMsgTask {

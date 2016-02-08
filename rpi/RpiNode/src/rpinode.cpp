@@ -401,20 +401,13 @@ void TNodeJsRf24Radio::onValue(const v8::FunctionCallbackInfo<v8::Value>& Args) 
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
-void TNodeJsRf24Radio::OnPongMainThread(const int& NodeId) {
-	if (!OnPongCallback.IsEmpty()) {
-		v8::Isolate* Isolate = v8::Isolate::GetCurrent();
-		v8::HandleScope HandleScope(Isolate);
-
-		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnPongCallback);
-		TNodeJsUtil::ExecuteVoid(Callback, v8::Integer::New(Isolate, NodeId));
-	}
-}
-
 void TNodeJsRf24Radio::OnMsgMainThread(const uint8& ValueId, const int& Val) {
 	if (!OnValueCallback.IsEmpty()) {
 		v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 		v8::HandleScope HandleScope(Isolate);
+
+		const int ValId = (int) ValueId;
+		printf("Got value to value id %d\n", ValId);
 
 		const TStr ValueNm = ValueIdNmH.GetDat((int) ValueId);
 

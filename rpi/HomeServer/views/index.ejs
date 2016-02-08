@@ -58,6 +58,11 @@
 										<label for="range-<%= sensor.id %>"><%= sensor.name %></label>
 										<input id="range-<%= sensor.id %>" type="range" class="form-control" />
 									</div>
+									<script type="text/javascript">
+									$(document).ready(function () {
+										createSlider('<%= sensor.id %>', 0, 100, val);
+									});
+									</script>
 									<% } %>
 	      						</div>
 	    					</div>
