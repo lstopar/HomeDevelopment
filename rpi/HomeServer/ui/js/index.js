@@ -67,7 +67,17 @@ $(document).ready(function () {
 		value: 0
 	}).on('slideStop', function (a, b) {
 		var value = a.value;
-		var id = $(a.target).attr('id').substring(5);
+		var id = $(a.target).attr('id').substring(6);
+		
+		$.ajax('api/set', {
+			method: 'POST',
+			contentType: 'json',
+			data: { id: id, value: value },
+			success: function () {
+				// TODO
+			},
+			error: handleAjaxError()
+		})
 		alert(id);
 	});
 	

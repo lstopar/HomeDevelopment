@@ -317,6 +317,9 @@ const uint8 TRf24Radio::COMM_CHANNEL = 0x4C;
 
 const uint64_t TRf24Radio::PIPES[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
+const char TRf24Radio::COMMAND_GET = 0x00;
+const char TRf24Radio::COMMAND_SET = 0x01;
+
 void TRf24Radio::TReadThread::Run() {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
 
@@ -373,13 +376,34 @@ void TRf24Radio::Init() {
 	ReadThread.Start();
 }
 
-bool TRf24Radio::Send(const TMem& Buff) {
-	TLock Lock(CriticalSection);
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message ...");
-	Radio.stopListening();
-	bool Success = Radio.write(Buff(), PAYLOAD_SIZE);
-	Radio.startListening();
-	return Success;
+bool TRf24Radio::Set(const int& NodeId, const int& ValId, const int& Val) {
+	TMem Msg;	Msg.Gen(PAYLOAD_SIZE);
+	Msg[0] = (char) NodeId;
+	Msg[1] = COMMAND_SET;
+	Msg[2] = (char) ValId;
+	Msg[3] = char((Val >> 24) & 0xFF);
+	Msg[4] = char((Val >> 16) & 0xFF);
+	Msg[5] = char((Val >> 8) & 0xFF);
+	Msg[6] = char(Val & 0xFF);
+	Msg[7] = 0xFF;
+	Msg[8] = 0xFF;
+
+	return Send(Msg);
+}
+
+bool TRf24Radio::Get(const int& NodeId, const int& ValId) {
+	TMem Msg;	Msg.Gen(PAYLOAD_SIZE);
+	Msg[0] = (char) NodeId;
+	Msg[1] = COMMAND_GET;
+	Msg[2] = (char) ValId;
+	Msg[3] = 0xFF;
+	Msg[4] = 0xFF;
+	Msg[5] = 0xFF;
+	Msg[6] = 0xFF;
+	Msg[7] = 0xFF;
+	Msg[8] = 0xFF;
+
+	return Send(Msg);
 }
 
 bool TRf24Radio::Read(TMem& Msg) {
@@ -403,4 +427,13 @@ bool TRf24Radio::Read(TMem& Msg) {
 		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception while reading!");
 	}
 	return false;
+}
+
+bool TRf24Radio::Send(const TMem& Buff) {
+	TLock Lock(CriticalSection);
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message ...");
+	Radio.stopListening();
+	bool Success = Radio.write(Buff(), PAYLOAD_SIZE);
+	Radio.startListening();
+	return Success;
 }

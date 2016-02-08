@@ -349,15 +349,10 @@ void TNodeJsRf24Radio::get(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 
 	const TStr ValueNm = TNodeJsUtil::GetArgStr(Args, 0);
 
+	const int NodeId = 1;
 	const uint8 ValueId = (uint8) JsRadio->ValueNmIdH.GetDat(ValueNm);
 
-	TMem Msg(TRf24Radio::PAYLOAD_SIZE);
-	Msg.Gen(TRf24Radio::PAYLOAD_SIZE);
-	Msg[0] = 0;					// TODO id of the node
-	Msg[1] = 0;					// get
-	Msg[2] = ValueId;			// the value we want to get
-
-	const bool Success = JsRadio->Radio.Send(Msg);
+	const bool Success = JsRadio->Radio.Get(NodeId, ValueId);
 
 	Args.GetReturnValue().Set(v8::Boolean::New(Isolate, Success));
 }
@@ -366,9 +361,18 @@ void TNodeJsRf24Radio::set(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
-	// TODO
+	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
 
-	Args.GetReturnValue().Set(v8::Undefined(Isolate));
+	const PJsonVal ArgVal = TNodeJsUtil::GetArgJson(Args, 0);
+	const TStr SensorNm = ArgVal->GetObjStr("id");
+	const int Val = ArgVal->GetObjInt("value");
+
+	const int NodeId = 1;
+	const int ValId = ValueNmIdH.GetDat(SensorNm);
+
+	bool Success = JsRadio->Radio.Set(NodeId, ValId, Val);
+
+	Args.GetReturnValue().Set(v8::Boolean::New(Isolate, Success));
 }
 
 void TNodeJsRf24Radio::onMsg(const v8::FunctionCallbackInfo<v8::Value>& Args) {

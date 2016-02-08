@@ -33,7 +33,7 @@ module.exports = exports = [
 		    	sensors: [
 		    	    {
 		    	    	id: 'light-couch',
-		    	    	internalId: 1,
+		    	    	internalId: 3,
 		    	    	type: 'dimmer',
 		    	    	unit: '%',
 		    	    	name: 'Brightness',

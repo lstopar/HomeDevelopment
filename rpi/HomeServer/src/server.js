@@ -37,12 +37,63 @@ function getRequestedPage(req) {
 	return req.path.split('/').pop();
 }
 
+
+//=====================================================
+//NON-SUCCESSFUL RESPONSES
+//=====================================================
+
+function handleNoPermission(req, res) {
+	if (log.debug())
+		log.debug('No permission, blocking page!');
+	
+	res.status(404);	// not found
+	res.send('Cannot GET ' + req.path);
+	res.end();
+}
+
+function handleBadRequest(req, res, msg) {
+	if (log.debug())
+		log.debug('Bad request, blocking page!');
+	
+	res.status(404);	// bad request
+	res.send(msg != null ? msg : ('Bad request ' + req.path));
+	res.end();
+}
+
+function handleServerError(e, req, res) {
+	log.error(e, 'Exception while processing request!');
+	res.status(500);	// internal server error
+	res.send(e.message);
+	res.end();
+}
+
+function handleBadInput(res, msg) {
+	res.status(400);	// bad request
+	res.send(msg);
+	res.end();
+}
+
 //=====================================================
 // API
 //=====================================================
 
 function initApi() {
-	// TODO
+	app.post(API_PATH + '/set', function (req, res) {
+		try {
+			var sensorId = req.body.id;
+			var value = req.body.value;
+			
+			if (log.debug())
+				log.debug('Setting value of %s to %s', sensorId, value);
+			
+			sensors.setValue(sensorId, value);
+			
+			res.status(204);	// no content
+			res.end();
+		} catch (e) {
+			handleServerError(e, req, res);
+		}
+	});
 }
 
 //=====================================================

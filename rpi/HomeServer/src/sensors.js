@@ -50,21 +50,27 @@ function initSensors() {
 			var deviceSensors = deviceConf.sensors;
 			var transform = deviceConf.transform;
 			
+			var device = null;
+			
+			if (config.mode != 'debug') {
+				device = createDevice(type, conf);
+				
+				devices.push({
+					device: device,
+					type: type,
+					transform: transform
+				});
+			}
+			
 			for (var sensorN = 0; sensorN < deviceSensors.length; sensorN++) {
 				var devSensor = deviceSensors[sensorN];
 				
 				if (devSensor.id == null) throw new Error('Sensor ID is not defined!');
 				if (devSensor.name == null) throw new Error('Sensor name is not defined!');
 				
+				devSensor.device = device;
+				
 				sensors[devSensor.id] = devSensor;
-			}
-			
-			if (config.mode != 'debug') {
-				devices.push({
-					device: createDevice(type, conf),
-					type: type,
-					transform: transform
-				});
 			}
 		} else {
 			log.info('Initializing radio ...');
@@ -192,6 +198,20 @@ function mockReadAll() {
 
 exports.getValue = function (sensorId) {
 	return sensorId in values ? values[sensorId] : 0;
+};
+
+exports.setValue = function (sensorId, value) {
+	if (sensorId in sensors) {
+		var device = sensors[sensorId].device;
+		device.set({ id: sensorId, value: value });
+	} else if (sensorId in radio.sensorH) {
+		var success = radio.radio.set({ id: sensorId, value: value });
+		
+		if (!success)
+			log.warn('Failed to set value %d for sensor %s', value, sensorId);
+	} else {
+		throw new Error('Could not find sensor: ' + sensorId);
+	}
 };
 
 exports.getSensors = function () {

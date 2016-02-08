@@ -158,6 +158,9 @@ private:
 
 	static const uint64_t PIPES[2];
 
+	static const char COMMAND_GET;
+	static const char COMMAND_SET;
+
 	RF24 Radio;
 	TReadThread ReadThread;
 
@@ -171,10 +174,15 @@ public:
 			const PNotify& Notify=TNotify::NullNotify);
 
 	void Init();
-	bool Send(const TMem& Buff);
+	bool Set(const int& NodeId, const int& ValId, const int& Val);
+	bool Get(const int& NodeId, const int& ValId);
+
 	bool Read(TMem& Msg);
 
 	void SetCallback(TRf24RadioCallback* Cb) { Callback = Cb; }
+
+private:
+	bool Send(const TMem& Buff);
 };
 
 
