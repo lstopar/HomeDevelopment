@@ -81,7 +81,7 @@ function initApi() {
 	app.post(API_PATH + '/set', function (req, res) {
 		try {
 			var sensorId = req.body.id;
-			var value = req.body.value;
+			var value = parseInt(req.body.value);
 			
 			log.debug(JSON.stringify(req.body));
 			
