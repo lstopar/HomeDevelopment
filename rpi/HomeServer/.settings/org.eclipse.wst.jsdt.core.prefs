@@ -1,2 +1,3 @@
 eclipse.preferences.version=1
-semanticValidation=disabled
+org.eclipse.wst.jsdt.core.compiler.problem.optionalSemicolon=ignore
+semanticValidation=enabled

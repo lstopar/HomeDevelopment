@@ -298,12 +298,16 @@ TNodeJsRf24Radio* TNodeJsRf24Radio::NewFromArgs(const v8::FunctionCallbackInfo<v
 	const bool Verbose = ParamJson->GetObjBool("verbose", false);
 	const PNotify Notify = Verbose ? TNotify::StdNotify : TNotify::NullNotify;
 
+	Notify->OnNotify(TNotifyType::ntInfo, "Parsing configuration ...");
+
 	THash<TStr, TInt> SensorNmIdH;
 
 	for (int SensorN = 0; SensorN < SensorJsonV->GetArrVals(); SensorN++) {
 		const PJsonVal SensorJson = SensorJsonV->GetArrVal(SensorN);
 		SensorNmIdH.AddDat(SensorJson->GetObjStr("id"), SensorJson->GetObjInt("internalId"));
 	}
+
+	Notify->OnNotify(TNotifyType::ntInfo, "Calling cpp constructor ...");
 
 	return new TNodeJsRf24Radio(PinCE, PinCSN, SensorNmIdH, Notify);
 }
@@ -312,6 +316,8 @@ TNodeJsRf24Radio::TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TS
 		const PNotify& Notify):
 	Radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, Notify),	// TODO make it a reference
 	ValueNmIdH(_ValueNmIdH) {
+
+	Radio.SetCallback(this);
 
 	int KeyId = ValueNmIdH.FFirstKeyId();
 	while (ValueNmIdH.FNextKeyId(KeyId)) {
