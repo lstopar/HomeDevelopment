@@ -389,7 +389,7 @@ bool TRf24Radio::Read(TMem& Msg) {
 		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Reading radio ...");
 
 		if (Radio.available()) {
-			char Payload[PAYLOAD_SIZE+1];	// TODO +1???
+			char Payload[PAYLOAD_SIZE];
 			Radio.read(Payload, PAYLOAD_SIZE);
 			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Read, extracting!");
 

@@ -352,6 +352,7 @@ void TNodeJsRf24Radio::get(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	const uint8 ValueId = (uint8) JsRadio->ValueNmIdH.GetDat(ValueNm);
 
 	TMem Msg(TRf24Radio::PAYLOAD_SIZE);
+	Msg.Gen(TRf24Radio::PAYLOAD_SIZE);
 	Msg[0] = 0;					// TODO id of the node
 	Msg[1] = 0;					// get
 	Msg[2] = ValueId;			// the value we want to get
