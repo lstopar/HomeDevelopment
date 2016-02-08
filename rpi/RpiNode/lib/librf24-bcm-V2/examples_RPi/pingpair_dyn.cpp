@@ -85,7 +85,7 @@ int main(int argc, char** argv){
 	radio.setChannel(CHANNEL);
 	radio.setDataRate(RF24_2MBPS);
 	radio.setPayloadSize(PAYLOAD_SIZE);
-	radio.setCRCLength(rf24_crclength_e::RF24_CRC_8);
+	radio.setCRCLength(RF24_CRC_8);
 	radio.printDetails();
 
 
