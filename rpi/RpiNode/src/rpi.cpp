@@ -386,7 +386,6 @@ bool TRf24Radio::Set(const int& NodeId, const int& ValId, const int& Val) {
 	Msg[5] = char((Val >> 8) & 0xFF);
 	Msg[6] = char(Val & 0xFF);
 	Msg[7] = 0xFF;
-	Msg[8] = 0xFF;
 
 	return Send(Msg);
 }
@@ -401,7 +400,6 @@ bool TRf24Radio::Get(const int& NodeId, const int& ValId) {
 	Msg[5] = 0xFF;
 	Msg[6] = 0xFF;
 	Msg[7] = 0xFF;
-	Msg[8] = 0xFF;
 
 	return Send(Msg);
 }
