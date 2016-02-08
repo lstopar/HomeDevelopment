@@ -61,15 +61,12 @@
             'target_name': 'test',
             'type': 'executable',
             'sources': [
-                'test.cpp'//,
-                //'lib/librf24-bcm/RF24.h',
-                //'lib/librf24-bcm/RF24.cpp'*/
+                'test.cpp'
             ],
             'include_dirs': [
-                /*'lib/librf24-bcm/'*/
             ],
             'defines': [],
-            'dependencies': [ /*'rf24'*/ ]
+            'dependencies': []
         },
         /*{
             # RF24 library
