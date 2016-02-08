@@ -296,30 +296,74 @@ void TYL40Adc::CleanUp() {
 
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
-//TRf24Radio::TRf24Radio(const uint8& PinCe, const uint8_t& PinCs,
-//		const uint32& SpiSpeed, const PNotify& _Notify):
-//		Radio(PinCe, PinCs, SpiSpeed),
-//		Notify(_Notify) {}
-//
-//void TRf24Radio::Init() {
-//	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
-//
-//	EAssertR(Radio.begin(), "Failed to start RF24 radio!");
-//	Radio.setRetries(RETRY_DELAY, RETRY_COUNT);
-//	Radio.setChannel(COMM_CHANNEL);
-//	Radio.setPALevel(POWER_LEVEL);
-//
-//	// TODO set pipes!!!
-//
-//	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
-//
-//	Radio.printDetails();
-//}
-//
-//bool TRf24Radio::Send(const uchar* Buff, const uint8& BuffLen) {
-//	TLock Lock(CriticalSection);
-//	Radio.stopListening();
-//	bool Success = Radio.write(Buff, BuffLen);
-//	Radio.startListening();
-//	return Success;
-//}
+void TRf24Radio::TReadThread::Run() {
+	try {
+		TStr Msg;
+		while (Radio->Read(Msg)) {
+			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message: %s", Msg.CStr());
+			if (Radio->Callback != nullptr) {
+				try {
+					Radio->Callback->OnMsg(Msg);
+				} catch (const PExcept& Except) {
+					Notify->OnNotifyFmt(TNotifyType::ntErr, "Error when calling read callback: %s", Except->GetMsgStr().CStr());
+				}
+			}
+		}
+
+		TSysProc::Sleep(20);
+	} catch (const PExcept& Except) {
+		Notify->OnNotifyFmt(TNotifyType::ntErr, "Error on the read thread: %s", Except->GetMsgStr().CStr());
+	}
+}
+
+TRf24Radio::TRf24Radio(const uint8& PinCe, const uint8_t& PinCs,
+		const uint32& SpiSpeed, const PNotify& _Notify):
+		Radio(PinCe, PinCs, SpiSpeed),
+		ReadThread(),
+		Callback(nullptr),
+		Notify(_Notify) {
+
+	ReadThread = TReadThread(this);
+	ReadThread.Start();
+}
+
+void TRf24Radio::Init() {
+	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
+
+	EAssertR(Radio.begin(), "Failed to start RF24 radio!");
+	Radio.begin();
+	Radio.setAutoAck(true);
+	Radio.setRetries(RETRY_DELAY, RETRY_COUNT);
+	Radio.setChannel(CHANNEL);
+	Radio.setDataRate(RF24_2MBPS);
+	Radio.setPayloadSize(PAYLOAD_SIZE);
+	Radio.setCRCLength(RF24_CRC_8);
+	Radio.printDetails();
+
+	Radio.openWritingPipe(PIPES[0]);
+	Radio.openReadingPipe(1,PIPES[1]);
+
+	Radio.startListening();
+
+	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
+}
+
+bool TRf24Radio::Send(const TMem& Buff) {
+	TLock Lock(CriticalSection);
+	Radio.stopListening();
+	bool Success = Radio.write(Buff(), PAYLOAD_SIZE);
+	Radio.startListening();
+	return Success;
+}
+
+bool TRf24Radio::Read(TStr& Msg) {
+	TLock Lock(CriticalSection);
+	if (Radio.available()) {
+		char Payload[PAYLOAD_SIZE+1];
+		Radio.read(Payload, PAYLOAD_SIZE);
+		Payload[PAYLOAD_SIZE] = 0;
+		Msg = Payload;
+		return true;
+	}
+	return false;
+}

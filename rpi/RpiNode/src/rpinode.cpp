@@ -264,6 +264,128 @@ void TNodeJsYL40Adc::TReadTask::Run() {
 	}
 }
 
+/////////////////////////////////////////
+// RF24 - Radio
+void TNodeJsRf24Radio::Init(v8::Handle<v8::Object> Exports) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(Isolate, TNodeJsUtil::_NewJs<TNodeJsRf24Radio>);
+	tpl->SetClassName(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()));
+
+	// ObjectWrap uses the first internal field to store the wrapped pointer.
+	tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+	// Add all methods, getters and setters here.
+	NODE_SET_PROTOTYPE_METHOD(tpl, "init", _init);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "get", _get);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "set", _set);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "onMsg", _onMsg);
+
+	Exports->Set(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()), tpl->GetFunction());
+}
+
+TRf24Radio* TNodeJsRf24Radio::NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	PJsonVal ParamJson = TNodeJsUtil::GetArgJson(Args, 0);
+
+	const int PinCE = ParamJson->GetObjInt("pinCE");
+	const int PinCSN = ParamJson->GetObjInt("pinCSN");
+
+	const bool Verbose = ParamJson->GetObjBool("verbose", false);
+	const PNotify Notify = Verbose ? TNotify::StdNotify : TNotify::NullNotify;
+
+	return new TRf24Radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, Notify);
+}
+
+TNodeJsRf24Radio::~TNodeJsRf24Radio() {
+	delete Radio;
+	MsgCallback.Reset();
+}
+
+void TNodeJsRf24Radio::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
+	JsRadio->Radio->Init();
+
+	Args.GetReturnValue().Set(v8::Undefined(Isolate));
+}
+
+void TNodeJsRf24Radio::get(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	const int NodeId = TNodeJsUtil::GetArgInt32(Args, 0);
+	const TStr ValueNm = TNodeJsUtil::GetArgStr(Args, 1);
+
+	const uint8 ValueId = ValueNmIdH.GetDat(ValueNm);
+
+	TMem Msg(TRf24Radio::PAYLOAD_SIZE);
+	Msg[0] = (uint8) NodeId;	// id of the node
+	Msg[1] = 0;					// get
+	Msg[2] = ValueId;			// the value we want to get
+
+	const bool Success = Radio->Send(Msg);
+
+	Args.GetReturnValue().Set(v8::Boolean::New(Isolate, Success));
+}
+
+void TNodeJsRf24Radio::set(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	// TODO
+
+	Args.GetReturnValue().Set(v8::Undefined(Isolate));
+}
+
+void TNodeJsRf24Radio::onMsg(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
+	v8::Local<v8::Function> Cb = TNodeJsUtil::GetArgFun(Args, 0);
+
+	JsRadio->MsgCallback.Reset(Isolate, Cb);
+	Args.GetReturnValue().Set(v8::Undefined(Isolate));
+}
+
+void TNodeJsRf24Radio::OnMsgMainThread(const int& NodeId, const uint8& ValueId, const TMem& Msg) {
+	if (!MsgCallback.IsEmpty()) {
+		v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+		v8::HandleScope HandleScope(Isolate);
+
+		// TODO do this somewhere else!
+		int Val = 0;
+		char* ValPtr = (char*) &Val;
+		for (int PosN = 0; PosN < 4; PosN++) {
+			*ValPtr = Msg[2 + PosN];
+		}
+
+		const int ArgC = 3;
+		v8::Handle<v8::Value> ArgV[ArgC] = {
+			v8::Integer::New(Isolate, NodeId),
+			v8::Integer::New(Isolate, ValueId),
+			v8::Integer::New(Isolate, Val)
+		};
+
+		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, MsgCallback);
+		TNodeJsUtil::ExecuteVoid(Callback, ArgC, ArgV);
+	}
+}
+
+void TNodeJsRf24Radio::OnMsg(const int& NodeId, const uint8& ValueId, const TMem& Msg) {
+	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, NodeId, ValueId, Msg), true);
+}
+
+void TNodeJsRf24Radio::TOnMsgTask::Run(TOnMsgTask& Task) {
+	Task.JsRadio->OnMsgMainThread(NodeId, ValueId, Msg);
+}
+
 
 //////////////////////////////////////////////
 // module initialization
@@ -271,6 +393,7 @@ void Init(v8::Handle<v8::Object> Exports) {
 	TNodeJsRpiBase::Init(Exports);
 	TNodejsDHT11Sensor::Init(Exports);
 	TNodeJsYL40Adc::Init(Exports);
+	TNodeJsRf24Radio::Init(Exports);
 }
 
 NODE_MODULE(rpinode, Init);

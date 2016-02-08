@@ -106,4 +106,51 @@ private:
 	};
 };
 
+/////////////////////////////////////////
+// RF24 - Radio
+class TNodeJsRf24Radio: public node::ObjectWrap, public TRf24Radio::TRf24RadioCallback {
+	friend class TNodeJsUtil;
+public:
+	static void Init(v8::Handle<v8::Object> Exports);
+	static const TStr GetClassId() { return "Rf24"; };
+
+private:
+	static TRf24Radio* NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args);
+
+	~TNodeJsRf24Radio();
+
+	TRf24Radio* Radio;
+	THash<TStr, uint8> ValueNmIdH;
+
+	v8::Persistent<v8::Function> MsgCallback;
+
+private:
+	JsDeclareFunction(init);
+	JsDeclareFunction(get);
+	JsDeclareFunction(set);
+	JsDeclareFunction(onMsg);
+
+	void OnMsgMainThread(const int& NodeId, const uint8& ValueId, const TMem& Msg);
+
+protected:
+	void OnMsg(const int& NodeId, const uint8& ValueId, const TMem& Msg);
+
+	class TOnMsgTask {
+	private:
+		TNodeJsRf24Radio* JsRadio;
+		const int NodeId;
+		const uint8 ValueId;
+		const TMem Msg;
+	public:
+		TOnMsgTask(TNodeJsRf24Radio* _JsRadio, const int& _NodeId, const uint8& _ValueId,
+				const TMem& _Msg):
+			JsRadio(_JsRadio),
+			NodeId(_NodeId),
+			ValueId(_ValueId),
+			Msg(_Msg) {}
+
+		void Run(TOnMsgTask& Task);
+	};
+};
+
 #endif /* SRC_RPINODE_H_ */
