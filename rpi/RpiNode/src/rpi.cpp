@@ -210,13 +210,13 @@ void TDHT11Sensor::Read() {
 
 /////////////////////////////////////////
 // YL-40 - ADC
-static constexpr uint32 TYL40Adc::I2C_ADDRESS = 0x48;
+constexpr uint32 TYL40Adc::I2C_ADDRESS = 0x48;
 
-static const uchar TYL40Adc::ANALOG_OUTPUT = 0x40;
-static const uchar TYL40Adc::MODE_READ = 0x01;
-static const uchar TYL40Adc::MODE_WRITE = 0x00;
+const uchar TYL40Adc::ANALOG_OUTPUT = 0x40;
+const uchar TYL40Adc::MODE_READ = 0x01;
+const uchar TYL40Adc::MODE_WRITE = 0x00;
 
-static const uint64 TYL40Adc::PROCESSING_DELAY = 2000;
+const uint64 TYL40Adc::PROCESSING_DELAY = 2000;
 
 TYL40Adc::TYL40Adc(const PNotify& _Notify):
 		FileDesc(-1),
