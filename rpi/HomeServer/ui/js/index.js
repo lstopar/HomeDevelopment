@@ -74,7 +74,7 @@ $(document).ready(function () {
 			dataType: 'json',
 			data: {
 				id: id,
-				value: value
+				value: parseInt(value)
 			},
 			success: function () {},
 			error: handleAjaxError()
