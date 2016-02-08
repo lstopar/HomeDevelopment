@@ -293,11 +293,19 @@ TRf24Radio* TNodeJsRf24Radio::NewFromArgs(const v8::FunctionCallbackInfo<v8::Val
 
 	const int PinCE = ParamJson->GetObjInt("pinCE");
 	const int PinCSN = ParamJson->GetObjInt("pinCSN");
+	const PJsonVal SensorJsonV = ParamJson->GetObjKey("sensors");
 
 	const bool Verbose = ParamJson->GetObjBool("verbose", false);
 	const PNotify Notify = Verbose ? TNotify::StdNotify : TNotify::NullNotify;
 
-	return new TRf24Radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, Notify);
+	THash<TStr, uint8> SensorNmIdH;
+
+	for (int SensorN = 0; SensorN < SensorJsonV->GetArrVals(); SensorN++) {
+		const PJsonVal SensorJson = SensorJsonV->GetArrVal(SensorN);
+		SensorNmIdH.AddDat(SensorJson->GetObjStr("id"), SensorJson->GetObjInt("internalId"));
+	}
+
+	return new TNodeJsRf24Radio(PinCE, PinCSN, SensorNmIdH, Notify);
 }
 
 TNodeJsRf24Radio::~TNodeJsRf24Radio() {

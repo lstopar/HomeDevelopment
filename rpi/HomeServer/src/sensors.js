@@ -10,7 +10,9 @@ var rpi = require('../' + config.rpilib);
 
 var devices = [];
 var sensors = {};
+var radio = null;
 var values = {};
+
 
 var callbacks = {
 	onValueReceived: function () {}
@@ -43,25 +45,56 @@ function initSensors() {
 		var deviceConf = devicesConf[deviceN];
 		
 		var type = deviceConf.type;
-		var conf = deviceConf.configuration;
-		var deviceSensors = deviceConf.sensors;
-		var transform = deviceConf.transform;
-		
-		for (var sensorN = 0; sensorN < deviceSensors.length; sensorN++) {
-			var devSensor = deviceSensors[sensorN];
+		if (type != 'Rf24') {
+			var conf = deviceConf.configuration;
+			var deviceSensors = deviceConf.sensors;
+			var transform = deviceConf.transform;
 			
-			if (devSensor.id == null) throw new Error('Sensor ID is not defined!');
-			if (devSensor.name == null) throw new Error('Sensor name is not defined!');
+			for (var sensorN = 0; sensorN < deviceSensors.length; sensorN++) {
+				var devSensor = deviceSensors[sensorN];
+				
+				if (devSensor.id == null) throw new Error('Sensor ID is not defined!');
+				if (devSensor.name == null) throw new Error('Sensor name is not defined!');
+				
+				sensors[devSensor.id] = devSensor;
+			}
 			
-			sensors[devSensor.id] = devSensor;
-		}
-		
-		if (config.mode != 'debug') {
-			devices.push({
-				device: createDevice(type, conf),
-				type: type,
-				transform: transform
-			});
+			if (config.mode != 'debug') {
+				devices.push({
+					device: createDevice(type, conf),
+					type: type,
+					transform: transform
+				});
+			}
+		} else {
+			var nodes = deviceConf.nodes;
+			
+			var radioSensorH = {};
+			var radioConf = [];
+			
+			for (var nodeN = 0; nodeN < nodes.length; nodeN++) {
+				var node = nodes[nodeN];
+				var nodeId = node.id;
+				
+				for (var sensorN = 0; sensorN < node.sensors.length; sensorN++) {
+					var sensorConf = node.sensors[sensorN];
+					radioSensorH[sensorConf.id] = sensorConf;
+					radioConf.push({
+						id: sensorConf.id,
+						internalId: sensorConf.internalId,
+						nodeId: nodeId
+					})
+				}
+			}
+			
+			radio = {
+				sensorH: radioSensorH,
+				radio: new rpi.Rf24({
+					pinCE: deviceConf.configuration.pinCE,
+					pinCSN: deviceConf.configuration.pinCSN,
+					sensors: radioConf
+				})
+			};
 		}
 	}
 }

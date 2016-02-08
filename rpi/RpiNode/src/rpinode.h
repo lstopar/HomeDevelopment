@@ -117,6 +117,11 @@ public:
 private:
 	static TRf24Radio* NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args);
 
+	TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TStr, uint8> _ValueNmIdH,
+			const PNotify& Notify):
+		Radio(new TRf24Radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, Notify)),	// TODO make it a reference
+		ValueNmIdH(_ValueNmIdH) {}
+
 	~TNodeJsRf24Radio();
 
 	TRf24Radio* Radio;
