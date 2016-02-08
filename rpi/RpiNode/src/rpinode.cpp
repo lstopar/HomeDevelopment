@@ -403,11 +403,7 @@ void TNodeJsRf24Radio::OnMsg(const TMem& Msg) {
 	const uint8 ValueId = (uint8) Msg[1];
 
 	// TODO do this somewhere else!
-	int Val = 0;
-	char* ValPtr = (char*) &Val;
-	for (int PosN = 0; PosN < 4; PosN++) {
-		*ValPtr = Msg[2 + PosN];
-	}
+	int Val = (int) Msg[2];
 
 	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, NodeId, ValueId, Val), true);
 }
