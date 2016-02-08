@@ -72,8 +72,10 @@ $(document).ready(function () {
 		$.ajax('api/set', {
 			method: 'POST',
 			dataType: 'json',
-			contentType: 'json',
-			data: { id: id, value: value },
+			data: {
+				id: id,
+				value: value
+			},
 			success: function () {},
 			error: handleAjaxError()
 		})
