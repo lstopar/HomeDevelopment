@@ -30,13 +30,13 @@
 	        <!-- /.sidebar-collapse -->
 	        <% var nodes = sensors.getNodes(); %>
 	        <% if (nodes.length > 0) { %>
-	        <h3>Devices</h3>
+	        <h4>Devices</h4>
 	        <ul id="ul-nodes" class="list-group" style="margin-bottom: 0px;">
             	<%
             	for (var i = 0; i < nodes.length; i++) {
             		var node = nodes[i];
             		var connected = sensors.isOnline(node.id); %>
-            		<li class="list-group-item">
+            		<li class="list-group-item" style="margin-top: 2px;">
             			<%= node.name %>
             			<% if (connected) { %>
             				<span id="span-status-node-<%= node.id %>" class="label label-success pull-right">Connected</span>
