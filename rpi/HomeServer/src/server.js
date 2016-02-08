@@ -198,5 +198,12 @@ exports.init = function (opts) {
 		}));
 	});
 	
+	sensors.onNodeEvent(function (event) {
+		ws.distribute(JSON.stringify({
+			type: 'nodeEvent',
+			content: event
+		}));
+	});
+	
 	log.info('Server initialized!');
 }

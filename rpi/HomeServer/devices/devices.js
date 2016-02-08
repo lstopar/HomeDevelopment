@@ -30,9 +30,10 @@ module.exports = exports = [
 		nodes: [
 		    {
 		    	id: 1,
+		    	name: 'Arduino - sofa',
 		    	sensors: [
 		    	    {
-		    	    	id: 'light-couch',
+		    	    	id: 'light-sofa',
 		    	    	internalId: 3,
 		    	    	type: 'dimmer',
 		    	    	unit: '%',

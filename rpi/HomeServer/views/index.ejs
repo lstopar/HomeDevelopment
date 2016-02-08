@@ -26,6 +26,17 @@
 	                    </a>
 	                </li>
 	            </ul>
+	            <ul id="ul-nodes">
+	            	<%
+	            	var nodes = sensors.getNodes();
+	            	for (var i = 0; i < nodes.length; i++) {
+	            		var node = nodes[i];
+	            		var connected = sensors.isOnline(node.id); %>
+	            		<li>
+	            			<%= connected ? 'C' : 'D' %> <%= node.name %>
+	            		</li>
+	            	<% } %>
+	            </ul>
 	        </div>
 	        <!-- /.sidebar-collapse -->
 	    </div>

@@ -15,7 +15,8 @@ var values = {};
 
 
 var callbacks = {
-	onValueReceived: function () {}
+	onValueReceived: function () {},
+	onNodeEvent: function () {}
 };
 
 //=======================================================
@@ -80,7 +81,6 @@ function initSensors() {
 			var radioSensorH = {};
 			var radioConf = [];
 			var nodeIdH = {};
-			var nodeIds = [];
 			
 			for (var nodeN = 0; nodeN < nodes.length; nodeN++) {
 				var node = nodes[nodeN];
@@ -96,7 +96,11 @@ function initSensors() {
 					})
 				}
 				
-				nodeIdH[nodeId] = true;
+				nodeIdH[nodeId] = {
+					id: nodeId,
+					name: node.name,
+					connected: false
+				};
 			}
 			
 			for (var nid in nodeIdH) {
@@ -106,7 +110,7 @@ function initSensors() {
 			log.info('Creating ...');
 			radio = {
 				sensorH: radioSensorH,
-				nodeIds: nodeIds,
+				nodes: nodeIdH,
 				radio: new rpi.Rf24({
 					pinCE: deviceConf.configuration.pinCE,
 					pinCSN: deviceConf.configuration.pinCSN,
@@ -147,6 +151,31 @@ function setValue(sensorId, value) {
 	}
 }
 
+function onNodeConnected(nodeId, connected) {
+	try {
+		var nodeIdH = radio.nodes;
+		var prevStatus = nodeIdH[nodeId].connected;
+		
+		if (connected != prevStatus) {
+			nodeIdH[nodeId].connected = connected;
+			
+			if (connected) {
+				log.info('Node %d has connected!', nodeId);
+			} else {
+				log.warn('Node %d has disconnected!', nodeId);
+			}
+			
+			callbacks.onNodeEvent({
+				id: nodeId,
+				name: nodeIdH[nodeId].name,
+				connected: connected
+			});
+		}
+	} catch (e) {
+		log.error(e, 'Exception while processing node connected event!');
+	}
+}
+
 function readDevices() {
 	for (var deviceN = 0; deviceN < devices.length; deviceN++) {
 		(function () {
@@ -177,17 +206,13 @@ function pingRadios() {
 		log.debug('Pinging radio devices ...');
 	
 	try {
-		var nodeIds = radio.nodeIds;
+		var nodeIdH = radio.nodes;
 		
-		for (var nodeN = 0; nodeN < nodeIds.length; nodeN++) {
-			var nodeId = nodeIds[nodeN];
-			
+		for (var nodeId in nodeIdH) {			
 			if (log.debug())
 				log.debug('Pinging node %d', nodeId)
 			
-			if (!radio.radio.ping(nodeId)) {
-				log.warn('Failed to ping radio node %s', nodeId);
-			}
+			onNodeConnected(nodeId, radio.radio.ping(nodeId));
 		}
 	} catch (e) {
 		log.error(e, 'Exception while pinging radio nodes!');
@@ -261,6 +286,22 @@ exports.getSensors = function () {
 	return result;
 };
 
+exports.isOnline = function (nodeId) {
+	if (radio == null) return false;
+	return radio.nodes[nodeId].connected;
+}
+
+exports.getNodes = function () {
+	if (radio == null) return [];
+	
+	var result = [];
+	for (var nodeId in radio.nodes) {
+		result.push(radio.nodes[nodeId]);
+	}
+	
+	return result;
+};
+
 exports.init = function () {
 	if (config.samplingInterval == null) throw new Error("The sampling interval is not set!");
 	
@@ -302,4 +343,8 @@ exports.init = function () {
 
 exports.onValueReceived = function (callback) {
 	callbacks.onValueReceived = callback;
+}
+
+exports.onNodeEvent = function (callback) {
+	callbacks.onNodeEvent = callback;
 }
