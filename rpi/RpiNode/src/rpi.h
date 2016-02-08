@@ -130,7 +130,7 @@ class TRf24Radio {
 public:
 	class TRf24RadioCallback {
 	protected:
-		virtual void OnMsg(const int& NodeId, const TStr& Msg) = 0;
+		virtual void OnMsg(const TMem& Msg) = 0;
 	};
 
 private:
@@ -171,7 +171,7 @@ public:
 
 	void Init();
 	bool Send(const TMem& Buff);
-	bool Read(TStr& Msg);
+	bool Read(TMem& Msg);
 
 	void SetCallback(TRf24RadioCallback* Cb) { Callback = Cb; }
 };

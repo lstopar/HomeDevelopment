@@ -133,7 +133,7 @@ private:
 	void OnMsgMainThread(const int& NodeId, const uint8& ValueId, const TMem& Msg);
 
 protected:
-	void OnMsg(const int& NodeId, const uint8& ValueId, const TMem& Msg);
+	void OnMsg(const TMem& Msg);
 
 	class TOnMsgTask {
 	private:
