@@ -5,9 +5,14 @@ $(document).ready(function () {
 		var type = reading.type;
 		
 		var thumbnail = $('#thumb-' + id);
-		var valSpan = thumbnail.find('#span-val-' + id);
 		
-		valSpan.html(tuUiPrecision(val, type));
+		if (type != 'dimmer') {
+			var valSpan = thumbnail.find('#span-val-' + id);
+			valSpan.html(tuUiPrecision(val, type));
+		} else {
+			var slider = thumbnail.find('#range-' + id);
+			slider.slider('setValue', tuUiPrecision(val, type));
+		}
 	}
 	
 	function getWsUrl() {
