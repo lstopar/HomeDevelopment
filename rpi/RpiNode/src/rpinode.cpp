@@ -407,7 +407,7 @@ void TNodeJsRf24Radio::OnMsg(const TMem& Msg) {
 }
 
 void TNodeJsRf24Radio::TOnMsgTask::Run(TOnMsgTask& Task) {
-	Task.JsRadio->OnMsgMainThread(NodeId, ValueId, Val);
+	Task.JsRadio->OnMsgMainThread(Task.NodeId, Task.ValueId, Task.Val);
 }
 
 
