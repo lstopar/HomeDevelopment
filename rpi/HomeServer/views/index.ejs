@@ -49,8 +49,15 @@
 									</div>
 								</div>
 								<div class="caption">
+									<% if (sensor.type != 'dimmer') { %>
 									<h4><%= sensor.name %>: <span class="pull-right"><span id="span-val-<%= sensor.id %>"><%= utils.formatVal(sensor, val); %></span><%= sensor.unit %><span></span></h4>
 									<p><%= sensor.description %></p>
+									<% } else { %>
+									<div class="form-group">
+										<label for="<%= sensor.id %>"><%= sensor.name %></label>
+										<input id="<%= sensor.id %>" type="range" class="form-control" />
+									</div>
+									<% } %>
 	      						</div>
 	    					</div>
 	  					</div>
@@ -65,6 +72,7 @@
     <!-- /#wrapper -->
 
      <% include partials/includejs %>
+     <script type="text/javascript" src="js/bootstrap-slider.min.js"></script>
      <script type="text/javascript" src="js/index.js"></script>
 </body>
 </html>

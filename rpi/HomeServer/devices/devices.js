@@ -36,7 +36,7 @@ module.exports = exports = [
 		    	    	internalId: 1,
 		    	    	type: 'dimmer',
 		    	    	unit: '%',
-		    	    	name: 'Dimmer 1',
+		    	    	name: 'Brightness',
 		    	    	description: 'Dimmer 1'
 		    	    }          
 		    	]

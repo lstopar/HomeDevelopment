@@ -155,7 +155,9 @@ function readDevices() {
 			});
 		})();
 	}
-	
+}
+
+function readRadioDevices() {
 	if (radio != null) {
 		var radioDevs = radio.sensorH;
 		for (var id in radioDevs) {
@@ -171,6 +173,7 @@ function readAll() {
 		log.debug('Reading all devices ...');
 	
 	readDevices();
+	readRadioDevices();
 }
 
 function mockReadAll() {
@@ -187,10 +190,6 @@ function mockReadAll() {
 // EXPORTS
 //=======================================================
 
-//for (var readingId in SENSOR_IDS) {
-//	exports[readingId] = SENSOR_IDS[readingId];
-//}
-
 exports.getValue = function (sensorId) {
 	return sensorId in values ? values[sensorId] : 0;
 };
@@ -199,6 +198,11 @@ exports.getSensors = function () {
 	var result = [];
 	for (var sensorId in sensors) {
 		result.push(sensors[sensorId]);
+	}
+	if (radio != null) {
+		for (var sensorId in radio.sensorH) {
+			result.push(radio.sensorH[sensorId]);
+		}
 	}
 	return result;
 };
