@@ -385,11 +385,11 @@ void TNodeJsRf24Radio::OnMsg(const TMem& Msg) {
 		*ValPtr = Msg[2 + PosN];
 	}
 
-	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, NodeId, ValueId, Msg), true);
+	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, NodeId, ValueId, Val), true);
 }
 
 void TNodeJsRf24Radio::TOnMsgTask::Run(TOnMsgTask& Task) {
-	Task.JsRadio->OnMsgMainThread(NodeId, ValueId, Msg);
+	Task.JsRadio->OnMsgMainThread(NodeId, ValueId, Val);
 }
 
 

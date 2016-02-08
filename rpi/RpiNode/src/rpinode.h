@@ -130,7 +130,7 @@ private:
 	JsDeclareFunction(set);
 	JsDeclareFunction(onMsg);
 
-	void OnMsgMainThread(const int& NodeId, const uint8& ValueId, const TMem& Msg);
+	void OnMsgMainThread(const int& NodeId, const uint8& ValueId, const int& Val);
 
 protected:
 	void OnMsg(const TMem& Msg);
@@ -140,14 +140,14 @@ protected:
 		TNodeJsRf24Radio* JsRadio;
 		const int NodeId;
 		const uint8 ValueId;
-		const TMem Msg;
+		const int Val;
 	public:
 		TOnMsgTask(TNodeJsRf24Radio* _JsRadio, const int& _NodeId, const uint8& _ValueId,
-				const TMem& _Msg):
+				const int& _Val):
 			JsRadio(_JsRadio),
 			NodeId(_NodeId),
 			ValueId(_ValueId),
-			Msg(_Msg) {}
+			Val(_Val) {}
 
 		void Run(TOnMsgTask& Task);
 	};
