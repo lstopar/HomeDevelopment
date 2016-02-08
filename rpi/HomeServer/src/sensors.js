@@ -67,6 +67,8 @@ function initSensors() {
 				});
 			}
 		} else {
+			log.info('Initializing radio ...');
+			
 			var nodes = deviceConf.nodes;
 			
 			var radioSensorH = {};
@@ -87,6 +89,7 @@ function initSensors() {
 				}
 			}
 			
+			log.info('Creating ...');
 			radio = {
 				sensorH: radioSensorH,
 				radio: new rpi.Rf24({
@@ -96,6 +99,7 @@ function initSensors() {
 				})
 			};
 			
+			log.info('Setting callback ...');
 			radio.radio.onMsg(function (val) {	// TODO move this somewhere, make a common interface
 				if (log.debug()) 
 					log.debug('Received value from the radio: %s', JSON.stringify(val));
@@ -152,6 +156,8 @@ function readDevices() {
 	if (radio != null) {
 		var radioDevs = radio.sensorH;
 		for (var id in radioDevs) {
+			if (log.debug())
+				log.debug('Calling get on radio ...');
 			radio.radio.get(id);
 		}
 	}
@@ -209,6 +215,7 @@ exports.init = function () {
 		}
 		
 		if (radio != null) {
+			log.info('Initializing radio ...');
 			radio.radio.init();
 		}
 		

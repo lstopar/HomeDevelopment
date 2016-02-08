@@ -310,7 +310,7 @@ TNodeJsRf24Radio* TNodeJsRf24Radio::NewFromArgs(const v8::FunctionCallbackInfo<v
 
 TNodeJsRf24Radio::TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TStr, TInt> _ValueNmIdH,
 		const PNotify& Notify):
-	Radio(new TRf24Radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, Notify)),	// TODO make it a reference
+	Radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, Notify),	// TODO make it a reference
 	ValueNmIdH(_ValueNmIdH) {
 
 	int KeyId = ValueNmIdH.FFirstKeyId();
@@ -322,7 +322,6 @@ TNodeJsRf24Radio::TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TS
 }
 
 TNodeJsRf24Radio::~TNodeJsRf24Radio() {
-	delete Radio;
 	MsgCallback.Reset();
 }
 
@@ -331,7 +330,7 @@ void TNodeJsRf24Radio::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	v8::HandleScope HandleScope(Isolate);
 
 	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
-	JsRadio->Radio->Init();
+	JsRadio->Radio.Init();
 
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
@@ -351,7 +350,7 @@ void TNodeJsRf24Radio::get(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	Msg[1] = 0;					// get
 	Msg[2] = ValueId;			// the value we want to get
 
-	const bool Success = JsRadio->Radio->Send(Msg);
+	const bool Success = JsRadio->Radio.Send(Msg);
 
 	Args.GetReturnValue().Set(v8::Boolean::New(Isolate, Success));
 }

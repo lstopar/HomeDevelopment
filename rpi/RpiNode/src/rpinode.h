@@ -121,7 +121,7 @@ private:
 			const PNotify& Notify);
 	~TNodeJsRf24Radio();
 
-	TRf24Radio* Radio;
+	TRf24Radio Radio;
 	THash<TStr, TInt> ValueNmIdH;
 	THash<TInt, TStr> ValueIdNmH;	// TODO
 
