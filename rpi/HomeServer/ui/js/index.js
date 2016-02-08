@@ -64,11 +64,10 @@ $(document).ready(function () {
 		min: 0,
 		max: 100,
 		step: 1,
-		value: 0,
-		slideStop: function (a, b) {
-			alert('bla');
-		}
-	})
+		value: 0
+	}).on('slideStop', function (a, b) {
+		alert('bla');
+	});
 	
 	initWs();
 	$('.nav-pills a')[0].click();
