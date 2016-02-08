@@ -74,12 +74,9 @@ $(document).ready(function () {
 			dataType: 'json',
 			contentType: 'json',
 			data: { id: id, value: value },
-			success: function () {
-				// TODO
-			},
+			success: function () {},
 			error: handleAjaxError()
 		})
-		alert(id);
 	});
 	
 	initWs();

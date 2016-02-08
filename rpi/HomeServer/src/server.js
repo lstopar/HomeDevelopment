@@ -83,6 +83,15 @@ function initApi() {
 			var sensorId = req.body.id;
 			var value = req.body.value;
 			
+			if (sensorId == null) {
+				handleBadRequest(req, res, 'Sensor id missing!');
+			}
+			
+			if (value == null) {
+				handleBadRequest(req, res, 'Value missing!');
+				return;
+			}
+			
 			if (log.debug())
 				log.debug('Setting value of %s to %s', sensorId, value);
 			
