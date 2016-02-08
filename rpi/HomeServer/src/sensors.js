@@ -208,6 +208,10 @@ exports.init = function () {
 			devices[deviceN].device.init();
 		}
 		
+		if (radio != null) {
+			radio.radio.init();
+		}
+		
 		log.info('Starting sampling sensors ...');
 		readAll();
 		setInterval(function () {
