@@ -22,7 +22,8 @@
         	'-lrt',
         	'-luuid',
         	'-fopenmp',
-        	'-lwiringPi'
+        	'-lwiringPi',
+        	'-lrf24-bcm'
         ],
         # GCC flags
         'cflags_cc!': [ '-fno-rtti', '-fno-exceptions' ],
@@ -60,17 +61,17 @@
             'target_name': 'test',
             'type': 'executable',
             'sources': [
-                'test.cpp',
+                'test.cpp'/*,
                 'lib/librf24-bcm/RF24.h',
-                'lib/librf24-bcm/RF24.cpp'
+                'lib/librf24-bcm/RF24.cpp'*/
             ],
             'include_dirs': [
-                'lib/librf24-bcm/'
+                /*'lib/librf24-bcm/'*/
             ],
             'defines': [],
-            'dependencies': [ 'rf24' ]
+            'dependencies': [ /*'rf24'*/ ]
         },
-        {
+        /*{
             # RF24 library
             'target_name': 'rf24',
             'type': 'static_library',
@@ -98,7 +99,7 @@
 		            ]
 	            }]
 	         ]
-        },
+        },*/
         {
             # glib library
             'target_name': 'glib',
