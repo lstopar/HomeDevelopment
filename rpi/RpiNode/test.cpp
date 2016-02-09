@@ -57,10 +57,10 @@ struct payload_t {                  // Structure of our payload
 
 int main(int argc, char** argv)
 {
+
 	// Refer to RF24.h or nRF24L01 DS for settings
 
 	radio.begin();
-
 	delay(5);
 	network.begin(/*channel*/ 90, /*node address*/ this_node);
 	radio.printDetails();
@@ -72,6 +72,7 @@ int main(int argc, char** argv)
 		unsigned long now = millis();              // If it's time to send a message, send it!
 		if ( now - last_sent >= interval  ){
     			last_sent = now;
+
 
     			printf("Sending ..\n");
 			payload_t payload = { millis(), packets_sent++ };
