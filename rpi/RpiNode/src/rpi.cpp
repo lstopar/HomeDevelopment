@@ -417,7 +417,9 @@ void TRf24Radio::Init() {
 	Radio1.setDataRate(RF24_2MBPS);	// TODO
 	Radio1.setCRCLength(RF24_CRC_8);
 
-	Network.begin(ADDRESS);
+	EAssertR(Radio1.isValid(), "Radio is not valid!");
+
+	Network.begin(TRadioProtocol::COMM_CHANNEL, ADDRESS);
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
 	Radio1.printDetails();
