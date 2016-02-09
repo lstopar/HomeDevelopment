@@ -71,7 +71,7 @@
         },
         {
             # node qminer module
-            'target_name': 'test',
+            'target_name': 'test1',
             'type': 'executable',
             'sources': [
                 'test1.cpp'
