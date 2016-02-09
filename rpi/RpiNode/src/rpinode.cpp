@@ -351,8 +351,8 @@ void TNodeJsRf24Radio::get(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 
 	const TStr ValueNm = TNodeJsUtil::GetArgStr(Args, 0);
 
-	const int NodeId = 1;
-	const uint8 ValueId = (uint8) JsRadio->ValueNmIdH.GetDat(ValueNm);
+	const uint16 NodeId = 01;
+	const int ValueId = JsRadio->ValueNmIdH.GetDat(ValueNm);
 
 	const bool Success = JsRadio->Radio.Get(NodeId, ValueId);
 
@@ -369,7 +369,7 @@ void TNodeJsRf24Radio::set(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	const TStr SensorNm = ArgVal->GetObjStr("id");
 	const int Val = ArgVal->GetObjInt("value");
 
-	const int NodeId = 1;
+	const uint16 NodeId = 01;	// TODO
 	const int ValId = JsRadio->ValueNmIdH.GetDat(SensorNm);
 
 	bool Success = JsRadio->Radio.Set(NodeId, ValId, Val);

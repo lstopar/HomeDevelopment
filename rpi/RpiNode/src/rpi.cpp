@@ -438,7 +438,7 @@ bool TRf24Radio::Ping(const uint16& NodeId) {
 	return Send(NodeId, TRadioProtocol::COMMAND_PING, TMem());
 }
 
-bool TRf24Radio::Set(const int& NodeId, const int& ValId, const int& Val) {
+bool TRf24Radio::Set(const uint16& NodeId, const int& ValId, const int& Val) {
 	TMem Payload;	TRadioProtocol::GenSetPayload(ValId, Val, Payload);
 	return Send(NodeId, TRadioProtocol::COMMAND_SET, Payload);
 }

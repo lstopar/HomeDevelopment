@@ -1,13 +1,13 @@
 module.exports = exports = [
 	{
-		"type": "DHT11",
-		"sensors": [
+		type: "DHT11",
+		sensors: [
 			{
-				"id": "lr-temp",
-				"type": "temperature",
-				"unit": "\u2103",
-				"name": "Temperature",
-				"description": "Temperature in the living room"
+				id: "lr-temp",
+				type: "temperature",
+				unit: "\u2103",
+				name: "Temperature",
+				description: "Temperature in the living room"
 			},
 			{
 				"id": "lr-hum",
@@ -29,7 +29,7 @@ module.exports = exports = [
 		type: 'Rf24',
 		nodes: [
 		    {
-		    	id: 1,
+		    	id: 01,
 		    	name: 'Arduino - sofa',
 		    	sensors: [
 		    	    {

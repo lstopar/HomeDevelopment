@@ -183,7 +183,7 @@ public:
 
 	void Init();
 	bool Ping(const uint16& NodeId);
-	bool Set(const int& NodeId, const int& ValId, const int& Val);
+	bool Set(const uint16& NodeId, const int& ValId, const int& Val);
 	bool Get(const uint16& NodeId, const int& ValId);
 
 	bool Read(RF24NetworkHeader& Header, TMem& Payload);

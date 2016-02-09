@@ -1,3 +1,7 @@
+#include <Sync.h>
+#include <RF24Network.h>
+#include <RF24Network_config.h>
+
 /*
   // March 2014 - TMRh20 - Updated along with High Speed RF24 Library fork
   // Parts derived from examples by J. Coliz <maniacbug@ymail.com>
@@ -19,42 +23,26 @@
 #include "RF24.h"
 #include "printf.h"
 
-const byte NODE_ID = 1;
+const int CHANNEL = 0x4C;
+const uint16_t MY_ADDRESS = 01;
 
-const byte COMMAND_GET = 0x00;
-const byte COMMAND_SET = 0x01;
-const byte COMMAND_PUSH = 0x02;
-const byte COMMAND_PING = 0xFF;
+const int PAYLOAD_LEN = 8;
+const unsigned char COMMAND_GET = 65;
+const unsigned char COMMAND_SET = 66;
+const unsigned char COMMAND_PUSH = 67;
+const unsigned char COMMAND_PING = 't';
 
 const int LED_PIN = 3;
 
-// Hardware configuration: Set up nRF24L01 radio on SPI bus plus pins 7 & 8 
 RF24 radio(7,8);
+RF24Network network(radio);
 
-const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
-
-const int PAYLOAD_LEN = 8;
-const int CHANNEL = 0x4C;
-
-byte received[PAYLOAD_LEN]; 
-
-// Role management: Set up role.  This sketch uses the same software for all the nodes
-// in this system.  Doing so greatly simplifies testing.  
-
-typedef enum { role_ping_out = 1, role_pong_back } role_e;                 // The various roles supported by this sketch
-const char* role_friendly_name[] = { "invalid", "Ping out", "Pong back"};  // The debug-friendly names of those roles
-role_e role = role_pong_back;                                              // The role of the current running sketch
-
-// A single byte to keep track of the data being sent back and forth
-int currPin3Val = 0;
+int pin3Val = 0;
 
 void setup(){
 
   Serial.begin(9600);
   printf_begin();
-  Serial.print(F("\n\rRF24/examples/pingpair_ack/\n\rROLE: "));
-  Serial.println(role_friendly_name[role]);
-  Serial.println(F("*** PRESS 'T' to begin transmitting to the other node"));
 
   Serial.println("Iniitalizing pins ...");
   pinMode(LED_PIN, OUTPUT);
@@ -62,16 +50,13 @@ void setup(){
   Serial.println("Iniitalizing radio ...");
   // Setup and configure rf radio
   radio.begin();
-  radio.setAutoAck(true);                    // Ensure autoACK is enabled
-  radio.setRetries(15,15);                 // Smallest time between retries, max no. of retries
-  radio.setChannel(CHANNEL);
   radio.setDataRate(RF24_2MBPS);
-  radio.setPayloadSize(PAYLOAD_LEN);                // Here we are sending 1-byte payloads to test the call-response speed
   radio.setCRCLength(RF24_CRC_8);
   radio.printDetails();                   // Dump the configuration of the rf unit for debugging
-  radio.openWritingPipe(pipes[1]);        // Both radios listen on the same pipes by default, and switch when writing
-  radio.openReadingPipe(1,pipes[0]);
-  radio.startListening();                 // Start listening
+
+  Serial.println("Iniitalizing network ...");
+  network.begin(CHANNEL, MY_ADDRESS);
+  Serial.println("Initialization complete!");
 }
 
 //====================================================
@@ -87,18 +72,18 @@ void writeRadio(const byte* buff, const int& len) {
 
 void processGet(const byte& valId) {
   if (valId == LED_PIN) {
-     int val = (int) (currPin3Val / 2.55);
+     int val = (int) (pin3Val / 2.55);
      Serial.print("Sending value: ");
      Serial.println(val);
      
      const byte payload[PAYLOAD_LEN] = {
-      NODE_ID,
-      COMMAND_PUSH,
       valId,
-      0x00, // TODO
-      0x00, // TODO
+      byte(val >> 24),
+      byte(val >> 16),
       byte(val >> 8),
       byte(val),
+      0xFF,
+      0xFF,
       0xFF
      };
 
@@ -114,7 +99,7 @@ void processSet(const byte& valId, const int& val) {
     
     int transVal = (int) (double(val)*2.55);
     analogWrite(LED_PIN, transVal);
-    currPin3Val = transVal;
+    pin3Val = transVal;
     processGet(valId);
   } else {
     Serial.print("Unknown val ID: "); Serial.println(valId);
@@ -122,37 +107,35 @@ void processSet(const byte& valId, const int& val) {
 }
 
 void loop(void) {
-  // Pong back role.  Receive each packet, dump it out, and send it back
-  
-  byte pipeNo;
-  while(radio.available(&pipeNo)) {
-    radio.read(received, PAYLOAD_LEN);
+  network.update();
 
-    const byte nodeId = received[0];
-    const byte command = received[1];
+  while (network.available()) {
+    RF24NetworkHeader header;
+    network.peek(header);
 
-    Serial.print("Got msg on pipe: ");
-    Serial.println(pipeNo);
+    Serial.println("Received message ...");
 
-    if (received[0] != NODE_ID) { continue; }
-
-    Serial.println("Msg is for me!");
-
-    if (command == COMMAND_PING) {
+    if (header.type == 't') {
+      network.read(header, NULL, 0);
       Serial.println("Received ping, ignoring ...");
-    } else if (command == COMMAND_GET) {
-      const byte valId = received[2];
-      processGet(valId);
-    } else if (command == COMMAND_SET) {
-      const byte valId = received[2];
-      const int val = 0x00 +   // TODO
-                      0x00 +   // TODO
-                      (int(received[5]) << 8) + 
-                      int(received[6]);
-      processSet(valId, val);
+    } else if (header.type == COMMAND_GET) {
+      Serial.println("Received GET request ...");
+      byte payload[PAYLOAD_LEN];
+      network.read(header, payload, PAYLOAD_LEN);
+      processGet(payload[0]);
+    } else if (header.type == COMMAND_SET) {
+      byte payload[PAYLOAD_LEN];
+      network.read(header, payload, PAYLOAD_LEN);
+
+      int val = int(payload[1] << 24) |
+                int(payload[2] << 16) |
+                int(payload[3] << 8) |
+                int(payload[4]);
+      
+      processSet(payload[0], val);
     } else {
-      Serial.print("Unknown command: ");
-      Serial.println(command);
+      Serial.print("Unknown header type: ");
+      Serial.println(header.type);
     }
   }
 }
