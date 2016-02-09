@@ -14,7 +14,8 @@
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 
-#include "RF24/RF24.h"
+#include <RF24/RF24.h>
+#include <RF24Network/RF24Network.h>
 
 
 enum TGpioLayout {
