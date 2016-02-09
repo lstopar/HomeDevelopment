@@ -58,9 +58,10 @@ int main(int argc, char** argv)
 
 	radio.begin();
 	radio.setAutoAck(true);
-  radio.setRetries(15, 15);
-  radio.setCRCLength(RF24_CRC_16);
-  delay(100);
+	radio.setRetries(15, 15);
+	radio.setDataRate(RF24_250KBPS);
+	radio.setCRCLength(RF24_CRC_16);
+	delay(100);
 	network.begin(/*channel*/ 90, /*node address*/ this_node);
 
 	radio.printDetails();
