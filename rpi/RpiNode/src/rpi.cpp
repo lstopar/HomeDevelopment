@@ -307,11 +307,12 @@ void TYL40Adc::CleanUp() {
 	}
 }
 
+const uint8 TRadioProtocol::COMM_CHANNEL = 0x4C;
 const int TRadioProtocol::PAYLOAD_SIZE = 8;
-const char TRadioProtocol::COMMAND_GET = 65;
-const char TRadioProtocol::COMMAND_SET = 66;
-const char TRadioProtocol::COMMAND_PUSH = 67;
-const char TRadioProtocol::COMMAND_PING = 't';
+const uchar TRadioProtocol::COMMAND_GET = 65;
+const uchar TRadioProtocol::COMMAND_SET = 66;
+const uchar TRadioProtocol::COMMAND_PUSH = 67;
+const uchar TRadioProtocol::COMMAND_PING = 't';
 
 void TRadioProtocol::ParsePushPayload(const TMem& Payload, int& ValId, int& Val) {
 	ValId = Payload[0];
@@ -350,10 +351,6 @@ void TRadioProtocol::GenSetPayload(const int& ValId, const int& Val, TMem& Paylo
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
 const rf24_pa_dbm_e TRf24Radio::POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_LOW;
-const uint8 TRf24Radio::COMM_CHANNEL = 0x4C;
-
-//const uint64_t TRf24Radio::PIPES[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
-
 const uint16 TRf24Radio::ADDRESS = 00;
 
 void TRf24Radio::TReadThread::Run() {
@@ -431,7 +428,7 @@ void TRf24Radio::Init() {
 
 //	Radio.startListening();
 
-	Network.begin(COMM_CHANNEL, ADDRESS);
+	Network.begin(TRadioProtocol::COMM_CHANNEL, ADDRESS);
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
 

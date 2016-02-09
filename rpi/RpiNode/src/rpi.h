@@ -127,6 +127,7 @@ private:
 
 class TRadioProtocol {
 public:
+	static const uint8 COMM_CHANNEL;
 	static const int PAYLOAD_SIZE;
 
 	static const uchar COMMAND_GET;
@@ -165,13 +166,7 @@ private:
 	};
 
 	static const rf24_pa_dbm_e POWER_LEVEL;
-//	static const uint8 RETRY_DELAY;
-//	static const uint8 RETRY_COUNT;
-	static const uint8 COMM_CHANNEL;
-
 	static const uint16 ADDRESS;
-
-//	static const uint64_t PIPES[2];
 
 	RF24 Radio1;
 	RF24Network Network;
