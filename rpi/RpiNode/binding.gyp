@@ -23,7 +23,8 @@
         	'-luuid',
         	'-fopenmp',
         	'-lwiringPi',
-        	'-lrf24-bcm'
+        	'-lrf24-bcm',
+        	'-lrf24net'
         ],
         # GCC flags
         'cflags_cc!': [ '-fno-rtti', '-fno-exceptions' ],

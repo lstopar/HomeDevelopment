@@ -307,6 +307,8 @@ void TYL40Adc::CleanUp() {
 	}
 }
 
+const int TRadioProtocol::PAYLOAD_SIZE = 8;
+
 void TRadioProtocol::ParsePushPayload(const TMem& Payload, int& ValId, int& Val) {
 	ValId = Payload[0];
 	Val = (int(Payload[1]) << 24) +
@@ -343,7 +345,6 @@ void TRadioProtocol::GenSetPayload(const int& ValId, const int& Val, TMem& Paylo
 
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
-const int TRf24Radio::PAYLOAD_SIZE = 8;
 const rf24_pa_dbm_e TRf24Radio::POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_LOW;
 const uint8 TRf24Radio::COMM_CHANNEL = 0x4C;
 
@@ -466,8 +467,8 @@ bool TRf24Radio::Read(RF24NetworkHeader& Header, TMem& Payload) {
 				Network.read(Header, nullptr, 0);
 			} else if (Header.type == COMMAND_GET || Header.type == COMMAND_PUSH ||
 					Header.type == COMMAND_SET) {
-				Payload.Gen(PAYLOAD_SIZE);
-				Network.read(Header, Payload(), PAYLOAD_SIZE);
+				Payload.Gen(TRadioProtocol::PAYLOAD_SIZE);
+				Network.read(Header, Payload(), TRadioProtocol::PAYLOAD_SIZE);
 			} else {
 				Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type %c!", Header.type);
 			}

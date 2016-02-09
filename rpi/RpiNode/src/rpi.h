@@ -126,6 +126,8 @@ private:
 
 class TRadioProtocol {
 public:
+	static const int PAYLOAD_SIZE;
+
 	static void ParsePushPayload(const TMem& Payload, int& ValId, int& Val);
 	static void GenGetPayload(const int& ValId, TMem& Payload);
 	static void GenSetPayload(const int& ValId, const int& Val, TMem& Payload);
@@ -139,8 +141,6 @@ public:
 	public:
 		virtual void OnValue(const int& ValId, const int& Val) = 0;
 	};
-
-	static const int PAYLOAD_SIZE;
 
 private:
 	class TReadThread: public TThread {
