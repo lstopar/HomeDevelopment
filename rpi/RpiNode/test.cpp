@@ -66,6 +66,7 @@ int main(int argc, char** argv)
 	{
 
 		  network.update();
+		  printf("updated network!\n");
   		  while ( network.available() ) {     // Is there anything ready for us?
 
 		 	RF24NetworkHeader header;        // If so, grab it and print it out
