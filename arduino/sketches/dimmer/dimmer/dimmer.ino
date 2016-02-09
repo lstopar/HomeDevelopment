@@ -52,11 +52,12 @@ void setup(){
   radio.begin();
   radio.setDataRate(RF24_2MBPS);
   radio.setCRCLength(RF24_CRC_8);
-  radio.printDetails();                   // Dump the configuration of the rf unit for debugging
 
   Serial.println("Iniitalizing network ...");
   network.begin(CHANNEL, MY_ADDRESS);
+  
   Serial.println("Initialization complete!");
+  radio.printDetails();
 }
 
 //====================================================

@@ -414,22 +414,13 @@ void TRf24Radio::Init() {
 	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
 
 	Radio1.begin();
-//	Radio.setAutoAck(true);
-//	Radio.setRetries(RETRY_DELAY, RETRY_COUNT);
-//	Radio.setChannel(COMM_CHANNEL);
 	Radio1.setDataRate(RF24_2MBPS);	// TODO
-//	Radio.setPayloadSize(PAYLOAD_SIZE);
 	Radio1.setCRCLength(RF24_CRC_8);
-	Radio1.printDetails();
-
-//	Radio.openWritingPipe(0xF0F0F0F0E1LL);
-//	Radio.openReadingPipe(1, 0xF0F0F0F0D2LL);
-
-//	Radio.startListening();
 
 	Network.begin(TRadioProtocol::COMM_CHANNEL, ADDRESS);
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
+	Radio1.printDetails();
 
 	ReadThread.Start();
 }
