@@ -44,8 +44,8 @@ module.exports = exports = [
 		    }    
 		],
 		configuration: {
-			pinCE: 25,
-			pinCSN: 8,
+			pinCE: 25,		// RPI_V2_GPIO_P1_22
+			pinCSN: 8,		// RPI_V2_GPIO_P1_24
 			verbose: true
 		}
 	}
