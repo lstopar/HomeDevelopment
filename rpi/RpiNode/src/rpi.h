@@ -168,7 +168,7 @@ private:
 	static const rf24_pa_dbm_e POWER_LEVEL;
 	static const uint16 ADDRESS;
 
-	RF24 Radio;
+	RF24 Radio1;
 	RF24Network Network;
 	TReadThread ReadThread;
 
