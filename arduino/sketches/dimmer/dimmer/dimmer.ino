@@ -40,7 +40,7 @@ void setup(){
   radio1.setCRCLength(RF24_CRC_8);
 
   Serial.println("Iniitalizing network ...");
-  network.begin(CHANNEL, MY_ADDRESS);
+  network.begin(MY_ADDRESS);
   
   Serial.println("Initialization complete!");
   radio1.printDetails();
