@@ -365,28 +365,29 @@ void TRf24Radio::TReadThread::Run() {
 
 				if (Radio->Callback == nullptr) { continue; }
 
-				const uchar Type = Header.type;
+				const uchar& Type = Header.type;
 
 				try {
 					switch (Type) {
-					case TRadioProtocol::COMMAND_PING:
+					case TRadioProtocol::COMMAND_PING: {
 						Notify->OnNotify(TNotifyType::ntInfo, "Received ping, ignoring ...");
 						break;
-					case TRadioProtocol::COMMAND_PUSH:
+					} case TRadioProtocol::COMMAND_PUSH: {
 						const uint16 NodeId = Header.from_node;
 
 						int ValId, Val;
 						TRadioProtocol::ParsePushPayload(Payload, ValId, Val);
 						Radio->Callback->OnValue(ValId, Val);
 						break;
-					case TRadioProtocol::COMMAND_GET:
+					} case TRadioProtocol::COMMAND_GET: {
 						Notify->OnNotify(TNotifyType::ntWarn, "GET not supported!");
 						break;
-					case TRadioProtocol::COMMAND_SET:
+					} case TRadioProtocol::COMMAND_SET: {
 						Notify->OnNotify(TNotifyType::ntWarn, "SET not supported!");
 						break;
-					default:
+					} default: {
 						Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type: %d", Type);
+					}
 					}
 				} catch (const PExcept& Except) {
 					Notify->OnNotifyFmt(TNotifyType::ntErr, "Error when calling read callback: %s", Except->GetMsgStr().CStr());
