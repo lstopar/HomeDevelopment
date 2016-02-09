@@ -57,11 +57,10 @@ int main(int argc, char** argv)
 	// Refer to RF24.h or nRF24L01 DS for settings
 
 	radio.begin();
-	network.begin(/*channel*/ 90, /*node address*/ this_node);
-
-  radio.setAutoAck(true);
+	radio.setAutoAck(true);
   radio.setRetries(15, 15);
   radio.setCRCLength(RF24_CRC_16);
+	network.begin(/*channel*/ 90, /*node address*/ this_node);
 
 	radio.printDetails();
 
