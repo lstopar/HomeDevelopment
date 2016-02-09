@@ -60,6 +60,7 @@ int main(int argc, char** argv)
 	radio.setAutoAck(true);
   radio.setRetries(15, 15);
   radio.setCRCLength(RF24_CRC_16);
+  delay(100);
 	network.begin(/*channel*/ 90, /*node address*/ this_node);
 
 	radio.printDetails();
@@ -68,7 +69,7 @@ int main(int argc, char** argv)
 	{
 
 		  network.update();
-		  printf("updated network!\n");
+//		  printf("updated network!\n");
   		  while ( network.available() ) {     // Is there anything ready for us?
 
 		 	RF24NetworkHeader header;        // If so, grab it and print it out
