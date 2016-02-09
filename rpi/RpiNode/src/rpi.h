@@ -129,6 +129,11 @@ class TRadioProtocol {
 public:
 	static const int PAYLOAD_SIZE;
 
+	static const uchar COMMAND_GET;
+	static const uchar COMMAND_SET;
+	static const uchar COMMAND_PUSH;
+	static const uchar COMMAND_PING;
+
 	static void ParsePushPayload(const TMem& Payload, int& ValId, int& Val);
 	static void GenGetPayload(const int& ValId, TMem& Payload);
 	static void GenSetPayload(const int& ValId, const int& Val, TMem& Payload);
@@ -167,11 +172,6 @@ private:
 	static const uint16 ADDRESS;
 
 //	static const uint64_t PIPES[2];
-
-	static const uchar COMMAND_GET;
-	static const uchar COMMAND_SET;
-	static const uchar COMMAND_PUSH;
-	static const uchar COMMAND_PING;
 
 	RF24 Radio1;
 	RF24Network Network;

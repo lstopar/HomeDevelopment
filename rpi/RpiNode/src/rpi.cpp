@@ -308,6 +308,10 @@ void TYL40Adc::CleanUp() {
 }
 
 const int TRadioProtocol::PAYLOAD_SIZE = 8;
+const char TRadioProtocol::COMMAND_GET = 65;
+const char TRadioProtocol::COMMAND_SET = 66;
+const char TRadioProtocol::COMMAND_PUSH = 67;
+const char TRadioProtocol::COMMAND_PING = 't';
 
 void TRadioProtocol::ParsePushPayload(const TMem& Payload, int& ValId, int& Val) {
 	ValId = Payload[0];
@@ -352,11 +356,6 @@ const uint8 TRf24Radio::COMM_CHANNEL = 0x4C;
 
 const uint16 TRf24Radio::ADDRESS = 00;
 
-const char TRf24Radio::COMMAND_GET = 65;
-const char TRf24Radio::COMMAND_SET = 66;
-const char TRf24Radio::COMMAND_PUSH = 67;
-const char TRf24Radio::COMMAND_PING = 't';
-
 void TRf24Radio::TReadThread::Run() {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
 
@@ -373,20 +372,20 @@ void TRf24Radio::TReadThread::Run() {
 
 				try {
 					switch (Type) {
-					case COMMAND_PING:
+					case TRadioProtocol::COMMAND_PING:
 						Notify->OnNotify(TNotifyType::ntInfo, "Received ping, ignoring ...");
 						break;
-					case COMMAND_PUSH:
+					case TRadioProtocol::COMMAND_PUSH:
 						const uint16 NodeId = Header.from_node;
 
 						int ValId, Val;
 						TRadioProtocol::ParsePushPayload(Payload, ValId, Val);
 						Radio->Callback->OnValue(ValId, Val);
 						break;
-					case COMMAND_GET:
+					case TRadioProtocol::COMMAND_GET:
 						Notify->OnNotify(TNotifyType::ntWarn, "GET not supported!");
 						break;
-					case COMMAND_SET:
+					case TRadioProtocol::COMMAND_SET:
 						Notify->OnNotify(TNotifyType::ntWarn, "SET not supported!");
 						break;
 					default:
@@ -440,17 +439,17 @@ void TRf24Radio::Init() {
 }
 
 bool TRf24Radio::Ping(const uint16& NodeId) {
-	return Send(NodeId, COMMAND_PING, TMem());
+	return Send(NodeId, TRadioProtocol::COMMAND_PING, TMem());
 }
 
 bool TRf24Radio::Set(const int& NodeId, const int& ValId, const int& Val) {
 	TMem Payload;	TRadioProtocol::GenSetPayload(ValId, Val, Payload);
-	return Send(NodeId, COMMAND_SET, Payload);
+	return Send(NodeId, TRadioProtocol::COMMAND_SET, Payload);
 }
 
 bool TRf24Radio::Get(const uint16& NodeId, const int& ValId) {
 	TMem Payload;	TRadioProtocol::GenGetPayload(ValId, Payload);
-	return Send(NodeId, COMMAND_GET, Payload);
+	return Send(NodeId, TRadioProtocol::COMMAND_GET, Payload);
 }
 
 bool TRf24Radio::Read(RF24NetworkHeader& Header, TMem& Payload) {
@@ -462,12 +461,13 @@ bool TRf24Radio::Read(RF24NetworkHeader& Header, TMem& Payload) {
 		if (Network.available()) {
 			Network.peek(Header);
 
-			if (Header.type == COMMAND_PING) {
+			if (Header.type == TRadioProtocol::COMMAND_PING) {
 				// the node is just testing
 				Network.read(Header, nullptr, 0);
-			} else if (Header.type == COMMAND_GET || Header.type == COMMAND_PUSH ||
-					Header.type == COMMAND_SET) {
-				Payload.Gen(TRadioProtocol::PAYLOAD_SIZE);
+			} else if (Header.type == TRadioProtocol::COMMAND_GET ||
+					Header.type == TRadioProtocol::COMMAND_PUSH ||
+					Header.type == TRadioProtocol::COMMAND_SET) {
+					Payload.Gen(TRadioProtocol::PAYLOAD_SIZE);
 				Network.read(Header, Payload(), TRadioProtocol::PAYLOAD_SIZE);
 			} else {
 				Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type %c!", Header.type);
