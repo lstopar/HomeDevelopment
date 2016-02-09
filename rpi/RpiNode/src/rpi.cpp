@@ -421,6 +421,7 @@ void TRf24Radio::Init() {
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
 	Radio1.printDetails();
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Parent node: %d", Network.parent());
 
 	ReadThread.Start();
 }

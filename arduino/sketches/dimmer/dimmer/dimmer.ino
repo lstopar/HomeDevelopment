@@ -34,8 +34,8 @@ const unsigned char COMMAND_PING = 't';
 
 const int LED_PIN = 3;
 
-RF24 radio(7,8);
-RF24Network network(radio);
+RF24 radio1(7,8);
+RF24Network network(radio1);
 
 int pin3Val = 0;
 
@@ -49,29 +49,29 @@ void setup(){
 
   Serial.println("Iniitalizing radio ...");
   // Setup and configure rf radio
-  radio.begin();
-  radio.setDataRate(RF24_2MBPS);
-  radio.setCRCLength(RF24_CRC_8);
+  radio1.begin();
+  radio1.setDataRate(RF24_2MBPS);
+  radio1.setCRCLength(RF24_CRC_8);
 
   Serial.println("Iniitalizing network ...");
   network.begin(CHANNEL, MY_ADDRESS);
   
   Serial.println("Initialization complete!");
-  radio.printDetails();
+  radio1.printDetails();
+  Serial.print("Parent node: "); Serial.println(network.parent());
 }
 
 //====================================================
 // RADIO FUNCTIONS
 //====================================================
 
-void writeRadio(const byte* buff, const int& len) {
+void writeRadio(const uint16_t& recipient, const unsigned char& type, const byte* buff, const int& len) {
   Serial.println("Sending message ...");
-  radio.stopListening();
-  radio.write(buff, len);
-  radio.startListening();
+  RF24NetworkHeader header(recipient, type);
+  network.write(header, buff, len);
 }
 
-void processGet(const byte& valId) {
+void processGet(const uint16_t& callerAddr, const byte& valId) {
   if (valId == LED_PIN) {
      int val = (int) (pin3Val / 2.55);
      Serial.print("Sending value: ");
@@ -88,20 +88,20 @@ void processGet(const byte& valId) {
       0xFF
      };
 
-     writeRadio(payload, PAYLOAD_LEN);
+     writeRadio(callerAddr, COMMAND_PUSH, payload, PAYLOAD_LEN);
   } else {
     Serial.print("Unknown val ID: "); Serial.println(valId);
   }
 }
 
-void processSet(const byte& valId, const int& val) {
+void processSet(const uint16_t& callerAddr, const byte& valId, const int& val) {
   if (valId == LED_PIN) {
     Serial.print("Setting LED ...");
     
     int transVal = (int) (double(val)*2.55);
     analogWrite(LED_PIN, transVal);
     pin3Val = transVal;
-    processGet(valId);
+    processGet(callerAddr, valId);
   } else {
     Serial.print("Unknown val ID: "); Serial.println(valId);
   }
@@ -111,19 +111,25 @@ void loop(void) {
   network.update();
 
   while (network.available()) {
+    Serial.println("Reading message ...");
+    
     RF24NetworkHeader header;
     network.peek(header);
 
     Serial.println("Received message ...");
+
+    const uint16_t& fromAddr = header.from_node;
 
     if (header.type == 't') {
       network.read(header, NULL, 0);
       Serial.println("Received ping, ignoring ...");
     } else if (header.type == COMMAND_GET) {
       Serial.println("Received GET request ...");
+      
       byte payload[PAYLOAD_LEN];
       network.read(header, payload, PAYLOAD_LEN);
-      processGet(payload[0]);
+      
+      processGet(fromAddr, payload[0]);
     } else if (header.type == COMMAND_SET) {
       byte payload[PAYLOAD_LEN];
       network.read(header, payload, PAYLOAD_LEN);
@@ -133,7 +139,7 @@ void loop(void) {
                 int(payload[3] << 8) |
                 int(payload[4]);
       
-      processSet(payload[0], val);
+      processSet(fromAddr, payload[0], val);
     } else {
       Serial.print("Unknown header type: ");
       Serial.println(header.type);
