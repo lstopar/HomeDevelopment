@@ -1,3 +1,3 @@
 #!/bin/bash
 
-git clone https://github.com/gnulnulf/RF24.git
+git clone https://github.com/TMRh20/RF24.git

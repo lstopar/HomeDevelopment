@@ -307,45 +307,89 @@ void TYL40Adc::CleanUp() {
 	}
 }
 
+void TRadioProtocol::ParsePushPayload(const TMem& Payload, int& ValId, int& Val) {
+	ValId = Payload[0];
+	Val = (int(Payload[1]) << 24) +
+		  (int(Payload[2]) << 16) +
+		  (int(Payload[3]) << 8) +
+		  int(Payload[4]);
+}
+
+void TRadioProtocol::GenGetPayload(const int& ValId, TMem& Payload) {
+	if (Payload.Len() != PAYLOAD_SIZE) { Payload.Gen(PAYLOAD_SIZE); }
+
+	Payload[0] = (char) ValId;
+	Payload[1] = 0xFF;
+	Payload[2] = 0xFF;
+	Payload[3] = 0xFF;
+	Payload[4] = 0xFF;
+	Payload[5] = 0xFF;
+	Payload[6] = 0xFF;
+	Payload[7] = 0xFF;
+}
+
+void TRadioProtocol::GenSetPayload(const int& ValId, const int& Val, TMem& Payload) {
+	if (Payload.Len() != PAYLOAD_SIZE) { Payload.Gen(PAYLOAD_SIZE); }
+
+	Payload[0] = (char) ValId;
+	Payload[1] = char((Val >> 24) & 0xFF);
+	Payload[2] = char((Val >> 16) & 0xFF);
+	Payload[3] = char((Val >> 8) & 0xFF);
+	Payload[4] = char(Val & 0xFF);
+	Payload[5] = 0xFF;
+	Payload[6] = 0xFF;
+	Payload[7] = 0xFF;
+}
+
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
 const int TRf24Radio::PAYLOAD_SIZE = 8;
 const rf24_pa_dbm_e TRf24Radio::POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_LOW;
-const uint8 TRf24Radio::RETRY_DELAY = 15;
-const uint8 TRf24Radio::RETRY_COUNT = 15;
 const uint8 TRf24Radio::COMM_CHANNEL = 0x4C;
 
-const uint64_t TRf24Radio::PIPES[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
+//const uint64_t TRf24Radio::PIPES[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
-const char TRf24Radio::COMMAND_GET = 0x00;
-const char TRf24Radio::COMMAND_SET = 0x01;
-const char TRf24Radio::COMMAND_PUSH = 0x02;
-const char TRf24Radio::COMMAND_PING = 0xFF;
+const uint16 TRf24Radio::ADDRESS = 00;
+
+const char TRf24Radio::COMMAND_GET = 65;
+const char TRf24Radio::COMMAND_SET = 66;
+const char TRf24Radio::COMMAND_PUSH = 67;
+const char TRf24Radio::COMMAND_PING = 't';
 
 void TRf24Radio::TReadThread::Run() {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
 
 	while (true) {
 		try {
-			TMem Msg(PAYLOAD_SIZE);
-			while (Radio->Read(Msg)) {
+			TMem Payload;
+			RF24NetworkHeader Header;
+			while (Radio->Read(Header, Payload)) {
 				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message!");
 
 				if (Radio->Callback == nullptr) { continue; }
 
-				uint8 NodeId;
-				char CommandId;
-				int ValId;
-				int Val;
-				TRf24Radio::ParseMsg(Msg, NodeId, CommandId, ValId, Val);
+				const uchar Type = Header.type;
 
 				try {
-					if (CommandId == COMMAND_PING) {
+					switch (Type) {
+					case COMMAND_PING:
 						Notify->OnNotify(TNotifyType::ntInfo, "Received ping, ignoring ...");
-					} else if (CommandId == COMMAND_PUSH) {
+						break;
+					case COMMAND_PUSH:
+						const uint16 NodeId = Header.from_node;
+
+						int ValId, Val;
+						TRadioProtocol::ParsePushPayload(Payload, ValId, Val);
 						Radio->Callback->OnValue(ValId, Val);
-					} else {
-						Notify->OnNotifyFmt(TNotifyType::ntWarn, "Invalid command ID: %d", CommandId);
+						break;
+					case COMMAND_GET:
+						Notify->OnNotify(TNotifyType::ntWarn, "GET not supported!");
+						break;
+					case COMMAND_SET:
+						Notify->OnNotify(TNotifyType::ntWarn, "SET not supported!");
+						break;
+					default:
+						Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type: %d", Type);
 					}
 				} catch (const PExcept& Except) {
 					Notify->OnNotifyFmt(TNotifyType::ntErr, "Error when calling read callback: %s", Except->GetMsgStr().CStr());
@@ -361,7 +405,8 @@ void TRf24Radio::TReadThread::Run() {
 
 TRf24Radio::TRf24Radio(const uint8& PinCe, const uint8_t& PinCs,
 		const uint32& SpiSpeed, const PNotify& _Notify):
-		Radio(PinCe, PinCs, SpiSpeed),
+		Radio1(PinCe, PinCs, SpiSpeed),
+		Network(Radio1),
 		ReadThread(),
 		Callback(nullptr),
 		Notify(_Notify) {
@@ -372,78 +417,59 @@ TRf24Radio::TRf24Radio(const uint8& PinCe, const uint8_t& PinCs,
 void TRf24Radio::Init() {
 	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
 
-	Radio.begin();
-	Radio.setAutoAck(true);
-	Radio.setRetries(RETRY_DELAY, RETRY_COUNT);
-	Radio.setChannel(COMM_CHANNEL);
-	Radio.setDataRate(RF24_2MBPS);
-	Radio.setPayloadSize(PAYLOAD_SIZE);
-	Radio.setCRCLength(RF24_CRC_8);
-	Radio.printDetails();
+	Radio1.begin();
+//	Radio.setAutoAck(true);
+//	Radio.setRetries(RETRY_DELAY, RETRY_COUNT);
+//	Radio.setChannel(COMM_CHANNEL);
+	Radio1.setDataRate(RF24_2MBPS);	// TODO
+//	Radio.setPayloadSize(PAYLOAD_SIZE);
+	Radio1.setCRCLength(RF24_CRC_8);
+	Radio1.printDetails();
 
-	Radio.openWritingPipe(0xF0F0F0F0E1LL);
-	Radio.openReadingPipe(1, 0xF0F0F0F0D2LL);
+//	Radio.openWritingPipe(0xF0F0F0F0E1LL);
+//	Radio.openReadingPipe(1, 0xF0F0F0F0D2LL);
 
-	Radio.startListening();
+//	Radio.startListening();
+
+	Network.begin(COMM_CHANNEL, ADDRESS);
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
 
 	ReadThread.Start();
 }
 
-bool TRf24Radio::Ping(const int& NodeId) {
-	TMem Msg;	Msg.Gen(PAYLOAD_SIZE);
-	Msg[0] = (char) NodeId;
-	Msg[1] = COMMAND_PING;
-	Msg[2] = 0xFF;
-	Msg[3] = 0xFF;
-	Msg[4] = 0xFF;
-	Msg[5] = 0xFF;
-	Msg[6] = 0xFF;
-	Msg[7] = 0xFF;
-
-	return Send(Msg);
+bool TRf24Radio::Ping(const uint16& NodeId) {
+	return Send(NodeId, COMMAND_PING, TMem());
 }
 
 bool TRf24Radio::Set(const int& NodeId, const int& ValId, const int& Val) {
-	TMem Msg;	Msg.Gen(PAYLOAD_SIZE);
-	Msg[0] = (char) NodeId;
-	Msg[1] = COMMAND_SET;
-	Msg[2] = (char) ValId;
-	Msg[3] = char((Val >> 24) & 0xFF);
-	Msg[4] = char((Val >> 16) & 0xFF);
-	Msg[5] = char((Val >> 8) & 0xFF);
-	Msg[6] = char(Val & 0xFF);
-	Msg[7] = 0xFF;
-
-	return Send(Msg);
+	TMem Payload;	TRadioProtocol::GenSetPayload(ValId, Val, Payload);
+	return Send(NodeId, COMMAND_SET, Payload);
 }
 
-bool TRf24Radio::Get(const int& NodeId, const int& ValId) {
-	TMem Msg;	Msg.Gen(PAYLOAD_SIZE);
-	Msg[0] = (char) NodeId;
-	Msg[1] = COMMAND_GET;
-	Msg[2] = (char) ValId;
-	Msg[3] = 0xFF;
-	Msg[4] = 0xFF;
-	Msg[5] = 0xFF;
-	Msg[6] = 0xFF;
-	Msg[7] = 0xFF;
-
-	return Send(Msg);
+bool TRf24Radio::Get(const uint16& NodeId, const int& ValId) {
+	TMem Payload;	TRadioProtocol::GenGetPayload(ValId, Payload);
+	return Send(NodeId, COMMAND_GET, Payload);
 }
 
-bool TRf24Radio::Read(TMem& Msg) {
+bool TRf24Radio::Read(RF24NetworkHeader& Header, TMem& Payload) {
 	try {
 		TLock Lock(CriticalSection);
 
-		if (Radio.available()) {
-			char Payload[PAYLOAD_SIZE];
-			Radio.read(Payload, PAYLOAD_SIZE);
+		Network.update();
 
-			if (Msg.Len() != PAYLOAD_SIZE) { Msg.Gen(PAYLOAD_SIZE); }
-			for (int i = 0; i < PAYLOAD_SIZE; i++) {
-				Msg[i] = Payload[i];
+		if (Network.available()) {
+			Network.peek(Header);
+
+			if (Header.type == COMMAND_PING) {
+				// the node is just testing
+				Network.read(Header, nullptr, 0);
+			} else if (Header.type == COMMAND_GET || Header.type == COMMAND_PUSH ||
+					Header.type == COMMAND_SET) {
+				Payload.Gen(PAYLOAD_SIZE);
+				Network.read(Header, Payload(), PAYLOAD_SIZE);
+			} else {
+				Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type %c!", Header.type);
 			}
 
 			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got message!");
@@ -456,29 +482,16 @@ bool TRf24Radio::Read(TMem& Msg) {
 	return false;
 }
 
-bool TRf24Radio::Send(const TMem& Buff) {
+bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff) {
 	TLock Lock(CriticalSection);
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message ...");
-	Radio.stopListening();
-	bool Success = Radio.write(Buff(), PAYLOAD_SIZE);
-	Radio.startListening();
-	return Success;
-}
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message to node %d ...", NodeAddr);
 
-void TRf24Radio::ParseMsg(const TMem& Msg, uint8& NodeId, char& CommandId,
-		int& ValId, int& Val) {
-	EAssertR(Msg.Len() == PAYLOAD_SIZE, "Invalid message length: " + TInt::GetStr(Msg.Len()));
-	NodeId = Msg[0];
-	CommandId = Msg[1];
+	RF24NetworkHeader Header(NodeAddr, Command);
+	bool Success = Network.write(Header, Buff(), Buff.Len());
 
-	if (CommandId != COMMAND_PING) {
-		ValId = Msg[2];
-
-		if (CommandId == COMMAND_PUSH || CommandId == COMMAND_SET) {
-			Val = (int(Msg[3]) << 24) +
-				  (int(Msg[4]) << 16) +
-				  (int(Msg[5]) << 8) +
-				  int(Msg[6]);
-		}
+	if (!Success) {
+		Notify->OnNotify(TNotifyType::ntWarn, "Failed to send message!");
 	}
+
+	return Success;
 }

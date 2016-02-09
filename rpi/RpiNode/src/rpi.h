@@ -124,6 +124,13 @@ private:
 	void CleanUp();
 };
 
+class TRadioProtocol {
+public:
+	static void ParsePushPayload(const TMem& Payload, int& ValId, int& Val);
+	static void GenGetPayload(const int& ValId, TMem& Payload);
+	static void GenSetPayload(const int& ValId, const int& Val, TMem& Payload);
+};
+
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
 class TRf24Radio {
@@ -152,18 +159,21 @@ private:
 	};
 
 	static const rf24_pa_dbm_e POWER_LEVEL;
-	static const uint8 RETRY_DELAY;
-	static const uint8 RETRY_COUNT;
+//	static const uint8 RETRY_DELAY;
+//	static const uint8 RETRY_COUNT;
 	static const uint8 COMM_CHANNEL;
 
-	static const uint64_t PIPES[2];
+	static const uint16 ADDRESS;
 
-	static const char COMMAND_GET;
-	static const char COMMAND_SET;
-	static const char COMMAND_PUSH;
-	static const char COMMAND_PING;
+//	static const uint64_t PIPES[2];
 
-	RF24 Radio;
+	static const uchar COMMAND_GET;
+	static const uchar COMMAND_SET;
+	static const uchar COMMAND_PUSH;
+	static const uchar COMMAND_PING;
+
+	RF24 Radio1;
+	RF24Network Network;
 	TReadThread ReadThread;
 
 	TRf24RadioCallback* Callback;
@@ -176,18 +186,16 @@ public:
 			const PNotify& Notify=TNotify::NullNotify);
 
 	void Init();
-	bool Ping(const int& NodeId);
+	bool Ping(const uint16& NodeId);
 	bool Set(const int& NodeId, const int& ValId, const int& Val);
-	bool Get(const int& NodeId, const int& ValId);
+	bool Get(const uint16& NodeId, const int& ValId);
 
-	bool Read(TMem& Msg);
+	bool Read(RF24NetworkHeader& Header, TMem& Payload);
 
 	void SetCallback(TRf24RadioCallback* Cb) { Callback = Cb; }
 
 private:
-	bool Send(const TMem& Buff);
-
-	static void ParseMsg(const TMem& Msg, uint8& NodeId, char& CommandId, int& ValId, int& Val);
+	bool Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff);
 };
 
 
