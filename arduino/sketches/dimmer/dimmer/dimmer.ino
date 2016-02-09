@@ -2,22 +2,6 @@
 #include <RF24Network.h>
 #include <RF24Network_config.h>
 
-/*
-  // March 2014 - TMRh20 - Updated along with High Speed RF24 Library fork
-  // Parts derived from examples by J. Coliz <maniacbug@ymail.com>
-*/
-/**
- * Example for efficient call-response using ack-payloads 
- *
- * This example continues to make use of all the normal functionality of the radios including
- * the auto-ack and auto-retry features, but allows ack-payloads to be written optionally as well.
- * This allows very fast call-response communication, with the responding radio never having to 
- * switch out of Primary Receiver mode to send back a payload, but having the option to if wanting
- * to initiate communication instead of respond to a commmunication.
- */
- 
-
-
 #include <SPI.h>
 #include "nRF24L01.h"
 #include "RF24.h"
@@ -46,6 +30,8 @@ void setup(){
 
   Serial.println("Iniitalizing pins ...");
   pinMode(LED_PIN, OUTPUT);
+
+  SPI.begin();
 
   Serial.println("Iniitalizing radio ...");
   // Setup and configure rf radio

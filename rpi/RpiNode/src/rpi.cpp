@@ -475,7 +475,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 	TLock Lock(CriticalSection);
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message to node %d ...", NodeAddr);
 
-	RF24NetworkHeader Header(NodeAddr, Command);
+	RF24NetworkHeader Header(NodeAddr, 0);	// TODO
 	bool Success = Network.write(Header, Buff(), Buff.Len());
 
 	if (!Success) {
