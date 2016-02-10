@@ -44,7 +44,7 @@ const uint16_t this_node = 01;
 // Address of the other node
 const uint16_t other_node = 00;
 
-const unsigned long interval = 2000; //ms  // How often to send 'hello world to the other unit
+const unsigned long interval = 100; //ms  // How often to send 'hello world to the other unit
 
 unsigned long last_sent;             // When did we last send?
 unsigned long packets_sent;          // How many have we sent already
@@ -66,7 +66,6 @@ int main(int argc, char** argv)
 	radio.printDetails();
 
 	while(1){
-
 		network.update();
 		unsigned long now = millis();              // If it's time to send a message, send it!
 		if ( now - last_sent >= interval  ){
