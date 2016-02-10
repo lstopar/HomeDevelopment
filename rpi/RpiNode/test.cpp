@@ -68,6 +68,7 @@ int main(int argc, char** argv)
 	network.begin(/*channel*/ 90, /*node address*/ this_node);
 	radio.printDetails();
 
+
 	while(1){
 		network.update();
 		unsigned long now = millis();              // If it's time to send a message, send it!

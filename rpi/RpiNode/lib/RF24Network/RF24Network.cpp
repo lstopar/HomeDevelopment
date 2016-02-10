@@ -854,7 +854,20 @@ bool RF24Network::write(uint16_t to_node, uint8_t directTo)  // Direct To: 0 = F
 {
   bool ok = false;
   bool isAckType = false;
-  if(frame_buffer[6] > 64 && frame_buffer[6] < 192 ){ isAckType=true; }
+  if(frame_buffer[6] > 64 && frame_buffer[6] < 192 ){
+	#if defined (RF24_LINUX)
+	  IF_SERIAL_DEBUG(printf_P("Sending acknowledgable packet ...\n"));
+  	#else
+	  IF_SERIAL_DEBUG(printf_P("Sending acknowledgable packet ...\n"));
+	#endif
+	  isAckType=true;
+  } else {
+	#if defined (RF24_LINUX)
+	  IF_SERIAL_DEBUG(printf_P("Sending unacknowledgable packet ...\n"));
+  	#else
+	  IF_SERIAL_DEBUG(printf_P("Sending unacknowledgable packet ...\n"));
+	#endif
+  }
   
   /*if( ( (frame_buffer[7] % 2) && frame_buffer[6] == NETWORK_MORE_FRAGMENTS) ){
 	isAckType = 0;
@@ -887,32 +900,43 @@ bool RF24Network::write(uint16_t to_node, uint8_t directTo)  // Direct To: 0 = F
 	#endif
  
 	if( directTo == TX_ROUTED && ok && conversion.send_node == to_node && isAckType){
-			
-			RF24NetworkHeader* header = (RF24NetworkHeader*)&frame_buffer;
-			header->type = NETWORK_ACK;				    // Set the payload type to NETWORK_ACK			
-			header->to_node = header->from_node;          // Change the 'to' address to the 'from' address			
+		#if defined (RF24_LINUX)
+			IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%u MAC: Sending ACK 0%o to 0%o\n"),millis(),to_node,header->from_node); );
+		#else
+			IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%lu MAC: Sending ACK 0%o to 0%o\n"),millis(),to_node,header->from_node); );
+		#endif
 
-			conversion.send_node = header->from_node;
-			conversion.send_pipe = TX_ROUTED;
-			conversion.multicast = 0;
-			logicalToPhysicalAddress(&conversion);
-			
-			//Write the data using the resulting physical address
-			frame_size = sizeof(RF24NetworkHeader);
-			write_to_pipe(conversion.send_node, conversion.send_pipe, conversion.multicast);
-			
-			//dynLen=0;
-			#if defined (RF24_LINUX)
-				IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%u MAC: Route OK to 0%o ACK sent to 0%o\n"),millis(),to_node,header->from_node); );
-			#else
-			    IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%lu MAC: Route OK to 0%o ACK sent to 0%o\n"),millis(),to_node,header->from_node); );
-			#endif
+		RF24NetworkHeader* header = (RF24NetworkHeader*)&frame_buffer;
+		header->type = NETWORK_ACK;				    // Set the payload type to NETWORK_ACK
+		header->to_node = header->from_node;          // Change the 'to' address to the 'from' address
+
+		conversion.send_node = header->from_node;
+		conversion.send_pipe = TX_ROUTED;
+		conversion.multicast = 0;
+		logicalToPhysicalAddress(&conversion);
+
+		//Write the data using the resulting physical address
+		frame_size = sizeof(RF24NetworkHeader);
+		write_to_pipe(conversion.send_node, conversion.send_pipe, conversion.multicast);
+
+		//dynLen=0;
+		#if defined (RF24_LINUX)
+			IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%u MAC: Route OK to 0%o ACK sent to 0%o\n"),millis(),to_node,header->from_node); );
+		#else
+			IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%lu MAC: Route OK to 0%o ACK sent to 0%o\n"),millis(),to_node,header->from_node); );
+		#endif
 	}
  
 
 
 	if( ok && conversion.send_node != to_node && (directTo==0 || directTo==3) && isAckType){
-	    #if !defined (DUAL_HEAD_RADIO)
+		#if defined (RF24_LINUX)
+		  IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%u: waiting for ACK 0%o via 0%o on pipe %x\n\r"),millis(),to_node,conversion.send_node,conversion.send_pipe); );
+		#else
+		  IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%lu: waiting for ACK 0%o via 0%o on pipe %x\n\r"),millis(),to_node,conversion.send_node,conversion.send_pipe); );
+		#endif
+
+		#if !defined (DUAL_HEAD_RADIO)
           // Now, continue listening
 		  if(networkFlags & FLAG_FAST_FRAG){
 			 radio.txStandBy(txTimeout);
@@ -924,6 +948,7 @@ bool RF24Network::write(uint16_t to_node, uint8_t directTo)  // Direct To: 0 = F
 		uint32_t reply_time = millis(); 
 
 		while( update() != NETWORK_ACK){
+
 			#if defined (RF24_LINUX)
             delayMicroseconds(900);
             #endif
