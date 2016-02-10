@@ -307,7 +307,7 @@ void TYL40Adc::CleanUp() {
 	}
 }
 
-const uint8 TRadioProtocol::COMM_CHANNEL = 0x4C;
+const uint8 TRadioProtocol::COMM_CHANNEL = 90;
 const int TRadioProtocol::PAYLOAD_SIZE = 8;
 const uchar TRadioProtocol::COMMAND_GET = 65;
 const uchar TRadioProtocol::COMMAND_SET = 66;
@@ -414,15 +414,13 @@ void TRf24Radio::Init() {
 	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
 
 	Radio1.begin();
-	Radio1.setDataRate(RF24_2MBPS);	// TODO
-	Radio1.setCRCLength(RF24_CRC_8);
-
-	EAssertR(Radio1.isValid(), "Radio is not valid!");
-
+	Radio1.setDataRate(RF24_2MBPS);	// IMPORTANT, doesn't work otherwise!!
+	Radio1.setPALevel(RF24_PA_HIGH);
+	delay(5);
 	Network.begin(TRadioProtocol::COMM_CHANNEL, ADDRESS);
+	radio.printDetails();
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
-	Radio1.printDetails();
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Parent node: %d", Network.parent());
 
 	ReadThread.Start();

@@ -7,7 +7,7 @@
 #include "RF24.h"
 #include "printf.h"
 
-const int CHANNEL = 0x4C;
+const int CHANNEL = 90;
 const uint16_t MY_ADDRESS = 01;
 
 const int PAYLOAD_LEN = 8;
