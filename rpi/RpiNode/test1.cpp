@@ -40,7 +40,6 @@ const uint16_t this_node = 00;
 
 // Address of the other node in Octal format (01,021, etc)
 const uint16_t other_node = 01;
-
 const unsigned long interval = 2000; //ms  // How often to send 'hello world to the other unit
 
 unsigned long last_sent;             // When did we last send?

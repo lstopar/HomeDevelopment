@@ -65,6 +65,8 @@ int main(int argc, char** argv)
 	network.begin(/*channel*/ 90, /*node address*/ this_node);
 	radio.printDetails();
 
+
+
 	while(1){
 
 		network.update();
