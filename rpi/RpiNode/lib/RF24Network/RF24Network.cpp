@@ -892,30 +892,30 @@ bool RF24Network::write(uint16_t to_node, uint8_t directTo)  // Direct To: 0 = F
 	#endif
  
 	if( directTo == TX_ROUTED && ok && conversion.send_node == to_node && isAckType){
-			printf("Waiting to ACK\n");
-			RF24NetworkHeader* header = (RF24NetworkHeader*)&frame_buffer;
-			header->type = NETWORK_ACK;				    // Set the payload type to NETWORK_ACK
-			header->to_node = header->from_node;          // Change the 'to' address to the 'from' address
+		printf("Sending ACK :) ...\n");
+		RF24NetworkHeader* header = (RF24NetworkHeader*)&frame_buffer;
+		header->type = NETWORK_ACK;				    // Set the payload type to NETWORK_ACK
+		header->to_node = header->from_node;          // Change the 'to' address to the 'from' address
 
-			conversion.send_node = header->from_node;
-			conversion.send_pipe = TX_ROUTED;
-			conversion.multicast = 0;
-			logicalToPhysicalAddress(&conversion);
+		conversion.send_node = header->from_node;
+		conversion.send_pipe = TX_ROUTED;
+		conversion.multicast = 0;
+		logicalToPhysicalAddress(&conversion);
 
-			//Write the data using the resulting physical address
-			frame_size = sizeof(RF24NetworkHeader);
-			write_to_pipe(conversion.send_node, conversion.send_pipe, conversion.multicast);
+		//Write the data using the resulting physical address
+		frame_size = sizeof(RF24NetworkHeader);
+		write_to_pipe(conversion.send_node, conversion.send_pipe, conversion.multicast);
 
-			//dynLen=0;
-			#if defined (RF24_LINUX)
-				IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%u MAC: Route OK to 0%o ACK sent to 0%o\n"),millis(),to_node,header->from_node); );
-			#else
-			    IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%lu MAC: Route OK to 0%o ACK sent to 0%o\n"),millis(),to_node,header->from_node); );
-			#endif
+		//dynLen=0;
+		#if defined (RF24_LINUX)
+			IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%u MAC: Route OK to 0%o ACK sent to 0%o\n"),millis(),to_node,header->from_node); );
+		#else
+			IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%lu MAC: Route OK to 0%o ACK sent to 0%o\n"),millis(),to_node,header->from_node); );
+		#endif
 	}
  
 
-
+	printf("Just before waiting for ACK: OK: %d, sendNode: %ud, toNode: %ud, directTo: %d, isAckType: %d\n", ok, conversion.send_node, to_node, directTo, isAckType);
 	if( ok && conversion.send_node != to_node && (directTo==0 || directTo==3) && isAckType){
 		printf("Waiting for ACK ...\n");
 	    #if !defined (DUAL_HEAD_RADIO)
