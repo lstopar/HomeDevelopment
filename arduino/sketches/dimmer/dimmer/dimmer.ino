@@ -18,33 +18,22 @@ const unsigned char COMMAND_PING = 't';
 
 const int LED_PIN = 3;
 
-RF24 radio1(7,8);
-RF24Network network(radio1);
+RF24 radio(7,8);
+RF24Network network(radio);
 
 int pin3Val = 0;
 
-void setup(){
-
+void setup() {
   Serial.begin(9600);
   printf_begin();
-
-  Serial.println("Iniitalizing pins ...");
-  pinMode(LED_PIN, OUTPUT);
-
+  Serial.println("RF24Network/examples/helloworld_rx/");
+ 
   SPI.begin();
+  radio.begin();
+  radio.setDataRate(RF24_2MBPS);
+  network.begin(CHANNEL, MY_ADDRESS);
 
-  Serial.println("Iniitalizing radio ...");
-  // Setup and configure rf radio
-  radio1.begin();
-  radio1.setDataRate(RF24_2MBPS);
-  radio1.setCRCLength(RF24_CRC_8);
-
-  Serial.println("Iniitalizing network ...");
-  network.begin(MY_ADDRESS);
-  
-  Serial.println("Initialization complete!");
-  radio1.printDetails();
-  Serial.print("Parent node: "); Serial.println(network.parent());
+  radio.printDetails();
 }
 
 //====================================================

@@ -418,7 +418,7 @@ void TRf24Radio::Init() {
 	Radio1.setPALevel(RF24_PA_HIGH);
 	delay(5);
 	Network.begin(TRadioProtocol::COMM_CHANNEL, ADDRESS);
-	radio.printDetails();
+	Radio1.printDetails();
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Parent node: %d", Network.parent());
