@@ -433,7 +433,11 @@ void TRf24Radio::Init() {
 	Radio->printDetails();
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Parent node: %d", Network->parent());
+
+	if (ADDRESS != 00) {
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Contacting parent node: %d", Network->parent());
+		Send(Network->parent(), 'k', TMem());
+	}
 
 	ReadThread.Start();
 }
