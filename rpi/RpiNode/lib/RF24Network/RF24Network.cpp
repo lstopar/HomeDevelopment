@@ -855,10 +855,7 @@ bool RF24Network::write(uint16_t to_node, uint8_t directTo)  // Direct To: 0 = F
   bool ok = false;
   bool isAckType = false;
   if(frame_buffer[6] > 64 && frame_buffer[6] < 192 ){
-	  printf("Will send acknowledgable packet ...\n");
 	  isAckType=true;
-  } else {
-	  printf("Will send unacknowledgable packet ...\n");
   }
   
   /*if( ( (frame_buffer[7] % 2) && frame_buffer[6] == NETWORK_MORE_FRAGMENTS) ){
@@ -893,7 +890,6 @@ bool RF24Network::write(uint16_t to_node, uint8_t directTo)  // Direct To: 0 = F
 		#endif
  
 	if( directTo == TX_ROUTED && ok && conversion.send_node == to_node && isAckType){
-		printf("Sending ACK :) ...\n");
 		RF24NetworkHeader* header = (RF24NetworkHeader*)&frame_buffer;
 		header->type = NETWORK_ACK;				    // Set the payload type to NETWORK_ACK
 		header->to_node = header->from_node;          // Change the 'to' address to the 'from' address
@@ -916,9 +912,7 @@ bool RF24Network::write(uint16_t to_node, uint8_t directTo)  // Direct To: 0 = F
 	}
  
 
-	printf("Just before waiting for ACK: OK: %d, sendNode: %ud, toNode: %ud, directTo: %d, isAckType: %d\n", ok, conversion.send_node, to_node, directTo, isAckType);
 	if( ok && conversion.send_node != to_node && (directTo==0 || directTo==3) && isAckType){
-		printf("Waiting for ACK ...\n");
 	    #if !defined (DUAL_HEAD_RADIO)
           // Now, continue listening
 		  if(networkFlags & FLAG_FAST_FRAG){
@@ -1031,7 +1025,11 @@ bool RF24Network::write_to_pipe( uint16_t node, uint8_t pipe, bool multicast )
   
   radio.openWritingPipe(out_pipe);
 
-  ok = radio.writeFast(frame_buffer, frame_size,multicast);
+  //========================================================
+  // TESTING
+//  ok = radio.writeFast(frame_buffer, frame_size,multicast);
+  ok = radio.write(frame_buffer, frame_size,multicast);
+  //========================================================
   
   if(!(networkFlags & FLAG_FAST_FRAG)){
     ok = radio.txStandBy(txTimeout);

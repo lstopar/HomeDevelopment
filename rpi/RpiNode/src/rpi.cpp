@@ -422,6 +422,7 @@ TRf24Radio::~TRf24Radio() {
 	delete Radio;
 }
 
+
 void TRf24Radio::Init() {
 	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
 

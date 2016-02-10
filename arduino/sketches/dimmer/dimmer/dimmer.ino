@@ -34,7 +34,7 @@ void setup() {
   radio.begin();
 
   radio.setAutoAck(true);
-  radio.setRetries(RETRY_DELAY, RETRY_COUNT);
+  radio.setRetries(15, 15);
   
   radio.setDataRate(RF24_2MBPS);
   radio.setPALevel(RF24_PA_HIGH);
