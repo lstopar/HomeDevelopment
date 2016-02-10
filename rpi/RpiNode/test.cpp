@@ -74,12 +74,12 @@ int main(int argc, char** argv)
     			last_sent = now;
     			printf("Sending ..\n");
 			payload_t payload = { millis(), packets_sent++ };
-		        RF24NetworkHeader header(/*to node*/ other_node);
+		        RF24NetworkHeader header(/*to node*/ other_node, 65);
 			bool ok = network.write(header,&payload,sizeof(payload));
-		        if (ok){
-		        	printf("ok.\n");
-		        }else{
-      				printf("failed.\n");
+			if (ok){
+				printf("ok.\n");
+			}else{
+				printf("failed.\n");
   			}
 		}
 	}
