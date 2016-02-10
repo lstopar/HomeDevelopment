@@ -7,21 +7,17 @@
 #include "RF24.h"
 #include "printf.h"
 
-const int CHANNEL = 90;
-const uint16_t MY_ADDRESS = 01;
+#include "protocol.h"
 
-const int PAYLOAD_LEN = 8;
-const unsigned char COMMAND_GET = 65;
-const unsigned char COMMAND_SET = 66;
-const unsigned char COMMAND_PUSH = 67;
-const unsigned char COMMAND_PING = 't';
+using namespace TRadioProtocol;
 
+const uint16_t MY_ADDRESS = ADDRESS_ARDUINO_SOFA;
 const int LED_PIN = 3;
+
+int pin3Val = 0;
 
 RF24 radio(7,8);
 RF24Network network(radio);
-
-int pin3Val = 0;
 
 void writeRadio(const uint16_t& recipient, const unsigned char& type, const byte* buff, const int& len);
 
@@ -40,7 +36,7 @@ void setup() {
   
   radio.setDataRate(RF24_2MBPS);
   radio.setPALevel(RF24_PA_HIGH);
-  network.begin(CHANNEL, MY_ADDRESS);
+  network.begin(COMM_CHANNEL, MY_ADDRESS);
 
   radio.printDetails();
 
@@ -76,7 +72,7 @@ void processGet(const uint16_t& callerAddr, const byte& valId) {
       0xFF
      };
 
-     writeRadio(callerAddr, COMMAND_PUSH, payload, PAYLOAD_LEN);
+     writeRadio(callerAddr, REQUEST_PUSH, payload, PAYLOAD_LEN);
   } else {
     Serial.print("Unknown val ID: "); Serial.println(valId);
   }
@@ -110,17 +106,17 @@ void loop(void) {
     if (header.type == 'k') {
       network.read(header, NULL, 0);
       Serial.println("Received configuration message, ignoring ...");
-    } else if (header.type == 't') {
+    } else if (header.type == REQUEST_PING) {
       network.read(header, NULL, 0);
       Serial.println("Received ping, ignoring ...");
-    } else if (header.type == COMMAND_GET) {
+    } else if (header.type == REQUEST_GET) {
       Serial.println("Received GET request ...");
       
       byte payload[PAYLOAD_LEN];
       network.read(header, payload, PAYLOAD_LEN);
       
       processGet(fromAddr, payload[0]);
-    } else if (header.type == COMMAND_SET) {
+    } else if (header.type == REQUEST_SET) {
       byte payload[PAYLOAD_LEN];
       network.read(header, payload, PAYLOAD_LEN);
 

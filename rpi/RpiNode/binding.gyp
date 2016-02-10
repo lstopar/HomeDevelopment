@@ -1,6 +1,7 @@
 {
 	'variables': {
 		'QMINER_PATH%': '../../../lib/qminer'
+		'SHARED_PATH%': '../../shared/RF24Protocol'
 	},
     'target_defaults': {
         'default_configuration': 'Release',
@@ -41,11 +42,14 @@
             	'src/rpinode.cpp',
             	'src/threads.h',
             	'src/threads.cpp',
+            	'<(SHARED_PATH)/protocol.h',
+                '<(SHARED_PATH)/protocol.cpp',
                 '<(QMINER_PATH)/src/nodejs/nodeutil.h',
                 '<(QMINER_PATH)/src/nodejs/nodeutil.cpp'
             ],
             'include_dirs': [
                 'src/',
+                '<(SHARED_PATH)/',
                 '<(QMINER_PATH)/src/nodejs/',
                 '<(QMINER_PATH)/src/glib/base/',
                 '<(QMINER_PATH)/src/glib/mine/',

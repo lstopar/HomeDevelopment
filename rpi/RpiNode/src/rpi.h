@@ -10,6 +10,7 @@
 
 #include "base.h"
 #include "threads.h"
+#include "protocol.h"
 
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
@@ -123,21 +124,6 @@ private:
 	void SendCommand(const uchar* Command, const int& CommandLen);
 
 	void CleanUp();
-};
-
-class TRadioProtocol {
-public:
-	static const uint8 COMM_CHANNEL;
-	static const int PAYLOAD_SIZE;
-
-	static const uchar COMMAND_GET;
-	static const uchar COMMAND_SET;
-	static const uchar COMMAND_PUSH;
-	static const uchar COMMAND_PING;
-
-	static void ParsePushPayload(const TMem& Payload, int& ValId, int& Val);
-	static void GenGetPayload(const int& ValId, TMem& Payload);
-	static void GenSetPayload(const int& ValId, const int& Val, TMem& Payload);
 };
 
 ///////////////////////////////////////////
