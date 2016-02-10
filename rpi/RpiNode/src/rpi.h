@@ -168,8 +168,8 @@ private:
 	static const rf24_pa_dbm_e POWER_LEVEL;
 	static const uint16 ADDRESS;
 
-	RF24 Radio1;
-	RF24Network Network;
+	RF24* Radio;
+	RF24Network* Network;
 	TReadThread ReadThread;
 
 	TRf24RadioCallback* Callback;
@@ -180,6 +180,7 @@ private:
 public:
 	TRf24Radio(const uint8& PinCe, const uint8_t& PinCs, const uint32& SpiSpeed=BCM2835_SPI_SPEED_8MHZ,
 			const PNotify& Notify=TNotify::StdNotify);
+	~TRf24Radio();
 
 	void Init();
 	bool Ping(const uint16& NodeId);
@@ -187,12 +188,12 @@ public:
 	bool Get(const uint16& NodeId, const int& ValId);
 
 	bool Read(RF24NetworkHeader& Header, TMem& Payload);
-	void UpdateNetwork();
 
 	void SetCallback(TRf24RadioCallback* Cb) { Callback = Cb; }
 
 private:
 	bool Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff);
+	void UpdateNetwork();
 };
 
 

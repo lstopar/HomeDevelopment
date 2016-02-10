@@ -403,28 +403,37 @@ void TRf24Radio::TReadThread::Run() {
 
 TRf24Radio::TRf24Radio(const uint8& PinCe, const uint8_t& PinCs,
 		const uint32& SpiSpeed, const PNotify& _Notify):
-		Radio1(PinCe, PinCs, SpiSpeed),
-		Network(Radio1),
+		Radio(nullptr),
+		Network(nullptr),
 		ReadThread(),
 		Callback(nullptr),
 		Notify(_Notify) {
 
+	Notify->OnNotify(TNotifyType::ntInfo, "Creating radio and network ...");
+	Radio = new RF24(PinCe, PinCs, SpiSpeed);
+	Network = new RF24Network(*Radio);
+
 	ReadThread = TReadThread(this);
-	Notify->OnNotify(TNotifyType::ntInfo, "Radio constructor called!");
+	Notify->OnNotify(TNotifyType::ntInfo, "Radio and network created!");
+}
+
+TRf24Radio::~TRf24Radio() {
+	delete Network;
+	delete Radio;
 }
 
 void TRf24Radio::Init() {
 	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
 
-	Radio1.begin();
-	Radio1.setDataRate(RF24_2MBPS);		// IMPORTANT, doesn't work otherwise!!
-	Radio1.setPALevel(RF24_PA_HIGH);	// set power to high for better range
+	Radio->begin();
+	Radio->setDataRate(RF24_2MBPS);		// IMPORTANT, doesn't work otherwise!!
+	Radio->setPALevel(RF24_PA_HIGH);	// set power to high for better range
 	delay(5);
-	Network.begin(TRadioProtocol::COMM_CHANNEL, ADDRESS);
-	Radio1.printDetails();
+	Network->begin(TRadioProtocol::COMM_CHANNEL, ADDRESS);
+	Radio->printDetails();
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Parent node: %d", Network.parent());
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Parent node: %d", Network->parent());
 
 	ReadThread.Start();
 }
@@ -447,19 +456,19 @@ bool TRf24Radio::Read(RF24NetworkHeader& Header, TMem& Payload) {
 	try {
 		TLock Lock(CriticalSection);
 
-		if (Network.available()) {
-			Network.peek(Header);
+		if (Network->available()) {
+			Network->peek(Header);
 
 			Notify->OnNotify(TNotifyType::ntInfo, "Received message, reading ...");
 
 			if (Header.type == TRadioProtocol::COMMAND_PING) {
 				// the node is just testing
-				Network.read(Header, nullptr, 0);
+				Network->read(Header, nullptr, 0);
 			} else if (Header.type == TRadioProtocol::COMMAND_GET ||
 					Header.type == TRadioProtocol::COMMAND_PUSH ||
 					Header.type == TRadioProtocol::COMMAND_SET) {
 					Payload.Gen(TRadioProtocol::PAYLOAD_SIZE);
-				Network.read(Header, Payload(), TRadioProtocol::PAYLOAD_SIZE);
+				Network->read(Header, Payload(), TRadioProtocol::PAYLOAD_SIZE);
 			} else {
 				Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type %c!", Header.type);
 			}
@@ -474,21 +483,21 @@ bool TRf24Radio::Read(RF24NetworkHeader& Header, TMem& Payload) {
 	return false;
 }
 
-void TRf24Radio::UpdateNetwork() {
-	TLock Lock(CriticalSection);
-	Network.update();
-}
-
 bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff) {
 	TLock Lock(CriticalSection);
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message to node %d ...", NodeAddr);
 
 	RF24NetworkHeader Header(NodeAddr, 0);	// TODO
-	bool Success = Network.write(Header, Buff(), Buff.Len());
+	bool Success = Network->write(Header, Buff(), Buff.Len());
 
 	if (!Success) {
 		Notify->OnNotify(TNotifyType::ntWarn, "Failed to send message!");
 	}
 
 	return Success;
+}
+
+void TRf24Radio::UpdateNetwork() {
+	TLock Lock(CriticalSection);
+	Network->update();
 }
