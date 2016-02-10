@@ -45,7 +45,7 @@
     //#define ENABLE_NETWORK_STATS
     
     /** Enable dynamic payloads - If using different types of NRF24L01 modules, some may be incompatible when using this feature **/
-    #define ENABLE_DYNAMIC_PAYLOADS
+//    #define ENABLE_DYNAMIC_PAYLOADS
 
     /** Debug Options */
     //#define SERIAL_DEBUG
@@ -64,7 +64,7 @@
 //    #define DISABLE_FRAGMENTATION
     // Enable MAX PAYLOAD SIZE if enabling fragmentation
     //#define MAX_PAYLOAD_SIZE  MAIN_BUFFER_SIZE-10
-    #define ENABLE_DYNAMIC_PAYLOADS
+//    #define ENABLE_DYNAMIC_PAYLOADS
     //#define DISABLE_USER_PAYLOADS 
   #endif
   /*************************************/
