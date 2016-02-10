@@ -1036,7 +1036,10 @@ bool RF24Network::write_to_pipe( uint16_t node, uint8_t pipe, bool multicast )
   
   if(!(networkFlags & FLAG_FAST_FRAG)){
 	  printf("Calling txStandBy\n");
-	  ok = radio.txStandBy(txTimeout);
+	  //========================================================
+	  // TESTING
+//	  ok = radio.txStandBy(txTimeout);
+	  //========================================================
 	  radio.setAutoAck(0,0);
 	  printf("After TX standby successfull: %d\n", ok);
   }

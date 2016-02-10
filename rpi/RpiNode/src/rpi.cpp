@@ -5,6 +5,7 @@
 TGpioLayout TRpiUtil::PinLayout = TGpioLayout::glUnset;
 TCriticalSection TRpiUtil::CriticalSection;
 
+
 void TRpiUtil::InitGpio(const TGpioLayout& Layout) {
 	TLock Lock(CriticalSection);
 
