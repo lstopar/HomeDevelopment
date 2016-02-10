@@ -62,6 +62,7 @@ int main(int argc, char** argv)
 
 	radio.begin();
 	radio.setDataRate(RF24_2MBPS);	// IMPORTANT, doesn't work otherwise!!
+	radio.setPALevel(RF24_PA_HIGH);
 	delay(5);
 	network.begin(/*channel*/ 90, /*node address*/ this_node);
 	radio.printDetails();
