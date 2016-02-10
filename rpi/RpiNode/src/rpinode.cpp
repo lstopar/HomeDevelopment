@@ -151,7 +151,6 @@ void TNodejsDHT11Sensor::TReadTask::Run() {
 		}
 	}
 
-
 	if (!Success) {
 		SetExcept(TExcept::New("Failed to read DHT11 after " + TUInt64::GetStr(JsSensor->MxSampleTm)));
 	}
