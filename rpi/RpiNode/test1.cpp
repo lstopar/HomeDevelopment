@@ -51,10 +51,8 @@ struct payload_t {                  // Structure of our payload
   unsigned long counter;
 };
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
 	// Refer to RF24.h or nRF24L01 DS for settings
-
 	radio.begin();
 
 	delay(5);
