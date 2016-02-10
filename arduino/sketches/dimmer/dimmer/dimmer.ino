@@ -97,8 +97,10 @@ void loop(void) {
     Serial.println("Received message ...");
 
     const uint16_t& fromAddr = header.from_node;
-
-    if (header.type == 't') {
+    if (header.type == 'k') {
+      network.read(header, NULL, 0);
+      Serial.println("Received configuration message, ignoring ...");
+    } else if (header.type == 't') {
       network.read(header, NULL, 0);
       Serial.println("Received ping, ignoring ...");
     } else if (header.type == COMMAND_GET) {

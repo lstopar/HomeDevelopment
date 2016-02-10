@@ -312,7 +312,7 @@ const int TRadioProtocol::PAYLOAD_SIZE = 8;
 const uchar TRadioProtocol::COMMAND_GET = 65;
 const uchar TRadioProtocol::COMMAND_SET = 66;
 const uchar TRadioProtocol::COMMAND_PUSH = 67;
-const uchar TRadioProtocol::COMMAND_PING = NETWORK_PING;
+const uchar TRadioProtocol::COMMAND_PING = 't';
 
 void TRadioProtocol::ParsePushPayload(const TMem& Payload, int& ValId, int& Val) {
 	ValId = Payload[0];

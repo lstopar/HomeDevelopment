@@ -866,8 +866,9 @@ bool RF24Network::write(uint16_t to_node, uint8_t directTo)  // Direct To: 0 = F
   }*/
   
   // Throw it away if it's not a valid address
-  if ( !is_valid_address(to_node) )
-    return false;  
+  if ( !is_valid_address(to_node) ) {
+	  return false;
+  }
   
   //Load info into our conversion structure, and get the converted address info
   logicalToPhysicalStruct conversion = { to_node,directTo,0};
@@ -882,14 +883,14 @@ bool RF24Network::write(uint16_t to_node, uint8_t directTo)  // Direct To: 0 = F
   ok=write_to_pipe(conversion.send_node, conversion.send_pipe, conversion.multicast);  	
   
   
-    if(!ok){	
-    #if defined (RF24_LINUX)
-    IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%u: MAC Send fail to 0%o via 0%o on pipe %x\n\r"),millis(),to_node,conversion.send_node,conversion.send_pipe);); 
+    if(!ok) {
+		#if defined (RF24_LINUX)
+		IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%u: MAC Send fail to 0%o via 0%o on pipe %x\n\r"),millis(),to_node,conversion.send_node,conversion.send_pipe););
 	}
-	#else
-	IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%lu: MAC Send fail to 0%o via 0%o on pipe %x\n\r"),millis(),to_node,conversion.send_node,conversion.send_pipe););
+		#else
+		IF_SERIAL_DEBUG_ROUTING( printf_P(PSTR("%lu: MAC Send fail to 0%o via 0%o on pipe %x\n\r"),millis(),to_node,conversion.send_node,conversion.send_pipe););
 	}
-	#endif
+		#endif
  
 	if( directTo == TX_ROUTED && ok && conversion.send_node == to_node && isAckType){
 		printf("Sending ACK :) ...\n");
