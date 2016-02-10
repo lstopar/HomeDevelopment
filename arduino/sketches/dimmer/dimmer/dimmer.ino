@@ -8,7 +8,7 @@
 #include "printf.h"
 
 const int CHANNEL = 90;
-const uint16_t MY_ADDRESS = 00;
+const uint16_t MY_ADDRESS = 01;
 
 const int PAYLOAD_LEN = 8;
 const unsigned char COMMAND_GET = 65;
