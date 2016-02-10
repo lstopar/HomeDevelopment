@@ -166,8 +166,8 @@ private:
 	};
 
 	static const rf24_pa_dbm_e POWER_LEVEL;
-	static const uint16 ADDRESS;
 
+	const uint16 MyAddr;
 	RF24* Radio;
 	RF24Network* Network;
 	TReadThread ReadThread;
@@ -178,8 +178,8 @@ private:
 	PNotify Notify;
 
 public:
-	TRf24Radio(const uint8& PinCe, const uint8_t& PinCs, const uint32& SpiSpeed=BCM2835_SPI_SPEED_8MHZ,
-			const PNotify& Notify=TNotify::StdNotify);
+	TRf24Radio(const uint16& NodeAddr, const uint8& PinCe, const uint8_t& PinCs,
+			const uint32& SpiSpeed=BCM2835_SPI_SPEED_8MHZ, const PNotify& Notify=TNotify::NullNotify);
 	~TRf24Radio();
 
 	void Init();

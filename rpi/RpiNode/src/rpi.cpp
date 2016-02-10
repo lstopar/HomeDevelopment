@@ -351,7 +351,6 @@ void TRadioProtocol::GenSetPayload(const int& ValId, const int& Val, TMem& Paylo
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
 const rf24_pa_dbm_e TRf24Radio::POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_LOW;
-const uint16 TRf24Radio::ADDRESS = 01;
 
 void TRf24Radio::TReadThread::Run() {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
@@ -401,8 +400,9 @@ void TRf24Radio::TReadThread::Run() {
 	}
 }
 
-TRf24Radio::TRf24Radio(const uint8& PinCe, const uint8_t& PinCs,
-		const uint32& SpiSpeed, const PNotify& _Notify):
+TRf24Radio::TRf24Radio(const uint16& NodeAddr, const uint8& PinCe,
+		const uint8_t& PinCs, const uint32& SpiSpeed, const PNotify& _Notify):
+		MyAddr(NodeAddr),
 		Radio(nullptr),
 		Network(nullptr),
 		ReadThread(),
@@ -435,12 +435,12 @@ void TRf24Radio::Init() {
 	Radio->setDataRate(RF24_2MBPS);		// IMPORTANT, doesn't work otherwise!!
 	Radio->setPALevel(RF24_PA_HIGH);	// set power to high for better range
 	delay(5);
-	Network->begin(TRadioProtocol::COMM_CHANNEL, ADDRESS);
+	Network->begin(TRadioProtocol::COMM_CHANNEL, MyAddr);
 	Radio->printDetails();
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
 
-	if (ADDRESS != 00) {
+	if (MyAddr != 00) {
 		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Contacting parent node: %d", Network->parent());
 		Send(Network->parent(), 'k', TMem());
 	}

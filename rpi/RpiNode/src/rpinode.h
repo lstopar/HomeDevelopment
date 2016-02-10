@@ -117,15 +117,16 @@ public:
 private:
 	static TNodeJsRf24Radio* NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args);
 
-	TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TStr, TInt> _ValueNmIdH,
-			const PNotify& Notify);
+	TNodeJsRf24Radio(const uint16& NodeId, const int& PinCE, const int& PinCSN, const TStrIntH& ValueNmIdH,
+			const TStrIntH& ValueNmNodeIdH, const PNotify& Notify);
 	~TNodeJsRf24Radio();
 
-	static constexpr uint16 TEST_NODE_ID = 00;
-
 	TRf24Radio Radio;
-	THash<TStr, TInt> ValueNmIdH;
-	THash<TInt, TStr> ValueIdNmH;
+
+	// structures to convert from JS to cpp IDs
+	TStrIntH ValueNmIdH;
+	TStrIntH ValueNmNodeIdH;
+	TIntStrH ValueIdNmH;
 
 	v8::Persistent<v8::Function> OnValueCallback;
 

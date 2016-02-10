@@ -23,6 +23,8 @@ RF24Network network(radio);
 
 int pin3Val = 0;
 
+void writeRadio(const uint16_t& recipient, const unsigned char& type, const byte* buff, const int& len);
+
 void setup() {
   Serial.begin(9600);
   printf_begin();
@@ -41,6 +43,10 @@ void setup() {
   network.begin(CHANNEL, MY_ADDRESS);
 
   radio.printDetails();
+
+  if (MY_ADDRESS != 00) {
+    writeRadio(network.parent(), 'k', NULL, 0);
+  }
 }
 
 //====================================================

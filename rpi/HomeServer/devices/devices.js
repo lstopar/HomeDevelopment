@@ -29,7 +29,7 @@ module.exports = exports = [
 		type: 'Rf24',
 		nodes: [
 		    {
-		    	id: 00,
+		    	id: 01,
 		    	name: 'Arduino - sofa',
 		    	sensors: [
 		    	    {
@@ -46,6 +46,7 @@ module.exports = exports = [
 		configuration: {
 			pinCE: 25,		// RPI_V2_GPIO_P1_22
 			pinCSN: 8,		// RPI_V2_GPIO_P1_24
+			id: 00,
 			verbose: true
 		}
 	}
