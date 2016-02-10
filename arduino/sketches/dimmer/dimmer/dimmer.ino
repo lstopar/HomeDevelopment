@@ -65,7 +65,7 @@ void setup(){
   radio.setAutoAck(true);                    // Ensure autoACK is enabled
   radio.setRetries(15,15);                 // Smallest time between retries, max no. of retries
   radio.setChannel(CHANNEL);
-  radio.setDataRate(RF24_2MBPS);
+  radio.setDataRate(RF24_250KBPS);
   radio.setPayloadSize(PAYLOAD_LEN);                // Here we are sending 1-byte payloads to test the call-response speed
   radio.setCRCLength(RF24_CRC_8);
   radio.printDetails();                   // Dump the configuration of the rf unit for debugging
