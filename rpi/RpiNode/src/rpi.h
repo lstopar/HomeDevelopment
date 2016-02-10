@@ -187,6 +187,7 @@ public:
 	bool Get(const uint16& NodeId, const int& ValId);
 
 	bool Read(RF24NetworkHeader& Header, TMem& Payload);
+	void UpdateNetwork();
 
 	void SetCallback(TRf24RadioCallback* Cb) { Callback = Cb; }
 

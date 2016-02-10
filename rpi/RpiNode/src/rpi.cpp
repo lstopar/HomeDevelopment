@@ -358,7 +358,7 @@ void TRf24Radio::TReadThread::Run() {
 
 	while (true) {
 		try {
-			Network.update();
+			Radio->UpdateNetwork();
 
 			TMem Payload;
 			RF24NetworkHeader Header;
@@ -472,6 +472,11 @@ bool TRf24Radio::Read(RF24NetworkHeader& Header, TMem& Payload) {
 		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception while reading!");
 	}
 	return false;
+}
+
+void TRf24Radio::UpdateNetwork() {
+	TLock Lock(CriticalSection);
+	Network.update();
 }
 
 bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff) {
