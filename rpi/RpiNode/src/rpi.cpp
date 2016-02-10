@@ -8,6 +8,7 @@ TCriticalSection TRpiUtil::CriticalSection;
 void TRpiUtil::InitGpio(const TGpioLayout& Layout) {
 	TLock Lock(CriticalSection);
 
+
 	int RetVal;
 	switch (Layout) {
 	case glUnset:
