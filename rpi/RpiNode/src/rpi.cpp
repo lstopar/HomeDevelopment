@@ -33,7 +33,6 @@ void TRpiUtil::SetPinMode(const int& Pin, const int& Mode) {
 }
 
 void TRpiUtil::DigitalWrite(const int& Pin, const bool& High) {
-	// TODO check if this is an output Pin
 	digitalWrite(Pin, High ? 1 : 0);
 }
 
