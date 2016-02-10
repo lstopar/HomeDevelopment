@@ -1,6 +1,6 @@
 {
 	'variables': {
-		'QMINER_PATH%': '../../../lib/qminer'
+		'QMINER_PATH%': '../../../lib/qminer',
 		'SHARED_PATH%': '../../shared/RF24Protocol'
 	},
     'target_defaults': {
