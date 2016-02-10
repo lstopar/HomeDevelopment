@@ -377,6 +377,7 @@ void TRf24Radio::Init() {
 	Radio.setRetries(RETRY_DELAY, RETRY_COUNT);
 	Radio.setChannel(COMM_CHANNEL);
 	Radio.setDataRate(RF24_250KBPS);
+	Radio.setPALevel(RF24_PA_HIGH);
 	Radio.setPayloadSize(PAYLOAD_SIZE);
 	Radio.setCRCLength(RF24_CRC_8);
 	Radio.printDetails();
