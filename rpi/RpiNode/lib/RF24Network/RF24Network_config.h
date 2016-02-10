@@ -10,6 +10,12 @@
 #ifndef __RF24NETWORK_CONFIG_H__
 #define __RF24NETWORK_CONFIG_H__
 
+    #define SERIAL_DEBUG
+    #define SERIAL_DEBUG_MINIMAL
+    #define SERIAL_DEBUG_ROUTING
+    #define SERIAL_DEBUG_FRAGMENTATION
+    #define SERIAL_DEBUG_FRAGMENTATION_L2
+
   #if !defined(__AVR_ATtiny85__) && !defined(__AVR_ATtiny84__)
 
     /********** USER CONFIG - non ATTiny **************/
