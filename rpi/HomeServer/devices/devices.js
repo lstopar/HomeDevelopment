@@ -29,7 +29,7 @@ module.exports = exports = [
 		type: 'Rf24',
 		nodes: [
 		    {
-		    	id: 01,
+		    	id: 00,
 		    	name: 'Arduino - sofa',
 		    	sensors: [
 		    	    {
