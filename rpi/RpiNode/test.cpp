@@ -65,15 +65,12 @@ int main(int argc, char** argv)
 	network.begin(/*channel*/ 90, /*node address*/ this_node);
 	radio.printDetails();
 
-
 	while(1){
 
 		network.update();
 		unsigned long now = millis();              // If it's time to send a message, send it!
 		if ( now - last_sent >= interval  ){
     			last_sent = now;
-
-
     			printf("Sending ..\n");
 			payload_t payload = { millis(), packets_sent++ };
 		        RF24NetworkHeader header(/*to node*/ other_node);

@@ -46,7 +46,6 @@ const unsigned long interval = 2000; //ms  // How often to send 'hello world to 
 unsigned long last_sent;             // When did we last send?
 unsigned long packets_sent;          // How many have we sent already
 
-
 struct payload_t {                  // Structure of our payload
   unsigned long ms;
   unsigned long counter;
