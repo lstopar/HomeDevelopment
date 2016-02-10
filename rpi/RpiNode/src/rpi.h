@@ -179,7 +179,7 @@ private:
 
 public:
 	TRf24Radio(const uint8& PinCe, const uint8_t& PinCs, const uint32& SpiSpeed=BCM2835_SPI_SPEED_8MHZ,
-			const PNotify& Notify=TNotify::NullNotify);
+			const PNotify& Notify=TNotify::StdNotify);
 
 	void Init();
 	bool Ping(const uint16& NodeId);

@@ -315,11 +315,15 @@ TNodeJsRf24Radio* TNodeJsRf24Radio::NewFromArgs(const v8::FunctionCallbackInfo<v
 
 TNodeJsRf24Radio::TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TStr, TInt> _ValueNmIdH,
 		const PNotify& Notify):
-	Radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, Notify),	// TODO make it a reference
-	ValueNmIdH(_ValueNmIdH) {
+	Radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, Notify),
+	ValueNmIdH(_ValueNmIdH),
+	ValueIdNmH(),
+	OnValueCallback() {
 
+	Notify->OnNotify(TNotifyType::ntInfo, "Setting radio cpp callback ...");
 	Radio.SetCallback(this);
 
+	Notify->OnNotify(TNotifyType::ntInfo, "Initializing Id conversion structures ...");
 	int KeyId = ValueNmIdH.FFirstKeyId();
 	while (ValueNmIdH.FNextKeyId(KeyId)) {
 		const int& ValId = ValueNmIdH[KeyId];
@@ -329,7 +333,6 @@ TNodeJsRf24Radio::TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TS
 }
 
 TNodeJsRf24Radio::~TNodeJsRf24Radio() {
-	OnPongCallback.Reset();
 	OnValueCallback.Reset();
 }
 
