@@ -35,6 +35,7 @@ RF24 radio(RPI_V2_GPIO_P1_22, RPI_V2_GPIO_P1_24/*BCM2835_SPI_CS0*/, BCM2835_SPI_
 
 RF24Network network(radio);
 
+
 // Address of our node in Octal format
 const uint16_t this_node = 00;
 
