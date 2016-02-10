@@ -453,6 +453,7 @@ bool TRf24Radio::Get(const uint16& NodeId, const int& ValId) {
 }
 
 bool TRf24Radio::Read(RF24NetworkHeader& Header, TMem& Payload) {
+	TRpiUtil::SetMaxPriority();
 	try {
 		TLock Lock(CriticalSection);
 
@@ -480,15 +481,20 @@ bool TRf24Radio::Read(RF24NetworkHeader& Header, TMem& Payload) {
 	} catch (...) {
 		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception while reading!");
 	}
+	TRpiUtil::SetDefaultPriority();
 	return false;
 }
 
 bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff) {
+	TRpiUtil::SetMaxPriority();
+
 	TLock Lock(CriticalSection);
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message to node %d ...", NodeAddr);
 
 	RF24NetworkHeader Header(NodeAddr, Command);
 	bool Success = Network->write(Header, Buff(), Buff.Len());
+
+	TRpiUtil::SetDefaultPriority();
 
 	if (!Success) {
 		Notify->OnNotify(TNotifyType::ntWarn, "Failed to send message!");
@@ -499,5 +505,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 
 void TRf24Radio::UpdateNetwork() {
 	TLock Lock(CriticalSection);
+	TRpiUtil::SetMaxPriority();
 	Network->update();
+	TRpiUtil::SetDefaultPriority();
 }

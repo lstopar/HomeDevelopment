@@ -26,7 +26,9 @@ int pin3Val = 0;
 void setup() {
   Serial.begin(9600);
   printf_begin();
-  Serial.println("RF24Network/examples/helloworld_rx/");
+  Serial.println("========================================");
+  Serial.println("DIMMER");
+  Serial.println("========================================");
  
   SPI.begin();
   radio.begin();
