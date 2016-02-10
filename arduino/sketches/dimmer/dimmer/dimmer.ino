@@ -32,6 +32,10 @@ void setup() {
  
   SPI.begin();
   radio.begin();
+
+  radio.setAutoAck(true);
+  radio.setRetries(RETRY_DELAY, RETRY_COUNT);
+  
   radio.setDataRate(RF24_2MBPS);
   radio.setPALevel(RF24_PA_HIGH);
   network.begin(CHANNEL, MY_ADDRESS);

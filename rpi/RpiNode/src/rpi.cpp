@@ -426,6 +426,11 @@ void TRf24Radio::Init() {
 	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
 
 	Radio->begin();
+	//============================================
+	// testing
+	Radio->setAutoAck(true);
+	Radio->setRetries(15, 15);
+	//============================================
 	Radio->setDataRate(RF24_2MBPS);		// IMPORTANT, doesn't work otherwise!!
 	Radio->setPALevel(RF24_PA_HIGH);	// set power to high for better range
 	delay(5);
