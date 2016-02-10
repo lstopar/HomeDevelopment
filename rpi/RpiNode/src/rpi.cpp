@@ -496,6 +496,7 @@ bool TRf24Radio::Read(RF24NetworkHeader& Header, TMem& Payload) {
 	return false;
 }
 
+
 bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff) {
 	TRpiUtil::SetMaxPriority();
 
