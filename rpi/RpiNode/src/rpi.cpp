@@ -429,7 +429,7 @@ void TRf24Radio::Init() {
 	Radio->setDataRate(RF24_2MBPS);		// IMPORTANT, doesn't work otherwise!!
 	Radio->setPALevel(RF24_PA_HIGH);	// set power to high for better range
 	delay(5);
-	Network->begin(TRadioProtocol::COMM_CHANNEL, ADDRESS);
+	Network->begin(90, 01);	// TODO hardcoded
 	Radio->printDetails();
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
@@ -487,7 +487,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 	TLock Lock(CriticalSection);
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message to node %d ...", NodeAddr);
 
-	RF24NetworkHeader Header(NodeAddr, 0);	// TODO
+	RF24NetworkHeader Header(NodeAddr, Command);
 	bool Success = Network->write(Header, Buff(), Buff.Len());
 
 	if (!Success) {

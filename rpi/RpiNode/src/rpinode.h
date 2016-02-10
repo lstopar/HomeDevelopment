@@ -125,7 +125,6 @@ private:
 	THash<TStr, TInt> ValueNmIdH;
 	THash<TInt, TStr> ValueIdNmH;
 
-	v8::Persistent<v8::Function> OnPongCallback;
 	v8::Persistent<v8::Function> OnValueCallback;
 
 private:

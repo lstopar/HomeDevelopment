@@ -8,7 +8,7 @@
 #include "printf.h"
 
 const int CHANNEL = 90;
-const uint16_t MY_ADDRESS = 01;
+const uint16_t MY_ADDRESS = 00;
 
 const int PAYLOAD_LEN = 8;
 const unsigned char COMMAND_GET = 65;
@@ -31,6 +31,7 @@ void setup() {
   SPI.begin();
   radio.begin();
   radio.setDataRate(RF24_2MBPS);
+  radio.setPALevel(RF24_PA_HIGH);
   network.begin(CHANNEL, MY_ADDRESS);
 
   radio.printDetails();
