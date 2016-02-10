@@ -121,6 +121,8 @@ private:
 			const PNotify& Notify);
 	~TNodeJsRf24Radio();
 
+	static constexpr uint16 TEST_NODE_ID = 00;
+
 	TRf24Radio Radio;
 	THash<TStr, TInt> ValueNmIdH;
 	THash<TInt, TStr> ValueIdNmH;
