@@ -2,7 +2,7 @@
 
 #ifndef ARDUINO
 void TRadioProtocol::ParseGetPayload(const TMem& Payload, int& ValId) {
-	EAssert(Payload.Len() == PAYLOAD_LEN);
+	EAssertR(Payload.Len() == PAYLOAD_LEN, "ParseGetPayload: invalid payload length: " + TInt::GetStr(Payload.Len()));
 #else
 void TRadioProtocol::ParseGetPayload(const char* Payload, int& ValId) {
 #endif
@@ -12,7 +12,7 @@ void TRadioProtocol::ParseGetPayload(const char* Payload, int& ValId) {
 
 #ifndef ARDUINO
 void TRadioProtocol::ParseSetPayload(const TMem& Payload, int& ValId, int& Val) {
-	EAssert(Payload.Len() == PAYLOAD_LEN);
+	EAssertR(Payload.Len() == PAYLOAD_LEN, "ParseSetPayload: invalid payload length: " + TInt::GetStr(Payload.Len()));
 #else
 void TRadioProtocol::ParseSetPayload(const char* Payload, int& ValId, int& Val) {
 #endif
@@ -25,7 +25,7 @@ void TRadioProtocol::ParseSetPayload(const char* Payload, int& ValId, int& Val) 
 
 #ifndef ARDUINO
 void TRadioProtocol::ParsePushPayload(const TMem& Payload, int& ValId, int& Val) {
-	EAssert(Payload.Len() == PAYLOAD_LEN);
+	EAssertR(Payload.Len() == PAYLOAD_LEN, "ParsePushPayload: invalid payload length: " + TInt::GetStr(Payload.Len()));EAssert(Payload.Len() == PAYLOAD_LEN);
 #else
 void TRadioProtocol::ParsePushPayload(const char* Payload,
 			int& ValId, int& Val) {
