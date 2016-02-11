@@ -324,10 +324,8 @@ void TRf24Radio::TReadThread::Run() {
 
 	while (true) {
 		try {
-			{
-				TLock Lock(Radio->CriticalSection);
-				Radio->UpdateNetwork();
-			}
+			TLock Lock(Radio->CriticalSection);
+			Radio->UpdateNetwork();
 
 			while (Radio->Read(FromNode, Type, Payload)) {
 				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message!");
