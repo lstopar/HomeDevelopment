@@ -9,7 +9,7 @@
 
 const uint16_t ADDRESS_RPI = 00;
 const uint16_t ADDRESS_ARDUINO_SOFA = 01;
-const uint16_t ADDRESS_ARDUINO_PIR = 05;
+const uint16_t ADDRESS_ARDUINO_PIR = 04;
 
 const unsigned char COMM_CHANNEL = 90;
 const int PAYLOAD_LEN = 8;
