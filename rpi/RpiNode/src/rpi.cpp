@@ -320,7 +320,7 @@ void TRf24Radio::TReadThread::Run() {
 
 	Payload.Gen(PAYLOAD_LEN);
 
-	printf("Payload len: %d\n", Payload.Len());
+//	printf("Payload len: %d\n", Payload.Len());
 
 	while (true) {
 		try {
@@ -329,13 +329,13 @@ void TRf24Radio::TReadThread::Run() {
 
 			while (Radio->Read(FromNode, Type, Payload)) {
 				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message!");
-				printf("Payload len: %d\n", Payload.Len());
+//				printf("Payload len: %d\n", Payload.Len());
 
 				if (Radio->Callback == nullptr) { continue; }
 
-				printf("Got request type %d\n", Type);
-				printf("Ping type: %d\n", REQUEST_PING);
-				printf("Chind config type: %d\n", REQUEST_CHILD_CONFIG);
+//				printf("Got request type %d\n", Type);
+//				printf("Ping type: %d\n", REQUEST_PING);
+//				printf("Chind config type: %d\n", REQUEST_CHILD_CONFIG);
 
 				try {
 					switch (Type) {
@@ -344,7 +344,7 @@ void TRf24Radio::TReadThread::Run() {
 						break;
 					} case REQUEST_PUSH: {
 						int ValId, Val;
-						printf("Payload len: %d\n", Payload.Len());
+//						printf("Payload len: %d\n", Payload.Len());
 						TRadioProtocol::ParsePushPayload(Payload, ValId, Val);
 						Radio->Callback->OnValue(ValId, Val);
 						break;
@@ -366,7 +366,7 @@ void TRf24Radio::TReadThread::Run() {
 				}
 			}
 
-			delayMicroseconds(500);
+//			delayMicroseconds(500);
 		} catch (const PExcept& Except) {
 			Notify->OnNotifyFmt(TNotifyType::ntErr, "Error on the read thread: %s", Except->GetMsgStr().CStr());
 		}
@@ -474,12 +474,12 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 			const uchar MsgType = Header.type;
 
 			if (!TRadioProtocol::HasPayload(MsgType)) {
-				printf("Got ping request\n");
+//				printf("Got ping request\n");
 				Network->read(Header, nullptr, 0);
 			} else {
-				printf("Got request with payload\n");
+//				printf("Got request with payload\n");
 				Network->read(Header, Payload(), PAYLOAD_LEN);
-				printf("Received payload: %s\n", Payload.GetAsStr('X').CStr());
+//				printf("Received payload: %s\n", Payload.GetAsStr('X').CStr());
 			}
 
 			Notify->OnNotify(TNotifyType::ntInfo, "Message processed!");
