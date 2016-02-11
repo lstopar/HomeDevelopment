@@ -470,6 +470,7 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 			Type = Header.type;
 
 			printf("Got request type %d\n", Type);
+			printf("Ping type: %d\n", REQUEST_PING);
 
 			if (TRadioProtocol::HasPayload(Type)) {
 				printf("Got ping request\n");
@@ -477,6 +478,7 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 			} else {
 				printf("Got request with payload\n");
 				Network->read(Header, Payload(), PAYLOAD_LEN);
+				printf("Received payload: %s\n", Payload.GetAsStr('X').CStr());
 			}
 
 			Notify->OnNotify(TNotifyType::ntInfo, "Message processed!");
