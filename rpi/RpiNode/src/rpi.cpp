@@ -411,7 +411,7 @@ void TRf24Radio::Init() {
 	Network->begin(COMM_CHANNEL, MyAddr);
 	Radio->printDetails();
 
-	Notify->OnNotify(TNotifyType::ntInfo, "My address: %d", MyAddr);
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "My address: %d", MyAddr);
 
 	if (MyAddr != 00) {
 		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Contacting parent node: %d", Network->parent());
