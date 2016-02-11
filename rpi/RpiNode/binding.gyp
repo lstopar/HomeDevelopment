@@ -1,6 +1,7 @@
 {
 	'variables': {
-		'QMINER_PATH%': '../../../lib/qminer'
+		'QMINER_PATH%': '../../../lib/qminer',
+		'SHARED_PATH%': '../../shared/RF24Protocol'
 	},
     'target_defaults': {
         'default_configuration': 'Release',
@@ -23,7 +24,8 @@
         	'-luuid',
         	'-fopenmp',
         	'-lwiringPi',
-        	'-lrf24-bcm'
+        	'-lrf24-bcm',
+        	'-lrf24network'
         ],
         # GCC flags
         'cflags_cc!': [ '-fno-rtti', '-fno-exceptions' ],
@@ -36,6 +38,8 @@
             'sources': [
             	'src/rpi.h',
             	'src/rpi.cpp',
+            	'<(SHARED_PATH)/protocol.h',
+            	'<(SHARED_PATH)/protocol.cpp',
             	'src/rpinode.h',
             	'src/rpinode.cpp',
             	'src/threads.h',
@@ -45,6 +49,7 @@
             ],
             'include_dirs': [
                 'src/',
+                '<(SHARED_PATH)/',
                 '<(QMINER_PATH)/src/nodejs/',
                 '<(QMINER_PATH)/src/glib/base/',
                 '<(QMINER_PATH)/src/glib/mine/',
@@ -62,6 +67,18 @@
             'type': 'executable',
             'sources': [
                 'test.cpp'
+            ],
+            'include_dirs': [
+            ],
+            'defines': [],
+            'dependencies': []
+        },
+        {
+            # node qminer module
+            'target_name': 'test1',
+            'type': 'executable',
+            'sources': [
+                'test1.cpp'
             ],
             'include_dirs': [
             ],

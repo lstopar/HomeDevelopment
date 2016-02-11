@@ -88,6 +88,10 @@ function initSensors() {
 				
 				for (var sensorN = 0; sensorN < node.sensors.length; sensorN++) {
 					var sensorConf = node.sensors[sensorN];
+					
+					// add the node ID, so it can be quickly accessed later
+					sensorConf.nodeId = nodeId;
+					
 					radioSensorH[sensorConf.id] = sensorConf;
 					radioConf.push({
 						id: sensorConf.id,
@@ -103,16 +107,14 @@ function initSensors() {
 				};
 			}
 			
+			var conf = deviceConf.configuration;
+			conf.sensors = radioConf;
+			
 			log.info('Creating ...');
 			radio = {
 				sensorH: radioSensorH,
 				nodes: nodeIdH,
-				radio: new rpi.Rf24({
-					pinCE: deviceConf.configuration.pinCE,
-					pinCSN: deviceConf.configuration.pinCSN,
-					verbose: deviceConf.configuration.verbose,
-					sensors: radioConf
-				})
+				radio: new rpi.Rf24(conf)
 			};
 			
 			log.info('Setting callback ...');
@@ -217,14 +219,15 @@ function pingRadios() {
 
 function readRadioDevices() {
 	if (radio != null) {
-		var radioDevs = radio.sensorH;
-		for (var id in radioDevs) {
+		var radioSensorH = radio.sensorH;
+		for (var id in radioSensorH) {
+			var nodeId = radioSensorH[id].nodeId;
+			
 			if (log.debug())
 				log.debug('Calling get on radio ...');
 			
-			if (!radio.radio.get(id)) {
-				log.warn('Failed to send message to device %s', id);
-			}
+			var success = radio.radio.get(id);
+			onNodeConnected(nodeId, success);
 		}
 	}
 }
@@ -261,9 +264,7 @@ exports.setValue = function (sensorId, value) {
 		device.set({ id: sensorId, value: value });
 	} else if (sensorId in radio.sensorH) {
 		var success = radio.radio.set({ id: sensorId, value: value });
-		
-		if (!success)
-			log.warn('Failed to set value %d for sensor %s', value, sensorId);
+		onNodeConnected(radio.sensorH[sensorId].nodeId, success);
 	} else {
 		throw new Error('Could not find sensor: ' + sensorId);
 	}

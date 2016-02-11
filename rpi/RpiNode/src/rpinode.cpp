@@ -294,6 +294,7 @@ TNodeJsRf24Radio* TNodeJsRf24Radio::NewFromArgs(const v8::FunctionCallbackInfo<v
 
 	const int PinCE = ParamJson->GetObjInt("pinCE");
 	const int PinCSN = ParamJson->GetObjInt("pinCSN");
+	const uint16 MyId = (uint16) ParamJson->GetObjInt("id");
 	const PJsonVal SensorJsonV = ParamJson->GetObjKey("sensors");
 
 	const bool Verbose = ParamJson->GetObjBool("verbose", false);
@@ -301,25 +302,34 @@ TNodeJsRf24Radio* TNodeJsRf24Radio::NewFromArgs(const v8::FunctionCallbackInfo<v
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Parsing configuration ...");
 
-	THash<TStr, TInt> SensorNmIdH;
+	TStrIntH SensorNmIdH;
+	TStrIntH SensorIdNodeIdH;
 
 	for (int SensorN = 0; SensorN < SensorJsonV->GetArrVals(); SensorN++) {
 		const PJsonVal SensorJson = SensorJsonV->GetArrVal(SensorN);
-		SensorNmIdH.AddDat(SensorJson->GetObjStr("id"), SensorJson->GetObjInt("internalId"));
+		const TStr& SensorId = SensorJson->GetObjStr("id");
+		SensorNmIdH.AddDat(SensorId, SensorJson->GetObjInt("internalId"));
+		SensorIdNodeIdH.AddDat(SensorId, SensorJson->GetObjInt("nodeId"));
 	}
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Calling cpp constructor ...");
 
-	return new TNodeJsRf24Radio(PinCE, PinCSN, SensorNmIdH, Notify);
+	return new TNodeJsRf24Radio(MyId, PinCE, PinCSN, SensorNmIdH, SensorIdNodeIdH, Notify);
 }
 
-TNodeJsRf24Radio::TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TStr, TInt> _ValueNmIdH,
+TNodeJsRf24Radio::TNodeJsRf24Radio(const uint16& NodeId, const int& PinCE, const int& PinCSN,
+		const TStrIntH& _ValueNmIdH, const TStrIntH& _ValueNmNodeIdH,
 		const PNotify& Notify):
-	Radio(PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, Notify),	// TODO make it a reference
-	ValueNmIdH(_ValueNmIdH) {
+	Radio(NodeId, PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, Notify),
+	ValueNmIdH(_ValueNmIdH),
+	ValueNmNodeIdH(_ValueNmNodeIdH),
+	ValueIdNmH(),
+	OnValueCallback() {
 
+	Notify->OnNotify(TNotifyType::ntInfo, "Setting radio cpp callback ...");
 	Radio.SetCallback(this);
 
+	Notify->OnNotify(TNotifyType::ntInfo, "Initializing Id conversion structures ...");
 	int KeyId = ValueNmIdH.FFirstKeyId();
 	while (ValueNmIdH.FNextKeyId(KeyId)) {
 		const int& ValId = ValueNmIdH[KeyId];
@@ -329,7 +339,6 @@ TNodeJsRf24Radio::TNodeJsRf24Radio(const int& PinCE, const int& PinCSN, THash<TS
 }
 
 TNodeJsRf24Radio::~TNodeJsRf24Radio() {
-	OnPongCallback.Reset();
 	OnValueCallback.Reset();
 }
 
@@ -351,8 +360,8 @@ void TNodeJsRf24Radio::get(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 
 	const TStr ValueNm = TNodeJsUtil::GetArgStr(Args, 0);
 
-	const int NodeId = 1;
-	const uint8 ValueId = (uint8) JsRadio->ValueNmIdH.GetDat(ValueNm);
+	const uint16 NodeId = (uint16) JsRadio->ValueNmNodeIdH.GetDat(ValueNm);
+	const int ValueId = JsRadio->ValueNmIdH.GetDat(ValueNm);
 
 	const bool Success = JsRadio->Radio.Get(NodeId, ValueId);
 
@@ -366,11 +375,11 @@ void TNodeJsRf24Radio::set(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
 
 	const PJsonVal ArgVal = TNodeJsUtil::GetArgJson(Args, 0);
-	const TStr SensorNm = ArgVal->GetObjStr("id");
+	const TStr ValueNm = ArgVal->GetObjStr("id");
 	const int Val = ArgVal->GetObjInt("value");
 
-	const int NodeId = 1;
-	const int ValId = JsRadio->ValueNmIdH.GetDat(SensorNm);
+	const uint16 NodeId = (uint16) JsRadio->ValueNmNodeIdH.GetDat(ValueNm);
+	const int ValId = JsRadio->ValueNmIdH.GetDat(ValueNm);
 
 	bool Success = JsRadio->Radio.Set(NodeId, ValId, Val);
 
@@ -383,7 +392,7 @@ void TNodeJsRf24Radio::ping(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 
 	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
 
-	const int NodeId = TNodeJsUtil::GetArgInt32(Args, 0);
+	const int NodeId = (uint16) TNodeJsUtil::GetArgInt32(Args, 0);
 
 	bool Success = JsRadio->Radio.Ping(NodeId);
 
@@ -421,6 +430,7 @@ void TNodeJsRf24Radio::OnMsgMainThread(const uint8& ValueId, const int& Val) {
 }
 
 void TNodeJsRf24Radio::OnValue(const int& ValId, const int& Val) {
+	printf("Executing callback for value id: %d", ValId);
 	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, ValId, Val), true);
 }
 

@@ -10,11 +10,13 @@
 
 #include "base.h"
 #include "threads.h"
+#include "protocol.h"
 
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 
-#include "RF24/RF24.h"
+#include <RF24/RF24.h>
+#include <RF24Network/RF24Network.h>
 
 
 enum TGpioLayout {
@@ -133,8 +135,6 @@ public:
 		virtual void OnValue(const int& ValId, const int& Val) = 0;
 	};
 
-	static const int PAYLOAD_SIZE;
-
 private:
 	class TReadThread: public TThread {
 	private:
@@ -152,18 +152,10 @@ private:
 	};
 
 	static const rf24_pa_dbm_e POWER_LEVEL;
-	static const uint8 RETRY_DELAY;
-	static const uint8 RETRY_COUNT;
-	static const uint8 COMM_CHANNEL;
 
-	static const uint64_t PIPES[2];
-
-	static const char COMMAND_GET;
-	static const char COMMAND_SET;
-	static const char COMMAND_PUSH;
-	static const char COMMAND_PING;
-
-	RF24 Radio;
+	const uint16 MyAddr;
+	RF24* Radio;
+	RF24Network* Network;
 	TReadThread ReadThread;
 
 	TRf24RadioCallback* Callback;
@@ -172,22 +164,21 @@ private:
 	PNotify Notify;
 
 public:
-	TRf24Radio(const uint8& PinCe, const uint8_t& PinCs, const uint32& SpiSpeed=BCM2835_SPI_SPEED_8MHZ,
-			const PNotify& Notify=TNotify::NullNotify);
+	TRf24Radio(const uint16& NodeAddr, const uint8& PinCe, const uint8_t& PinCs,
+			const uint32& SpiSpeed=BCM2835_SPI_SPEED_8MHZ, const PNotify& Notify=TNotify::NullNotify);
+	~TRf24Radio();
 
 	void Init();
-	bool Ping(const int& NodeId);
-	bool Set(const int& NodeId, const int& ValId, const int& Val);
-	bool Get(const int& NodeId, const int& ValId);
-
-	bool Read(TMem& Msg);
+	bool Ping(const uint16& NodeId);
+	bool Set(const uint16& NodeId, const int& ValId, const int& Val);
+	bool Get(const uint16& NodeId, const int& ValId);
 
 	void SetCallback(TRf24RadioCallback* Cb) { Callback = Cb; }
 
 private:
-	bool Send(const TMem& Buff);
-
-	static void ParseMsg(const TMem& Msg, uint8& NodeId, char& CommandId, int& ValId, int& Val);
+	bool Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff);
+	void UpdateNetwork();
+	bool Read(uint16& From, uchar& Type, TMem& Payload);
 };
 
 

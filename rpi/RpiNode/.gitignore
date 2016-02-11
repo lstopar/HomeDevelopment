@@ -4,3 +4,6 @@
 .settings/
 .project
 .cproject
+
+# link to the libraries
+/lib

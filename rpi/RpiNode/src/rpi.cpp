@@ -309,177 +309,188 @@ void TYL40Adc::CleanUp() {
 
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
-const int TRf24Radio::PAYLOAD_SIZE = 8;
 const rf24_pa_dbm_e TRf24Radio::POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_LOW;
-const uint8 TRf24Radio::RETRY_DELAY = 15;
-const uint8 TRf24Radio::RETRY_COUNT = 15;
-const uint8 TRf24Radio::COMM_CHANNEL = 0x4C;
-
-const uint64_t TRf24Radio::PIPES[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
-
-const char TRf24Radio::COMMAND_GET = 0x00;
-const char TRf24Radio::COMMAND_SET = 0x01;
-const char TRf24Radio::COMMAND_PUSH = 0x02;
-const char TRf24Radio::COMMAND_PING = 0xFF;
 
 void TRf24Radio::TReadThread::Run() {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
 
+	uint16 FromNode;
+	uchar Type;
+	TMem Payload;
+
+	Payload.Gen(PAYLOAD_LEN);
+
+	printf("Payload len: %d\n", Payload.Len());
+
 	while (true) {
 		try {
-			TMem Msg(PAYLOAD_SIZE);
-			while (Radio->Read(Msg)) {
+			Radio->UpdateNetwork();
+
+			while (Radio->Read(FromNode, Type, Payload)) {
 				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message!");
+				printf("Payload len: %d\n", Payload.Len());
 
 				if (Radio->Callback == nullptr) { continue; }
 
-				uint8 NodeId;
-				char CommandId;
-				int ValId;
-				int Val;
-				TRf24Radio::ParseMsg(Msg, NodeId, CommandId, ValId, Val);
+				printf("Got request type %d\n", Type);
+				printf("Ping type: %d\n", REQUEST_PING);
+				printf("Chind config type: %d\n", REQUEST_CHILD_CONFIG);
 
 				try {
-					if (CommandId == COMMAND_PING) {
+					switch (Type) {
+					case REQUEST_PING: {
 						Notify->OnNotify(TNotifyType::ntInfo, "Received ping, ignoring ...");
-					} else if (CommandId == COMMAND_PUSH) {
+						break;
+					} case REQUEST_PUSH: {
+						int ValId, Val;
+						printf("Payload len: %d\n", Payload.Len());
+						TRadioProtocol::ParsePushPayload(Payload, ValId, Val);
 						Radio->Callback->OnValue(ValId, Val);
-					} else {
-						Notify->OnNotifyFmt(TNotifyType::ntWarn, "Invalid command ID: %d", CommandId);
+						break;
+					} case REQUEST_GET: {
+						Notify->OnNotify(TNotifyType::ntWarn, "GET not supported!");
+						break;
+					} case REQUEST_SET: {
+						Notify->OnNotify(TNotifyType::ntWarn, "SET not supported!");
+						break;
+					} case REQUEST_CHILD_CONFIG: {
+						Notify->OnNotify(TNotifyType::ntWarn, "Child woke up and sent configuration request, ignoring ...");
+						break;
+					} default: {
+						Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type: %d", Type);
+					}
 					}
 				} catch (const PExcept& Except) {
 					Notify->OnNotifyFmt(TNotifyType::ntErr, "Error when calling read callback: %s", Except->GetMsgStr().CStr());
 				}
 			}
 
-			TSysProc::Sleep(20);
+			delayMicroseconds(500);
 		} catch (const PExcept& Except) {
 			Notify->OnNotifyFmt(TNotifyType::ntErr, "Error on the read thread: %s", Except->GetMsgStr().CStr());
 		}
 	}
 }
 
-TRf24Radio::TRf24Radio(const uint8& PinCe, const uint8_t& PinCs,
-		const uint32& SpiSpeed, const PNotify& _Notify):
-		Radio(PinCe, PinCs, SpiSpeed),
+TRf24Radio::TRf24Radio(const uint16& NodeAddr, const uint8& PinCe,
+		const uint8_t& PinCs, const uint32& SpiSpeed, const PNotify& _Notify):
+		MyAddr(NodeAddr),
+		Radio(nullptr),
+		Network(nullptr),
 		ReadThread(),
 		Callback(nullptr),
 		Notify(_Notify) {
 
+	Notify->OnNotify(TNotifyType::ntInfo, "Creating radio and network ...");
+	Radio = new RF24(PinCe, PinCs, SpiSpeed);
+	Network = new RF24Network(*Radio);
+
 	ReadThread = TReadThread(this);
+	Notify->OnNotify(TNotifyType::ntInfo, "Radio and network created!");
 }
+
+TRf24Radio::~TRf24Radio() {
+	delete Network;
+	delete Radio;
+}
+
 
 void TRf24Radio::Init() {
 	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
 
-	Radio.begin();
-	Radio.setAutoAck(true);
-	Radio.setRetries(RETRY_DELAY, RETRY_COUNT);
-	Radio.setChannel(COMM_CHANNEL);
-	Radio.setDataRate(RF24_2MBPS);
-	Radio.setPALevel(RF24_PA_LOW);
-	Radio.setPayloadSize(PAYLOAD_SIZE);
-	Radio.setCRCLength(RF24_CRC_8);
-	Radio.printDetails();
-
-	Radio.openWritingPipe(0xF0F0F0F0E1LL);
-	Radio.openReadingPipe(1, 0xF0F0F0F0D2LL);
-
-	Radio.startListening();
+	Radio->begin();
+	//============================================
+	// testing
+	Radio->setAutoAck(true);
+	Radio->setRetries(15, 15);
+	//============================================
+	Radio->setDataRate(RF24_2MBPS);		// IMPORTANT, doesn't work otherwise!!
+	Radio->setPALevel(RF24_PA_HIGH);	// set power to high for better range
+	delay(5);
+	Network->begin(COMM_CHANNEL, MyAddr);
+	Radio->printDetails();
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Initialized!");
+
+	if (MyAddr != 00) {
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Contacting parent node: %d", Network->parent());
+		Send(Network->parent(), 'k', TMem());
+	}
 
 	ReadThread.Start();
 }
 
-bool TRf24Radio::Ping(const int& NodeId) {
-	TMem Msg;	Msg.Gen(PAYLOAD_SIZE);
-	Msg[0] = (char) NodeId;
-	Msg[1] = COMMAND_PING;
-	Msg[2] = 0xFF;
-	Msg[3] = 0xFF;
-	Msg[4] = 0xFF;
-	Msg[5] = 0xFF;
-	Msg[6] = 0xFF;
-	Msg[7] = 0xFF;
-
-	return Send(Msg);
+bool TRf24Radio::Ping(const uint16& NodeId) {
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Pipnging node %ud ...", NodeId);
+	return Send(NodeId, REQUEST_PING, TMem());
 }
 
-bool TRf24Radio::Set(const int& NodeId, const int& ValId, const int& Val) {
-	TMem Msg;	Msg.Gen(PAYLOAD_SIZE);
-	Msg[0] = (char) NodeId;
-	Msg[1] = COMMAND_SET;
-	Msg[2] = (char) ValId;
-	Msg[3] = char((Val >> 24) & 0xFF);
-	Msg[4] = char((Val >> 16) & 0xFF);
-	Msg[5] = char((Val >> 8) & 0xFF);
-	Msg[6] = char(Val & 0xFF);
-	Msg[7] = 0xFF;
-
-	return Send(Msg);
+bool TRf24Radio::Set(const uint16& NodeId, const int& ValId, const int& Val) {
+	TMem Payload;	TRadioProtocol::GenSetPayload(ValId, Val, Payload);
+	return Send(NodeId, REQUEST_SET, Payload);
 }
 
-bool TRf24Radio::Get(const int& NodeId, const int& ValId) {
-	TMem Msg;	Msg.Gen(PAYLOAD_SIZE);
-	Msg[0] = (char) NodeId;
-	Msg[1] = COMMAND_GET;
-	Msg[2] = (char) ValId;
-	Msg[3] = 0xFF;
-	Msg[4] = 0xFF;
-	Msg[5] = 0xFF;
-	Msg[6] = 0xFF;
-	Msg[7] = 0xFF;
-
-	return Send(Msg);
+bool TRf24Radio::Get(const uint16& NodeId, const int& ValId) {
+	TMem Payload;	TRadioProtocol::GenGetPayload(ValId, Payload);
+	return Send(NodeId, REQUEST_GET, Payload);
 }
 
-bool TRf24Radio::Read(TMem& Msg) {
+bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff) {
+	TRpiUtil::SetMaxPriority();
+
+	TLock Lock(CriticalSection);
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message to node %d ...", NodeAddr);
+
+	RF24NetworkHeader Header(NodeAddr, Command);
+	bool Success = Network->write(Header, Buff(), Buff.Len());
+
+	TRpiUtil::SetDefaultPriority();
+
+	if (!Success) {
+		Notify->OnNotify(TNotifyType::ntWarn, "Failed to send message!");
+	}
+
+	return Success;
+}
+
+void TRf24Radio::UpdateNetwork() {
+	TLock Lock(CriticalSection);
+	TRpiUtil::SetMaxPriority();
+	Network->update();
+	TRpiUtil::SetDefaultPriority();
+}
+bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
+	TRpiUtil::SetMaxPriority();
 	try {
 		TLock Lock(CriticalSection);
 
-		if (Radio.available()) {
-			char Payload[PAYLOAD_SIZE];
-			Radio.read(Payload, PAYLOAD_SIZE);
+		RF24NetworkHeader Header;
+		if (Network->available()) {
+			Network->peek(Header);
 
-			if (Msg.Len() != PAYLOAD_SIZE) { Msg.Gen(PAYLOAD_SIZE); }
-			for (int i = 0; i < PAYLOAD_SIZE; i++) {
-				Msg[i] = Payload[i];
+			Notify->OnNotify(TNotifyType::ntInfo, "Received message, reading ...");
+
+			const uchar MsgType = Header.type;
+
+			if (!TRadioProtocol::HasPayload(MsgType)) {
+				printf("Got ping request\n");
+				Network->read(Header, nullptr, 0);
+			} else {
+				printf("Got request with payload\n");
+				Network->read(Header, Payload(), PAYLOAD_LEN);
+				printf("Received payload: %s\n", Payload.GetAsStr('X').CStr());
 			}
 
-			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got message!");
+			Notify->OnNotify(TNotifyType::ntInfo, "Message processed!");
+
+			From = Header.from_node;
+			Type = MsgType;
 
 			return true;
 		}
 	} catch (...) {
 		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception while reading!");
 	}
+	TRpiUtil::SetDefaultPriority();
 	return false;
-}
-
-bool TRf24Radio::Send(const TMem& Buff) {
-	TLock Lock(CriticalSection);
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message ...");
-	Radio.stopListening();
-	bool Success = Radio.write(Buff(), PAYLOAD_SIZE);
-	Radio.startListening();
-	return Success;
-}
-
-void TRf24Radio::ParseMsg(const TMem& Msg, uint8& NodeId, char& CommandId,
-		int& ValId, int& Val) {
-	EAssertR(Msg.Len() == PAYLOAD_SIZE, "Invalid message length: " + TInt::GetStr(Msg.Len()));
-	NodeId = Msg[0];
-	CommandId = Msg[1];
-
-	if (CommandId != COMMAND_PING) {
-		ValId = Msg[2];
-
-		if (CommandId == COMMAND_PUSH || CommandId == COMMAND_SET) {
-			Val = (int(Msg[3]) << 24) +
-				  (int(Msg[4]) << 16) +
-				  (int(Msg[5]) << 8) +
-				  int(Msg[6]);
-		}
-	}
 }
