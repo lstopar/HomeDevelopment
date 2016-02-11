@@ -1,19 +1,7 @@
 #include "protocol.h"
 
 bool TRadioProtocol::HasPayload(const unsigned char& Type) {
-	printf("Checking type: %d\n", Type);
-
-	if (Type == REQUEST_PING) {
-		printf("This is a PING type\n");
-		return false;
-	}
-
-	if (Type == REQUEST_CHILD_CONFIG) {
-		printf("This is a child config type\n");
-		return false;
-	}
-
-	return true;
+	return Type != REQUEST_PING && Type != REQUEST_CHILD_CONFIG;
 }
 
 #ifndef ARDUINO

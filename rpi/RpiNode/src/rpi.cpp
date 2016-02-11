@@ -472,7 +472,7 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 
 			const uchar MsgType = Header.type;
 
-			if (TRadioProtocol::HasPayload(MsgType)) {
+			if (!TRadioProtocol::HasPayload(MsgType)) {
 				printf("Got ping request\n");
 				Network->read(Header, nullptr, 0);
 			} else {
