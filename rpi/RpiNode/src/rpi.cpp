@@ -439,8 +439,10 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 			From = Header.from_node;
 			Type = Header.type;
 
+			printf("Got request type %d\n", Type);
+
 			if (Type == REQUEST_PING ||
-							   REQUEST_CHILD_CONFIG) {
+					    REQUEST_CHILD_CONFIG) {
 				// the node is just testing
 				Network->read(Header, nullptr, 0);
 			} else if (Type == REQUEST_GET ||
