@@ -311,58 +311,6 @@ void TYL40Adc::CleanUp() {
 //// RF24 Radio transmitter
 const rf24_pa_dbm_e TRf24Radio::POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_LOW;
 
-void TRf24Radio::TReadThread::Run() {
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
-
-	uint16 FromNode;
-	uchar Type;
-	TMem Payload;
-
-	while (true) {
-		try {
-			Radio->UpdateNetwork();
-
-			while (Radio->Read(FromNode, Type, Payload)) {
-				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message!");
-
-				if (Radio->Callback == nullptr) { continue; }
-
-				try {
-					switch (Type) {
-					case REQUEST_PING: {
-						Notify->OnNotify(TNotifyType::ntInfo, "Received ping, ignoring ...");
-						break;
-					} case REQUEST_PUSH: {
-						int ValId, Val;
-						printf("Payload len: %d\n", Payload.Len());
-						TRadioProtocol::ParsePushPayload(Payload, ValId, Val);
-						Radio->Callback->OnValue(ValId, Val);
-						break;
-					} case REQUEST_GET: {
-						Notify->OnNotify(TNotifyType::ntWarn, "GET not supported!");
-						break;
-					} case REQUEST_SET: {
-						Notify->OnNotify(TNotifyType::ntWarn, "SET not supported!");
-						break;
-					} case REQUEST_CHILD_CONFIG: {
-						Notify->OnNotify(TNotifyType::ntWarn, "Child woke up and sent configuration request, ignoring ...");
-						break;
-					} default: {
-						Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type: %d", Type);
-					}
-					}
-				} catch (const PExcept& Except) {
-					Notify->OnNotifyFmt(TNotifyType::ntErr, "Error when calling read callback: %s", Except->GetMsgStr().CStr());
-				}
-			}
-
-			delayMicroseconds(500);
-		} catch (const PExcept& Except) {
-			Notify->OnNotifyFmt(TNotifyType::ntErr, "Error on the read thread: %s", Except->GetMsgStr().CStr());
-		}
-	}
-}
-
 TRf24Radio::TRf24Radio(const uint16& NodeAddr, const uint8& PinCe,
 		const uint8_t& PinCs, const uint32& SpiSpeed, const PNotify& _Notify):
 		MyAddr(NodeAddr),
@@ -426,52 +374,6 @@ bool TRf24Radio::Get(const uint16& NodeId, const int& ValId) {
 	return Send(NodeId, REQUEST_GET, Payload);
 }
 
-bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
-	TRpiUtil::SetMaxPriority();
-	try {
-		TLock Lock(CriticalSection);
-
-		RF24NetworkHeader Header;
-		if (Network->available()) {
-			Network->peek(Header);
-
-			Notify->OnNotify(TNotifyType::ntInfo, "Received message, reading ...");
-
-			From = Header.from_node;
-			Type = Header.type;
-
-			printf("Got request type %d\n", Type);
-
-			if (Type == REQUEST_PING ||
-					    REQUEST_CHILD_CONFIG) {
-				// the node is just testing
-				Network->read(Header, nullptr, 0);
-			} else if (Type == REQUEST_GET ||
-					   Type == REQUEST_SET ||
-					   Type == REQUEST_PUSH) {
-
-				if (Payload.Len() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
-
-				printf("Payload len: %d\n", Payload.Len());
-				Network->read(Header, Payload(), PAYLOAD_LEN);
-
-				printf("Payload len after read: %d\n", Payload.Len());
-			} else {
-				Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type %c!", Header.type);
-			}
-
-			Notify->OnNotify(TNotifyType::ntInfo, "Message processed!");
-
-			return true;
-		}
-	} catch (...) {
-		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception while reading!");
-	}
-	TRpiUtil::SetDefaultPriority();
-	return false;
-}
-
-
 bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff) {
 	TRpiUtil::SetMaxPriority();
 
@@ -495,4 +397,107 @@ void TRf24Radio::UpdateNetwork() {
 	TRpiUtil::SetMaxPriority();
 	Network->update();
 	TRpiUtil::SetDefaultPriority();
+}
+bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
+	TRpiUtil::SetMaxPriority();
+	try {
+		TLock Lock(CriticalSection);
+
+		RF24NetworkHeader Header;
+		if (Network->available()) {
+			Network->peek(Header);
+
+			Notify->OnNotify(TNotifyType::ntInfo, "Received message, reading ...");
+
+			From = Header.from_node;
+			Type = Header.type;
+
+			printf("Got request type %d\n", Type);
+
+			if (Type == REQUEST_PING ||
+					    REQUEST_CHILD_CONFIG) {
+				// the node is just testing
+				printf("Ping or child config request\n");
+				Network->read(Header, nullptr, 0);
+			} else if (Type == REQUEST_GET ||
+					   Type == REQUEST_SET ||
+					   Type == REQUEST_PUSH) {
+
+//				if (Payload.Len() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
+
+				printf("Payload len: %d\n", Payload.Len());
+				Network->read(Header, Payload(), PAYLOAD_LEN);
+
+				printf("Payload len after read: %d\n", Payload.Len());
+			} else {
+				Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type %c!", Header.type);
+			}
+
+			Notify->OnNotify(TNotifyType::ntInfo, "Message processed!");
+
+			return true;
+		}
+	} catch (...) {
+		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception while reading!");
+	}
+	TRpiUtil::SetDefaultPriority();
+	return false;
+}
+
+
+void TRf24Radio::TReadThread::Run() {
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
+
+	uint16 FromNode;
+	uchar Type;
+	TMem Payload;
+
+	Payload.Gen(PAYLOAD_LEN);
+
+	printf("Payload len: %d\n", Payload.Len());
+
+	while (true) {
+		try {
+			Radio->UpdateNetwork();
+
+			while (Radio->Read(FromNode, Type, Payload)) {
+				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message!");
+				printf("Payload len: %d\n", Payload.Len());
+
+				if (Radio->Callback == nullptr) { continue; }
+
+				try {
+					switch (Type) {
+					case REQUEST_PING: {
+						Notify->OnNotify(TNotifyType::ntInfo, "Received ping, ignoring ...");
+						break;
+					} case REQUEST_PUSH: {
+						int ValId, Val;
+						printf("Payload len: %d\n", Payload.Len());
+						TRadioProtocol::ParsePushPayload(Payload, ValId, Val);
+						Radio->Callback->OnValue(ValId, Val);
+						break;
+					} case REQUEST_GET: {
+						Notify->OnNotify(TNotifyType::ntWarn, "GET not supported!");
+						break;
+					} case REQUEST_SET: {
+						Notify->OnNotify(TNotifyType::ntWarn, "SET not supported!");
+						break;
+					} case REQUEST_CHILD_CONFIG: {
+						Notify->OnNotify(TNotifyType::ntWarn, "Child woke up and sent configuration request, ignoring ...");
+						break;
+					} default: {
+						Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type: %d", Type);
+					}
+					}
+				} catch (const PExcept& Except) {
+					Notify->OnNotifyFmt(TNotifyType::ntErr, "Error when calling read callback: %s", Except->GetMsgStr().CStr());
+				}
+			}
+
+			delayMicroseconds(500);
+		} catch (const PExcept& Except) {
+			Notify->OnNotifyFmt(TNotifyType::ntErr, "Error on the read thread: %s", Except->GetMsgStr().CStr());
+		}
+	}
 }

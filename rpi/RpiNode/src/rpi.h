@@ -129,6 +129,8 @@ private:
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
 class TRf24Radio {
+	class TReadThread;
+
 public:
 	class TRf24RadioCallback {
 	public:
@@ -136,21 +138,6 @@ public:
 	};
 
 private:
-	class TReadThread: public TThread {
-	private:
-		TRf24Radio* Radio;
-		PNotify Notify;
-	public:
-		TReadThread():
-			Radio(),
-			Notify() {}
-		TReadThread(TRf24Radio* _Radio):
-			Radio(_Radio),
-			Notify(_Radio->Notify) {}
-
-		void Run();
-	};
-
 	static const rf24_pa_dbm_e POWER_LEVEL;
 
 	const uint16 MyAddr;
@@ -173,13 +160,27 @@ public:
 	bool Set(const uint16& NodeId, const int& ValId, const int& Val);
 	bool Get(const uint16& NodeId, const int& ValId);
 
-	bool Read(uint16& From, uchar& Type, TMem& Payload);
-
 	void SetCallback(TRf24RadioCallback* Cb) { Callback = Cb; }
 
 private:
 	bool Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff);
 	void UpdateNetwork();
+	bool Read(uint16& From, uchar& Type, TMem& Payload);
+
+	class TReadThread: public TThread {
+	private:
+		TRf24Radio* Radio;
+		PNotify Notify;
+	public:
+		TReadThread():
+			Radio(),
+			Notify() {}
+		TReadThread(TRf24Radio* _Radio):
+			Radio(_Radio),
+			Notify(_Radio->Notify) {}
+
+		void Run();
+	};
 };
 
 
