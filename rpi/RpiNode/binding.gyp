@@ -36,14 +36,14 @@
         {
             'target_name': 'rpinode',
             'sources': [
+            	'<(SHARED_PATH)/protocol.h',
+                '<(SHARED_PATH)/protocol.cpp',
             	'src/rpi.h',
             	'src/rpi.cpp',
             	'src/rpinode.h',
             	'src/rpinode.cpp',
             	'src/threads.h',
             	'src/threads.cpp',
-            	'<(SHARED_PATH)/protocol.h',
-                '<(SHARED_PATH)/protocol.cpp',
                 '<(QMINER_PATH)/src/nodejs/nodeutil.h',
                 '<(QMINER_PATH)/src/nodejs/nodeutil.cpp'
             ],
