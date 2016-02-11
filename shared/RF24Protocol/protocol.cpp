@@ -1,6 +1,7 @@
 #include "protocol.h"
 
 bool TRadioProtocol::HasPayload(const unsigned char& Type) {
+	printf("Checking type: %d\n", Type);
 	return Type != REQUEST_PING && Type != REQUEST_CHILD_CONFIG;
 }
 
@@ -34,12 +35,7 @@ void TRadioProtocol::ParsePushPayload(const TMem& Payload, int& ValId, int& Val)
 void TRadioProtocol::ParsePushPayload(const char* Payload,
 			int& ValId, int& Val) {
 #endif
-
-	ValId = (int) Payload[0];
-	Val = (int(Payload[1]) << 24) +
-		  (int(Payload[2]) << 16) +
-		  (int(Payload[3]) << 8) +
-		  int(Payload[4]);
+	ParseSetPayload(Payload, ValId, Val);
 }
 
 #ifndef ARDUINO
@@ -74,4 +70,14 @@ void TRadioProtocol::GenSetPayload(const int& ValId, const int& Val,
 	Payload[5] = 0xFF;
 	Payload[6] = 0xFF;
 	Payload[7] = 0xFF;
+}
+
+#ifndef ARDUINO
+void TRadioProtocol::GenPushPayload(const int& ValId, const int& Val, TMem& Payload) {
+	if (Payload.Len() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
+#else
+void TRadioProtocol::GenPushPayload(const int& ValId, const int& Val,
+		char* Payload) {
+#endif
+	GenSetPayload(ValId, Val, Payload);
 }
