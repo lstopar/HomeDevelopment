@@ -471,23 +471,10 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 
 			printf("Got request type %d\n", Type);
 
-			if (Type == REQUEST_PING ||
-					    REQUEST_CHILD_CONFIG) {
-				// the node is just testing
-				printf("Ping or child config request\n");
+			if (TRadioProtocol::HasPayload(Type)) {
 				Network->read(Header, nullptr, 0);
-			} else if (Type == REQUEST_GET ||
-					   Type == REQUEST_SET ||
-					   Type == REQUEST_PUSH) {
-
-//				if (Payload.Len() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
-
-				printf("Payload len: %d\n", Payload.Len());
-				Network->read(Header, Payload(), PAYLOAD_LEN);
-
-				printf("Payload len after read: %d\n", Payload.Len());
 			} else {
-				Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type %c!", Header.type);
+				Network->read(Header, Payload(), PAYLOAD_LEN);
 			}
 
 			Notify->OnNotify(TNotifyType::ntInfo, "Message processed!");

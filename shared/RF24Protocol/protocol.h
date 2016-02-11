@@ -21,6 +21,8 @@ const unsigned char REQUEST_CHILD_CONFIG = 'k';
 
 class TRadioProtocol {
 public:
+	static bool HasPayload(const uchar& Type);
+
 #ifndef ARDUINO
 	static void ParseGetPayload(const TMem& Payload, int& ValId);
 	static void ParseSetPayload(const TMem& Payload, int& ValId, int& Val);

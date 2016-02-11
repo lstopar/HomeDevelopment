@@ -1,5 +1,9 @@
 #include "protocol.h"
 
+bool TRadioProtocol::HasPayload(const unsigned char& Type) {
+	return Type != REQUEST_PING && Type != REQUEST_CHILD_CONFIG;
+}
+
 #ifndef ARDUINO
 void TRadioProtocol::ParseGetPayload(const TMem& Payload, int& ValId) {
 	EAssertR(Payload.Len() == PAYLOAD_LEN, "ParseGetPayload: invalid payload length: " + TInt::GetStr(Payload.Len()));
