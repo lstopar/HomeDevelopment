@@ -41,7 +41,21 @@ module.exports = exports = [
 		    	    	description: 'Dimmer 1'
 		    	    }          
 		    	]
-		    }    
+		    },
+		    {
+		    	id: 02,
+		    	name: 'Arduino - motion',
+		    	sensors: [
+		    	    {
+		    	    	id: 'motion-lr',
+		    	    	internalId: 4,
+		    	    	type: 'pir',
+		    	    	unit: '[0/1]',
+		    	    	name: 'Motion living room',
+		    	    	description: ''
+		    	    }
+		    	]
+		    }
 		],
 		configuration: {
 			pinCE: 25,		// RPI_V2_GPIO_P1_22
@@ -50,4 +64,5 @@ module.exports = exports = [
 			verbose: true
 		}
 	}
+	
 ]

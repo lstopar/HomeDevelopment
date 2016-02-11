@@ -9,6 +9,8 @@ module.exports = exports = {
 			return 'img/humidity.png';
 		case 'luminosity':
 			return 'img/luminosity.png';
+		case 'pir':
+			return 'img/luminosity.png';	// TODO
 		case 'dimmer':
 			return 'img/bulb.png';
 		default:
