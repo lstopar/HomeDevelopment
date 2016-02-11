@@ -36,8 +36,6 @@
         {
             'target_name': 'rpinode',
             'sources': [
-            	'<(SHARED_PATH)/protocol.h',
-                '<(SHARED_PATH)/protocol.cpp',
             	'src/rpi.h',
             	'src/rpi.cpp',
             	'src/rpinode.h',
