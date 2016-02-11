@@ -346,6 +346,7 @@ void TRf24Radio::TReadThread::Run() {
 						break;
 					} case REQUEST_CHILD_CONFIG: {
 						Notify->OnNotify(TNotifyType::ntWarn, "Child woke up and sent configuration request, ignoring ...");
+						break;
 					} default: {
 						Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type: %d", Type);
 					}
