@@ -333,6 +333,7 @@ void TRf24Radio::TReadThread::Run() {
 						break;
 					} case REQUEST_PUSH: {
 						int ValId, Val;
+						printf("Payload len: %d\n", Payload.Len());
 						TRadioProtocol::ParsePushPayload(Payload, ValId, Val);
 						Radio->Callback->OnValue(ValId, Val);
 						break;
@@ -441,7 +442,9 @@ bool TRf24Radio::Read(RF24NetworkHeader& Header, TMem& Payload) {
 					   Header.type == REQUEST_SET ||
 					   Header.type == REQUEST_PUSH) {
 				Payload.Gen(PAYLOAD_LEN);
+				printf("Payload len: %d\n", Payload.Len());
 				Network->read(Header, Payload(), PAYLOAD_LEN);
+				printf("Payload len after read: %d\n", Payload.Len());
 			} else {
 				Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type %c!", Header.type);
 			}
