@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifndef ARDUINO
+#include "base.h"
+#endif
+
 const uint16_t ADDRESS_RPI = 00;
 const uint16_t ADDRESS_ARDUINO_SOFA = 01;
 
