@@ -40,7 +40,7 @@ void TRadioProtocol::ParsePushPayload(const char* Payload,
 
 #ifndef ARDUINO
 void TRadioProtocol::GenGetPayload(const int& ValId, TMem& Payload) {
-	if (Payload.Length() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
+	if (Payload.Len() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
 #else
 void TRadioProtocol::GenGetPayload(const int& ValId, char* Payload) {
 #endif
@@ -57,7 +57,7 @@ void TRadioProtocol::GenGetPayload(const int& ValId, char* Payload) {
 
 #ifndef ARDUINO
 void TRadioProtocol::GenSetPayload(const int& ValId, const int& Val, TMem& Payload) {
-	if (Payload.Length() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
+	if (Payload.Len() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
 #else
 void TRadioProtocol::GenSetPayload(const int& ValId, const int& Val,
 			char* Payload) {
