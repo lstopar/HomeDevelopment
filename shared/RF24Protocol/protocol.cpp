@@ -1,11 +1,33 @@
 #include "protocol.h"
 
-using namespace TRadioProtocol;
+#ifndef ARDUINO
+void TRadioProtocol::ParseGetPayload(const TMem& Payload, int& ValId) {
+	EAssert(Payload.Len() == PAYLOAD_LEN);
+#else
+void TRadioProtocol::ParseGetPayload(const char* Payload, int& ValId) {
+#endif
+	ValId = Payload[0];
+}
+
 
 #ifndef ARDUINO
-void ParsePushPayload(const TMem& Payload, int& ValId, int& Val) {
+void TRadioProtocol::ParseSetPayload(const TMem& Payload, int& ValId, int& Val) {
+	EAssert(Payload.Len() == PAYLOAD_LEN);
 #else
-void ParsePushPayload(const char* Payload,
+void TRadioProtocol::ParseSetPayload(const char* Payload, int& ValId, int& Val) {
+#endif
+	ValId = Payload[0];
+	Val = int(Payload[1] << 24) |
+		  int(Payload[2] << 16) |
+		  int(Payload[3] << 8) |
+		  int(Payload[4]);
+}
+
+#ifndef ARDUINO
+void TRadioProtocol::ParsePushPayload(const TMem& Payload, int& ValId, int& Val) {
+	EAssert(Payload.Len() == PAYLOAD_LEN);
+#else
+void TRadioProtocol::ParsePushPayload(const char* Payload,
 			int& ValId, int& Val) {
 #endif
 
@@ -17,10 +39,10 @@ void ParsePushPayload(const char* Payload,
 }
 
 #ifndef ARDUINO
-void GenGetPayload(const int& ValId, TMem& Payload) {
+void TRadioProtocol::GenGetPayload(const int& ValId, TMem& Payload) {
 	if (Payload.Length() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
 #else
-void GenGetPayload(const int& ValId, char* Payload) {
+void TRadioProtocol::GenGetPayload(const int& ValId, char* Payload) {
 #endif
 
 	Payload[0] = (char) ValId;
@@ -34,10 +56,10 @@ void GenGetPayload(const int& ValId, char* Payload) {
 }
 
 #ifndef ARDUINO
-void GenSetPayload(const int& ValId, const int& Val, TMem& Payload) {
+void TRadioProtocol::GenSetPayload(const int& ValId, const int& Val, TMem& Payload) {
 	if (Payload.Length() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
 #else
-void GenSetPayload(const int& ValId, const int& Val,
+void TRadioProtocol::GenSetPayload(const int& ValId, const int& Val,
 			char* Payload) {
 #endif
 	Payload[0] = (char) ValId;

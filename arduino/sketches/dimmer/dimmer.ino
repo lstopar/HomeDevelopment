@@ -9,8 +9,6 @@
 
 #include "protocol.h"
 
-using namespace TRadioProtocol;
-
 const uint16_t MY_ADDRESS = ADDRESS_ARDUINO_SOFA;
 const int LED_PIN = 3;
 
@@ -112,20 +110,20 @@ void loop(void) {
     } else if (header.type == REQUEST_GET) {
       Serial.println("Received GET request ...");
       
-      byte payload[PAYLOAD_LEN];
+      char payload[PAYLOAD_LEN];
       network.read(header, payload, PAYLOAD_LEN);
       
-      processGet(fromAddr, payload[0]);
+      int valId;  TRadioProtocol::ParseGetPayload(payload, valId);
+      
+      processGet(fromAddr, valId);
     } else if (header.type == REQUEST_SET) {
-      byte payload[PAYLOAD_LEN];
+      char payload[PAYLOAD_LEN];
       network.read(header, payload, PAYLOAD_LEN);
 
-      int val = int(payload[1] << 24) |
-                int(payload[2] << 16) |
-                int(payload[3] << 8) |
-                int(payload[4]);
+      int valId, val;
+      TRadioProtocol::ParseSetPayload(payload, valId, val);
       
-      processSet(fromAddr, payload[0], val);
+      processSet(fromAddr, valId, val);
     } else {
       Serial.print("Unknown header type: ");
       Serial.println(header.type);
