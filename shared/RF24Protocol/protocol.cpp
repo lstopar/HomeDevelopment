@@ -10,7 +10,7 @@ void TRadioProtocol::ParseGetPayload(const TMem& Payload, int& ValId) {
 #else
 void TRadioProtocol::ParseGetPayload(const char* Payload, int& ValId) {
 #endif
-	ValId = Payload[0];
+	ValId = (int) Payload[0];
 }
 
 
@@ -20,7 +20,7 @@ void TRadioProtocol::ParseSetPayload(const TMem& Payload, int& ValId, int& Val) 
 #else
 void TRadioProtocol::ParseSetPayload(const char* Payload, int& ValId, int& Val) {
 #endif
-	ValId = Payload[0];
+	ValId = (int) Payload[0];
 	Val = int(Payload[1] << 24) |
 		  int(Payload[2] << 16) |
 		  int(Payload[3] << 8) |
@@ -35,7 +35,7 @@ void TRadioProtocol::ParsePushPayload(const char* Payload,
 			int& ValId, int& Val) {
 #endif
 
-	ValId = Payload[0];
+	ValId = (int) Payload[0];
 	Val = (int(Payload[1]) << 24) +
 		  (int(Payload[2]) << 16) +
 		  (int(Payload[3]) << 8) +

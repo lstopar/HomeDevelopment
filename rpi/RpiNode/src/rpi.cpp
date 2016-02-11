@@ -332,6 +332,10 @@ void TRf24Radio::TReadThread::Run() {
 
 				if (Radio->Callback == nullptr) { continue; }
 
+				printf("Got request type %d\n", Type);
+				printf("Ping type: %d\n", REQUEST_PING);
+				printf("Chind config type: %d\n", REQUEST_CHILD_CONFIG);
+
 				try {
 					switch (Type) {
 					case REQUEST_PING: {
@@ -468,10 +472,6 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 
 			From = Header.from_node;
 			Type = Header.type;
-
-			printf("Got request type %d\n", Type);
-			printf("Ping type: %d\n", REQUEST_PING);
-			printf("Chind config type: %d\n", REQUEST_CHILD_CONFIG);
 
 			if (TRadioProtocol::HasPayload(Type)) {
 				printf("Got ping request\n");

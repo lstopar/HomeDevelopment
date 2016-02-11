@@ -430,6 +430,7 @@ void TNodeJsRf24Radio::OnMsgMainThread(const uint8& ValueId, const int& Val) {
 }
 
 void TNodeJsRf24Radio::OnValue(const int& ValId, const int& Val) {
+	printf("Executing callback for value id: %d", ValId);
 	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, ValId, Val), true);
 }
 
