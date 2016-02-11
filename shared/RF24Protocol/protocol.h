@@ -16,8 +16,8 @@ const int PAYLOAD_LEN = 8;
 const unsigned char REQUEST_GET = 65;
 const unsigned char REQUEST_SET = 66;
 const unsigned char REQUEST_PUSH = 67;
-const unsigned char REQUEST_PING = 't';
-const unsigned char REQUEST_CHILD_CONFIG = 'k';
+const unsigned char REQUEST_PING = 't';			// 116
+const unsigned char REQUEST_CHILD_CONFIG = 'k';	//107
 
 class TRadioProtocol {
 public:

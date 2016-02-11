@@ -471,6 +471,7 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 
 			printf("Got request type %d\n", Type);
 			printf("Ping type: %d\n", REQUEST_PING);
+			printf("Chind config type: %d\n", REQUEST_CHILD_CONFIG);
 
 			if (TRadioProtocol::HasPayload(Type)) {
 				printf("Got ping request\n");
