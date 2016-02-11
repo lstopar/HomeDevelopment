@@ -1,6 +1,8 @@
 #ifndef SRC_RPI_H_
 #define SRC_RPI_H_
 
+#include <stdint.h>
+
 namespace TRadioProtocol {
 
 	const uint16_t ADDRESS_RPI = 00;
