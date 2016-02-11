@@ -314,18 +314,19 @@ const rf24_pa_dbm_e TRf24Radio::POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_LOW;
 void TRf24Radio::TReadThread::Run() {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
 
+	uint16 FromNode;
+	uchar Type;
+	TMem Payload;
+
 	while (true) {
 		try {
 			Radio->UpdateNetwork();
 
-			TMem Payload;
-			RF24NetworkHeader Header;
-			while (Radio->Read(Header, Payload)) {
+			while (Radio->Read(FromNode, Type, Payload)) {
 				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message!");
 
 				if (Radio->Callback == nullptr) { continue; }
 
-				const uchar& Type = Header.type;
 				try {
 					switch (Type) {
 					case REQUEST_PING: {
@@ -424,11 +425,12 @@ bool TRf24Radio::Get(const uint16& NodeId, const int& ValId) {
 	return Send(NodeId, REQUEST_GET, Payload);
 }
 
-bool TRf24Radio::Read(RF24NetworkHeader& Header, TMem& Payload) {
+bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 	TRpiUtil::SetMaxPriority();
 	try {
 		TLock Lock(CriticalSection);
 
+		RF24NetworkHeader Header;
 		if (Network->available()) {
 			Network->peek(Header);
 
@@ -441,9 +443,15 @@ bool TRf24Radio::Read(RF24NetworkHeader& Header, TMem& Payload) {
 			} else if (Header.type == REQUEST_GET ||
 					   Header.type == REQUEST_SET ||
 					   Header.type == REQUEST_PUSH) {
-				Payload.Gen(PAYLOAD_LEN);
+
+				if (Payload.Len() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
+
 				printf("Payload len: %d\n", Payload.Len());
 				Network->read(Header, Payload(), PAYLOAD_LEN);
+
+				From = Header.from_node;
+				Type = Header.type;
+
 				printf("Payload len after read: %d\n", Payload.Len());
 			} else {
 				Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type %c!", Header.type);

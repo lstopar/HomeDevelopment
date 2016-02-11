@@ -173,7 +173,7 @@ public:
 	bool Set(const uint16& NodeId, const int& ValId, const int& Val);
 	bool Get(const uint16& NodeId, const int& ValId);
 
-	bool Read(RF24NetworkHeader& Header, TMem& Payload);
+	bool Read(uint16& From, uchar& Type, TMem& Payload);
 
 	void SetCallback(TRf24RadioCallback* Cb) { Callback = Cb; }
 
