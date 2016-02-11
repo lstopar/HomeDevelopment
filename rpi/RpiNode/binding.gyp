@@ -38,8 +38,8 @@
             'sources': [
             	'src/rpi.h',
             	'src/rpi.cpp',
-            	<(SHARED_PATH)/protocol.h',
-            	<(SHARED_PATH)/protocol.cpp',
+            	'<(SHARED_PATH)/protocol.h',
+            	'<(SHARED_PATH)/protocol.cpp',
             	'src/rpinode.h',
             	'src/rpinode.cpp',
             	'src/threads.h',
