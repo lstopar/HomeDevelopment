@@ -31,9 +31,9 @@ void setup() {
 
   radio.setAutoAck(true);
   radio.setRetries(15, 15);
-  
   radio.setDataRate(RF24_2MBPS);
   radio.setPALevel(RF24_PA_HIGH);
+  
   network.begin(COMM_CHANNEL, MY_ADDRESS);
 
   radio.printDetails();
