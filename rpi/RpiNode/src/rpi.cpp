@@ -436,21 +436,21 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 
 			Notify->OnNotify(TNotifyType::ntInfo, "Received message, reading ...");
 
-			if (Header.type == REQUEST_PING ||
+			From = Header.from_node;
+			Type = Header.type;
+
+			if (Type == REQUEST_PING ||
 							   REQUEST_CHILD_CONFIG) {
 				// the node is just testing
 				Network->read(Header, nullptr, 0);
-			} else if (Header.type == REQUEST_GET ||
-					   Header.type == REQUEST_SET ||
-					   Header.type == REQUEST_PUSH) {
+			} else if (Type == REQUEST_GET ||
+					   Type == REQUEST_SET ||
+					   Type == REQUEST_PUSH) {
 
 				if (Payload.Len() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
 
 				printf("Payload len: %d\n", Payload.Len());
 				Network->read(Header, Payload(), PAYLOAD_LEN);
-
-				From = Header.from_node;
-				Type = Header.type;
 
 				printf("Payload len after read: %d\n", Payload.Len());
 			} else {
