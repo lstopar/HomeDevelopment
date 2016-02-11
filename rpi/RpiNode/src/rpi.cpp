@@ -470,8 +470,7 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 
 			Notify->OnNotify(TNotifyType::ntInfo, "Received message, reading ...");
 
-			From = Header.from_node;
-			Type = Header.type;
+			const uchar MsgType = Header.type;
 
 			if (TRadioProtocol::HasPayload(Type)) {
 				printf("Got ping request\n");
@@ -483,6 +482,9 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 			}
 
 			Notify->OnNotify(TNotifyType::ntInfo, "Message processed!");
+
+			From = Header.from_node;
+			Type = Header.type;
 
 			return true;
 		}
