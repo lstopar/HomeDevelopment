@@ -398,14 +398,7 @@ TRf24Radio::~TRf24Radio() {
 void TRf24Radio::Init() {
 	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
 
-	Radio->begin();
-	Radio->setAutoAck(true);
-	Radio->setRetries(15, 15);
-	Radio->setDataRate(RF24_250KBPS);
-	Radio->setPALevel(RF24_PA_HIGH);	// set power to high for better range
-	delay(5);
-	Network->begin(COMM_CHANNEL, MyAddr);
-	Radio->printDetails();
+	TRadioProtocol::InitRadio(*Radio, *Network, MyAddr);
 
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "My address: %d", MyAddr);
 

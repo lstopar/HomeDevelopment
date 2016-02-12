@@ -88,3 +88,14 @@ void TRadioProtocol::GenPushPayload(const int& ValId, const int& Val,
 #endif
 	GenSetPayload(ValId, Val, Payload);
 }
+
+void TRadioProtocol::InitRadio(RF24& Radio, RF24Network& Network, const uint16_t& Addr) {
+	Radio.begin();
+	Radio.setAutoAck(true);
+	Radio.setRetries(15, 15);
+	Radio.setDataRate(RF24_250KBPS);
+	Radio.setPALevel(RF24_PA_HIGH);	// set power to high for better range
+	delay(5);
+	Network.begin(COMM_CHANNEL, Addr);
+	Radio.printDetails();
+}

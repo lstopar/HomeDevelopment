@@ -3,15 +3,20 @@
 
 #include <stdint.h>
 
-#ifndef ARDUINO
+#ifdef ARDUINO
+#include "RF24.h"
+#include "RF24Network.h"
+#else
 #include "base.h"
+#include "RF24/RF24.h"
+#include "RF24Network/RF24Network.h"
 #endif
 
 const uint16_t ADDRESS_RPI = 00;
 const uint16_t ADDRESS_ARDUINO_SOFA = 01;
 const uint16_t ADDRESS_ARDUINO_PIR = 04;
 
-const unsigned char COMM_CHANNEL = 90;
+const unsigned char COMM_CHANNEL = 0x4C;
 const int PAYLOAD_LEN = 8;
 
 const unsigned char REQUEST_GET = 65;
@@ -40,6 +45,8 @@ public:
 	static void GenSetPayload(const int& ValId, const int& Val, char* Payload);
 	static void GenPushPayload(const int& ValId, const int& Val, char* Payload);
 #endif
+
+	static void InitRadio(RF24& Radio, RF24Network& Network, const uint16_t& Addr);
 };
 
 #endif
