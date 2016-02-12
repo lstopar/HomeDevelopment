@@ -89,7 +89,8 @@ void TRadioProtocol::GenPushPayload(const int& ValId, const int& Val,
 	GenSetPayload(ValId, Val, Payload);
 }
 
-void TRadioProtocol::InitRadio(RF24& Radio, RF24Network& Network, const uint16_t& Addr) {
+void TRadioProtocol::InitRadio(RF24& Radio, RF24Network& Network, const uint16_t& Addr,
+		const rf24_pa_dbm_e& Power) {
 	Radio.begin();
 	Radio.setAutoAck(true);
 	Radio.setRetries(15, 15);

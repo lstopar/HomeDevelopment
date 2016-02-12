@@ -46,7 +46,8 @@ public:
 	static void GenPushPayload(const int& ValId, const int& Val, char* Payload);
 #endif
 
-	static void InitRadio(RF24& Radio, RF24Network& Network, const uint16_t& Addr);
+	static void InitRadio(RF24& Radio, RF24Network& Network, const uint16_t& Addr,
+			const rf24_pa_dbm_e& Power=RF24_PA_HIGH);
 };
 
 #endif
