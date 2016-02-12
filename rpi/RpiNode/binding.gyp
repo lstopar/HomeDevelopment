@@ -59,7 +59,6 @@
             ],
             'dependencies': [
                 'glib'
-                //'protocol'
             ]
         },
         {
