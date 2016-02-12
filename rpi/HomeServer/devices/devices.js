@@ -42,6 +42,8 @@ module.exports = exports = function (setValue) {
 				    }
 				],
 				configuration: {
+					pinCE: 25,		// RPI_V2_GPIO_P1_22	// TODO the pins are hardcoded in C++
+					pinCSN: 8,		// RPI_V2_GPIO_P1_24
 					id: 00,
 					verbose: true
 				}
