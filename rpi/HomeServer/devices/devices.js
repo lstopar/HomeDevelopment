@@ -41,7 +41,7 @@ module.exports = exports = [
 		    	    	description: 'Dimmer 1'
 		    	    }          
 		    	]
-		    }/*,
+		    },
 		    {
 		    	id: 03,
 		    	name: 'Arduino - motion',
@@ -55,7 +55,7 @@ module.exports = exports = [
 		    	    	description: ''
 		    	    }
 		    	]
-		    }*/
+		    }
 		],
 		configuration: {
 			pinCE: 25,		// RPI_V2_GPIO_P1_22

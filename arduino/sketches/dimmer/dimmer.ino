@@ -29,6 +29,9 @@ void setup() {
   SPI.begin();
 
   TRadioProtocol::InitRadio(radio, network, MY_ADDRESS);
+
+  Serial.print("My address: ");
+  Serial.println(MY_ADDRESS);
   
   if (MY_ADDRESS != 00) {
     writeRadio(network.parent(), REQUEST_CHILD_CONFIG, NULL, 0);

@@ -58,8 +58,8 @@
             'defines': [
             ],
             'dependencies': [
-                'glib',
-                'protocol'
+                'glib'
+                //'protocol'
             ]
         },
         {
@@ -86,7 +86,7 @@
             'defines': [],
             'dependencies': []
         },
-        {
+        /*{
             # protocol library
             'target_name': 'protocol',
             'type': 'static_library',
@@ -103,7 +103,7 @@
             'dependencies': [
                 'glib'
             ]
-        },
+        },*/
         {
             # glib library
             'target_name': 'glib',
