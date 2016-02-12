@@ -1,6 +1,6 @@
 #include "protocol.h"
 
-static bool TRadioProtocol::IsValidType(const unsigned char& Type) {
+bool TRadioProtocol::IsValidType(const unsigned char& Type) {
 	return Type == REQUEST_PING ||
 			Type == REQUEST_CHILD_CONFIG ||
 			Type == REQUEST_GET ||

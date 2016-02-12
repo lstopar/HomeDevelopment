@@ -9,7 +9,7 @@
 
 #include "protocol.h"
 
-const uint16_t MY_ADDRESS = ADDRESS_ARDUINO_SOFA;
+const uint16_t MY_ADDRESS = 01;
 const int LED_PIN = 3;
 
 int pin3Val = 0;
