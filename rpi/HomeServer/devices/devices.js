@@ -43,7 +43,7 @@ module.exports = exports = [
 		    	]
 		    },
 		    {
-		    	id: 03,
+		    	id: 02,
 		    	name: 'Arduino - motion',
 		    	sensors: [
 		    	    {
