@@ -8,8 +8,8 @@
 #include "RF24Network.h"
 #else
 #include "base.h"
-//#include <RF24/RF24.h>
-//#include <RF24Network/RF24Network.h>
+#include <RF24/RF24.h>
+#include <RF24Network/RF24Network.h>
 #endif
 
 const uint16_t ADDRESS_RPI = 00;

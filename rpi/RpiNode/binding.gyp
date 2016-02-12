@@ -58,7 +58,8 @@
             'defines': [
             ],
             'dependencies': [
-                'glib'
+                'glib',
+                'protocol'
             ]
         },
         {
@@ -84,6 +85,24 @@
             ],
             'defines': [],
             'dependencies': []
+        },
+        {
+            # protocol library
+            'target_name': 'protocol',
+            'type': 'static_library',
+            'sources': [
+                '<(SHARED_PATH)/protocol.h',
+            	'<(SHARED_PATH)/protocol.cpp'
+            ],
+            'include_dirs': [
+                '<(SHARED_PATH)/',
+                '<(QMINER_PATH)/src/glib/base/'
+            ],
+            'defines': [
+            ],
+            'dependencies': [
+                'glib'
+            ]
         },
         {
             # glib library
