@@ -383,7 +383,7 @@ TRf24Radio::TRf24Radio(const uint16& NodeAddr, const uint8& PinCe,
 		Notify(_Notify) {
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Creating radio and network ...");
-	Radio = new RF24(PinCe, PinCs, SpiSpeed);
+	Radio = new RF24(RPI_V2_GPIO_P1_15,BCM2835_SPI_CS0, BCM2835_SPI_SPEED_8MHZ);
 	Network = new RF24Network(*Radio);
 
 	ReadThread = TReadThread(this);
