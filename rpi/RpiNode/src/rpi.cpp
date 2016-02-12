@@ -322,7 +322,6 @@ void TRf24Radio::TReadThread::Run() {
 
 	while (true) {
 		try {
-			TLock Lock(Radio->CriticalSection);
 			Radio->UpdateNetwork();
 
 			while (Radio->Read(FromNode, Type, Payload)) {
