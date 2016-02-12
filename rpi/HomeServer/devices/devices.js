@@ -34,7 +34,7 @@ module.exports = exports = function (setValue) {
 				    	    	id: MOTION_ID,
 				    	    	internalId: 4,
 				    	    	type: 'pir',
-				    	    	unit: '[0/1]',
+				    	    	unit: '',
 				    	    	name: 'Motion living room',
 				    	    	description: ''
 				    	    }
