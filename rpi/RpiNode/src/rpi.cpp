@@ -326,13 +326,8 @@ void TRf24Radio::TReadThread::Run() {
 
 			while (Radio->Read(FromNode, Type, Payload)) {
 				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message!");
-//				printf("Payload len: %d\n", Payload.Len());
 
 				if (Radio->Callback == nullptr) { continue; }
-
-//				printf("Got request type %d\n", Type);
-//				printf("Ping type: %d\n", REQUEST_PING);
-//				printf("Chind config type: %d\n", REQUEST_CHILD_CONFIG);
 
 				try {
 					switch (Type) {
@@ -342,7 +337,6 @@ void TRf24Radio::TReadThread::Run() {
 					} case REQUEST_PUSH: {
 						Notify->OnNotify(TNotifyType::ntInfo, "Received PUSH ...");
 						int ValId, Val;
-//						printf("Payload len: %d\n", Payload.Len());
 						TRadioProtocol::ParsePushPayload(Payload, ValId, Val);
 						Radio->Callback->OnValue(ValId, Val);
 						break;
@@ -364,7 +358,6 @@ void TRf24Radio::TReadThread::Run() {
 				}
 			}
 
-//			delay(10);
 			delayMicroseconds(500);
 		} catch (const PExcept& Except) {
 			Notify->OnNotifyFmt(TNotifyType::ntErr, "Error on the read thread: %s", Except->GetMsgStr().CStr());
