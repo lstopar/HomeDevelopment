@@ -383,7 +383,7 @@ TRf24Radio::TRf24Radio(const uint16& NodeAddr, const uint8& PinCe,
 		Notify(_Notify) {
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Creating radio and network ...");
-	Radio = new RF24(RPI_V2_GPIO_P1_15,BCM2835_SPI_CS0, BCM2835_SPI_SPEED_8MHZ);
+	Radio = new RF24(RPI_V2_GPIO_P1_15, BCM2835_SPI_CS0, BCM2835_SPI_SPEED_8MHZ);
 	Network = new RF24Network(*Radio);
 
 	ReadThread = TReadThread(this);
@@ -400,13 +400,10 @@ void TRf24Radio::Init() {
 	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
 
 	Radio->begin();
-	//============================================
-	// testing
 	Radio->setAutoAck(true);
 	Radio->setRetries(15, 15);
-	//============================================
 	Radio->setDataRate(RF24_250KBPS);
-	Radio->setPALevel(RF24_PA_MAX);	// set power to high for better range
+	Radio->setPALevel(RF24_PA_HIGH);	// set power to high for better range
 	delay(5);
 	Network->begin(COMM_CHANNEL, MyAddr);
 	Radio->printDetails();
