@@ -303,7 +303,7 @@ exports.init = function () {
 	if (config.samplingInterval == null) throw new Error("The sampling interval is not set!");
 	
 	log.info('Initializing Rpi');
-	rpi.init();
+//	rpi.init();
 	initSensors();
 	
 	if (config.mode != 'debug') {

@@ -405,7 +405,7 @@ void TRf24Radio::Init() {
 	Radio->setAutoAck(true);
 	Radio->setRetries(15, 15);
 	//============================================
-	Radio->setDataRate(RF24_2MBPS);		// IMPORTANT, doesn't work otherwise!!
+	Radio->setDataRate(RF24_250KBPS);
 	Radio->setPALevel(RF24_PA_MAX);	// set power to high for better range
 	delay(5);
 	Network->begin(COMM_CHANNEL, MyAddr);

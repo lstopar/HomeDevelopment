@@ -1,5 +1,5 @@
 module.exports = exports = [
-	{
+	/*{
 		type: "DHT11",
 		sensors: [
 			{
@@ -24,7 +24,7 @@ module.exports = exports = [
 			timeout: 10000,
 			verbose: true
 		}
-	},
+	},*/
 	{
 		type: 'Rf24',
 		nodes: [
