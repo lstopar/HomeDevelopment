@@ -22,6 +22,7 @@ const unsigned char REQUEST_CHILD_CONFIG = 'k';		//107
 
 class TRadioProtocol {
 public:
+	static bool IsValidType(const unsigned char& Type);
 	static bool HasPayload(const unsigned char& Type);
 
 #ifndef ARDUINO

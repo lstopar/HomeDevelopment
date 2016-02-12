@@ -320,8 +320,6 @@ void TRf24Radio::TReadThread::Run() {
 
 	Payload.Gen(PAYLOAD_LEN);
 
-//	printf("Payload len: %d\n", Payload.Len());
-
 	while (true) {
 		try {
 			TLock Lock(Radio->CriticalSection);
@@ -343,6 +341,7 @@ void TRf24Radio::TReadThread::Run() {
 						Notify->OnNotify(TNotifyType::ntInfo, "Received ping, ignoring ...");
 						break;
 					} case REQUEST_PUSH: {
+						Notify->OnNotify(TNotifyType::ntInfo, "Received PUSH ...");
 						int ValId, Val;
 //						printf("Payload len: %d\n", Payload.Len());
 						TRadioProtocol::ParsePushPayload(Payload, ValId, Val);
@@ -435,14 +434,11 @@ bool TRf24Radio::Get(const uint16& NodeId, const int& ValId) {
 
 bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff) {
 	TLock Lock(CriticalSection);
-	TRpiUtil::SetMaxPriority();
 
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message to node %d ...", NodeAddr);
 
 	RF24NetworkHeader Header(NodeAddr, Command);
 	bool Success = Network->write(Header, Buff(), Buff.Len());
-
-	TRpiUtil::SetDefaultPriority();
 
 	if (!Success) {
 		Notify->OnNotify(TNotifyType::ntWarn, "Failed to send message!");
@@ -453,13 +449,10 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 
 void TRf24Radio::UpdateNetwork() {
 	TLock Lock(CriticalSection);
-	TRpiUtil::SetMaxPriority();
 	Network->update();
-	TRpiUtil::SetDefaultPriority();
 }
 bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 	TLock Lock(CriticalSection);
-	TRpiUtil::SetMaxPriority();
 
 	try {
 		RF24NetworkHeader Header;
@@ -470,13 +463,12 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 
 			const uchar MsgType = Header.type;
 
-			if (!TRadioProtocol::HasPayload(MsgType)) {
-//				printf("Got ping request\n");
+			if (!TRadioProtocol::IsValidType(MsgType)) {
+				Network->read(Header, nullptr, 0);
+			} else if (!TRadioProtocol::HasPayload(MsgType)) {
 				Network->read(Header, nullptr, 0);
 			} else {
-//				printf("Got request with payload\n");
 				Network->read(Header, Payload(), PAYLOAD_LEN);
-//				printf("Received payload: %s\n", Payload.GetAsStr('X').CStr());
 			}
 
 			Notify->OnNotify(TNotifyType::ntInfo, "Message processed!");
@@ -489,6 +481,5 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 	} catch (...) {
 		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception while reading!");
 	}
-	TRpiUtil::SetDefaultPriority();
 	return false;
 }
