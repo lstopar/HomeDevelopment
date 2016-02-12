@@ -27,18 +27,9 @@ void setup() {
   Serial.println("========================================");
  
   SPI.begin();
-  radio.begin();
 
-  radio.setAutoAck(true);
-  radio.setRetries(15, 15);
-  radio.setDataRate(RF24_250KBPS);
-  radio.setPALevel(RF24_PA_HIGH);  // set power to high for better range
-  delay(5);
+  TRadioProtocol::InitRadio(radio, network, MY_ADDRESS);
   
-  network.begin(COMM_CHANNEL, MY_ADDRESS);
-
-  radio.printDetails();
-
   if (MY_ADDRESS != 00) {
     writeRadio(network.parent(), REQUEST_CHILD_CONFIG, NULL, 0);
   }
