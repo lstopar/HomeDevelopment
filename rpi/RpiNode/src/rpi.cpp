@@ -366,7 +366,7 @@ void TRf24Radio::TReadThread::Run() {
 				}
 			}
 
-//			delayMicroseconds(500);
+			delayMicroseconds(500);
 		} catch (const PExcept& Except) {
 			Notify->OnNotifyFmt(TNotifyType::ntErr, "Error on the read thread: %s", Except->GetMsgStr().CStr());
 		}
