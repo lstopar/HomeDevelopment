@@ -144,8 +144,7 @@ private:
 			const int& Val);
 
 public:
-	void OnValue(const uint16& NodeId, const uint8& ValueId,
-			const int& Val);
+	void OnValue(const uint16& NodeId, const int& ValId, const int& Val);
 
 	class TOnMsgTask {
 	private:
