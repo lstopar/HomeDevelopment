@@ -281,13 +281,13 @@ exports.setValue = setValue;
 
 exports.getSensors = function () {
 	var result = [];
-	for (var sensorId in sensors) {
-		result.push(sensors[sensorId]);
-	}
 	if (radio != null) {
 		for (var sensorId in radio.sensorH) {
 			result.push(radio.sensorH[sensorId]);
 		}
+	}
+	for (var sensorId in sensors) {
+		result.push(sensors[sensorId]);
 	}
 	return result;
 };
