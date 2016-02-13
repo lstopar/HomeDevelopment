@@ -30,6 +30,14 @@ module.exports = exports = function (setValue) {
 				    	id: 02,
 				    	name: 'Arduino - motion',
 				    	sensors: [
+							{
+								id: LUMINOSITY_ID,
+								internalId: 3,
+								type: 'luminosity',
+								unit: '%',
+								name: 'Luminosity living room',
+								description: ''
+							},
 				    	    {
 				    	    	id: MOTION_ID,
 				    	    	internalId: 4,

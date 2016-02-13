@@ -28,7 +28,7 @@ void setup() {
  
   SPI.begin();
 
-  TRadioProtocol::InitRadio(radio, network, MY_ADDRESS);
+  TRadioProtocol::InitRadio(radio, network, MY_ADDRESS, RF24_PA_MAX);
 
   Serial.print("My address: ");
   Serial.println(MY_ADDRESS);
