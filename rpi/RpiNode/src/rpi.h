@@ -8,16 +8,15 @@
 #ifndef SRC_RPI_H_
 #define SRC_RPI_H_
 
-#include "base.h"
-#include "threads.h"
-#include "protocol.h"
-
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 
 #include <RF24/RF24.h>
 #include <RF24Network/RF24Network.h>
 
+#include "base.h"
+#include "threads.h"
+#include "protocol.h"
 
 enum TGpioLayout {
 	glUnset,
@@ -132,7 +131,7 @@ class TRf24Radio {
 public:
 	class TRf24RadioCallback {
 	public:
-		virtual void OnValue(const int& ValId, const int& Val) = 0;
+		virtual void OnValue(const uint16& NodeId, const int& ValId, const int& Val) = 0;
 	};
 
 private:

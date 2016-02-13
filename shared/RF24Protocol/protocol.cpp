@@ -1,5 +1,13 @@
 #include "protocol.h"
 
+bool TRadioProtocol::IsValidType(const unsigned char& Type) {
+	return Type == REQUEST_PING ||
+			Type == REQUEST_CHILD_CONFIG ||
+			Type == REQUEST_GET ||
+			Type == REQUEST_PUSH ||
+			Type == REQUEST_SET;
+}
+
 bool TRadioProtocol::HasPayload(const unsigned char& Type) {
 	return Type != REQUEST_PING && Type != REQUEST_CHILD_CONFIG;
 }
@@ -79,4 +87,16 @@ void TRadioProtocol::GenPushPayload(const int& ValId, const int& Val,
 		char* Payload) {
 #endif
 	GenSetPayload(ValId, Val, Payload);
+}
+
+void TRadioProtocol::InitRadio(RF24& Radio, RF24Network& Network, const uint16_t& Addr,
+		const rf24_pa_dbm_e& Power) {
+	Radio.begin();
+	Radio.setAutoAck(true);
+	Radio.setRetries(15, 15);
+	Radio.setDataRate(RF24_2MBPS);
+	Radio.setPALevel(RF24_PA_HIGH);	// set power to high for better range
+	delay(5);
+	Network.begin(COMM_CHANNEL, Addr);
+	Radio.printDetails();
 }

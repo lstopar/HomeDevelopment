@@ -9,7 +9,7 @@
 
 #include "protocol.h"
 
-const uint16_t MY_ADDRESS = ADDRESS_ARDUINO_SOFA;
+const uint16_t MY_ADDRESS = 01;
 const int LED_PIN = 3;
 
 int pin3Val = 0;
@@ -27,17 +27,12 @@ void setup() {
   Serial.println("========================================");
  
   SPI.begin();
-  radio.begin();
 
-  radio.setAutoAck(true);
-  radio.setRetries(15, 15);
-  radio.setDataRate(RF24_2MBPS);
-  radio.setPALevel(RF24_PA_HIGH);
+  TRadioProtocol::InitRadio(radio, network, MY_ADDRESS, RF24_PA_MAX);
+
+  Serial.print("My address: ");
+  Serial.println(MY_ADDRESS);
   
-  network.begin(COMM_CHANNEL, MY_ADDRESS);
-
-  radio.printDetails();
-
   if (MY_ADDRESS != 00) {
     writeRadio(network.parent(), REQUEST_CHILD_CONFIG, NULL, 0);
   }

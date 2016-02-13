@@ -6,12 +6,12 @@ $(document).ready(function () {
 		
 		var thumbnail = $('#thumb-' + id);
 		
-		if (type != 'dimmer') {
-			var valSpan = thumbnail.find('#span-val-' + id);
-			valSpan.html(tuUiPrecision(val, type));
-		} else {
+		if (type == 'dimmer') {
 			var slider = thumbnail.find('#range-' + id);
 			slider.slider('setValue', tuUiPrecision(val, type));
+		} else {
+			var valSpan = thumbnail.find('#span-val-' + id);
+			valSpan.html(tuUiPrecision(val, type));
 		}
 	}
 	

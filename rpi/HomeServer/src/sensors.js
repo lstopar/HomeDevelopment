@@ -20,6 +20,145 @@ var callbacks = {
 };
 
 //=======================================================
+// SENSOR FUNCTIONS
+//=======================================================
+
+function setValue(sensorId, value) {
+	if (sensorId in sensors) {
+		var device = sensors[sensorId].device;
+		device.set({ id: sensorId, value: value });
+	} else if (sensorId in radio.sensorH) {
+		var success = radio.radio.set({ id: sensorId, value: value });
+		onNodeConnected(radio.sensorH[sensorId].nodeId, success);
+	} else {
+		throw new Error('Could not find sensor: ' + sensorId);
+	}
+}
+
+function updateValue(sensorId, value) {
+	try {
+		if (log.trace())
+			log.trace('Setting value for sensor "%s" to %d ...', sensorId, value);
+		
+		var type = sensorId in sensors ? sensors[sensorId] : radio.sensorH[sensorId].type;
+		
+		values[sensorId] = value;
+		callbacks.onValueReceived({
+			id: sensorId,
+			value: value,
+			type: type
+		});
+		
+		if (devices.onValue != null) {
+			devices.onValue(sensorId, value);
+		}
+	} catch (e) {
+		log.error(e, 'Exception while setting value of sensor: %s', sensorId);
+	}
+}
+
+function onNodeConnected(nodeId, connected) {
+	try {
+		var nodeIdH = radio.nodes;
+		var prevStatus = nodeIdH[nodeId].connected;
+		
+		if (connected != prevStatus) {
+			nodeIdH[nodeId].connected = connected;
+			
+			if (connected) {
+				log.info('Node %d has connected!', nodeId);
+			} else {
+				log.warn('Node %d has disconnected!', nodeId);
+			}
+			
+			callbacks.onNodeEvent({
+				id: nodeId,
+				name: nodeIdH[nodeId].name,
+				connected: connected
+			});
+		}
+	} catch (e) {
+		log.error(e, 'Exception while processing node connected event!');
+	}
+}
+
+function readDevices() {
+	for (var deviceN = 0; deviceN < devices.length; deviceN++) {
+		(function () {
+			var deviceConf = devices[deviceN];
+			var device = deviceConf.device;
+			var transform = deviceConf.transform;
+			
+			device.read(function (e, vals) {
+				if (e != null) {
+					log.error(e, 'Device of type %s had an error while reading!', deviceConf.type);
+					return;
+				}
+				
+				var trans = transform != null ? transform(vals) : vals;
+				
+				if (log.debug())
+					log.debug('Read values: %s', JSON.stringify(trans));
+				
+				for (var sensorId in trans)
+					updateValue(sensorId, trans[sensorId]);
+			});
+		})();
+	}
+}
+
+function pingRadios() {
+	if (log.debug())
+		log.debug('Pinging radio devices ...');
+	
+	try {
+		var nodeIdH = radio.nodes;
+		
+		for (var nodeId in nodeIdH) {			
+			if (log.debug())
+				log.debug('Pinging node %d', nodeId)
+			
+			onNodeConnected(nodeId, radio.radio.ping(parseInt(nodeId)));
+		}
+	} catch (e) {
+		log.error(e, 'Exception while pinging radio nodes!');
+	}
+}
+
+function readRadioDevices() {
+	if (radio != null) {
+		var radioSensorH = radio.sensorH;
+		for (var id in radioSensorH) {
+			var nodeId = radioSensorH[id].nodeId;
+			
+			if (log.debug())
+				log.debug('Calling get on radio ...');
+			
+			var success = radio.radio.get(id);
+			onNodeConnected(nodeId, success);
+		}
+	}
+}
+
+function readAll() {
+	if (log.debug())
+		log.debug('Reading all devices ...');
+	
+	readDevices();
+	readRadioDevices();
+}
+
+function mockReadAll() {
+	if (log.debug())
+		log.debug('Reading all devices ...');
+	
+	for (var sensorId in sensors) {
+		var value = Math.random()*100;
+		updateValue(sensorId, value);
+	}
+}
+
+//=======================================================
 // INITIALIZATION
 //=======================================================
 
@@ -36,7 +175,9 @@ function createDevice(type, devConfig) {
 
 function initSensors() {
 	log.info('Reading devices configuration ...');
-	var devicesConf = require(path.join(__dirname, '../devices', config.devices));
+	var devs = require(path.join(__dirname, '../devices', config.devices))(setValue)
+	var devicesConf = devs.devices;
+	var onValueCb = devs.onValue != null ? devs.onValue : function () {};
 	
 	if (log.info())
 		log.info('Using device configuration:\n%s', JSON.stringify(devicesConf, null, '\t'));
@@ -121,132 +262,10 @@ function initSensors() {
 			radio.radio.onValue(function (val) {	// TODO move this somewhere, make a common interface
 				if (log.debug()) 
 					log.debug('Received value from the radio: %s', JSON.stringify(val));
-				setValue(val.id, val.value);
+				updateValue(val.id, val.value);
+				onValueCb(val.id, val.value);
 			});
 		}
-	}
-}
-
-//=======================================================
-// SENSOR FUNCTIONS
-//=======================================================
-
-function setValue(sensorId, value) {
-	try {
-		if (log.trace())
-			log.trace('Setting value for sensor "%s" to %d ...', sensorId, value);
-		
-		var type = sensorId in sensors ? sensors[sensorId] : radio.sensorH[sensorId].type;
-		
-		values[sensorId] = value;
-		callbacks.onValueReceived({
-			id: sensorId,
-			value: value,
-			type: type
-		});
-	} catch (e) {
-		log.error(e, 'Exception while setting value of sensor: %s', sensorId);
-	}
-}
-
-function onNodeConnected(nodeId, connected) {
-	try {
-		var nodeIdH = radio.nodes;
-		var prevStatus = nodeIdH[nodeId].connected;
-		
-		if (connected != prevStatus) {
-			nodeIdH[nodeId].connected = connected;
-			
-			if (connected) {
-				log.info('Node %d has connected!', nodeId);
-			} else {
-				log.warn('Node %d has disconnected!', nodeId);
-			}
-			
-			callbacks.onNodeEvent({
-				id: nodeId,
-				name: nodeIdH[nodeId].name,
-				connected: connected
-			});
-		}
-	} catch (e) {
-		log.error(e, 'Exception while processing node connected event!');
-	}
-}
-
-function readDevices() {
-	for (var deviceN = 0; deviceN < devices.length; deviceN++) {
-		(function () {
-			var deviceConf = devices[deviceN];
-			var device = deviceConf.device;
-			var transform = deviceConf.transform;
-			
-			device.read(function (e, vals) {
-				if (e != null) {
-					log.error(e, 'Device of type %s had an error while reading!', deviceConf.type);
-					return;
-				}
-				
-				var trans = transform != null ? transform(vals) : vals;
-				
-				if (log.debug())
-					log.debug('Read values: %s', JSON.stringify(trans));
-				
-				for (var sensorId in trans)
-					setValue(sensorId, trans[sensorId]);
-			});
-		})();
-	}
-}
-
-function pingRadios() {
-	if (log.debug())
-		log.debug('Pinging radio devices ...');
-	
-	try {
-		var nodeIdH = radio.nodes;
-		
-		for (var nodeId in nodeIdH) {			
-			if (log.debug())
-				log.debug('Pinging node %d', nodeId)
-			
-			onNodeConnected(nodeId, radio.radio.ping(parseInt(nodeId)));
-		}
-	} catch (e) {
-		log.error(e, 'Exception while pinging radio nodes!');
-	}
-}
-
-function readRadioDevices() {
-	if (radio != null) {
-		var radioSensorH = radio.sensorH;
-		for (var id in radioSensorH) {
-			var nodeId = radioSensorH[id].nodeId;
-			
-			if (log.debug())
-				log.debug('Calling get on radio ...');
-			
-			var success = radio.radio.get(id);
-			onNodeConnected(nodeId, success);
-		}
-	}
-}
-
-function readAll() {
-	if (log.debug())
-		log.debug('Reading all devices ...');
-	
-	readDevices();
-	readRadioDevices();
-}
-
-function mockReadAll() {
-	if (log.debug())
-		log.debug('Reading all devices ...');
-	
-	for (var sensorId in sensors) {
-		var value = Math.random()*100;
-		setValue(sensorId, value);
 	}
 }
 
@@ -258,27 +277,17 @@ exports.getValue = function (sensorId) {
 	return sensorId in values ? values[sensorId] : 0;
 };
 
-exports.setValue = function (sensorId, value) {
-	if (sensorId in sensors) {
-		var device = sensors[sensorId].device;
-		device.set({ id: sensorId, value: value });
-	} else if (sensorId in radio.sensorH) {
-		var success = radio.radio.set({ id: sensorId, value: value });
-		onNodeConnected(radio.sensorH[sensorId].nodeId, success);
-	} else {
-		throw new Error('Could not find sensor: ' + sensorId);
-	}
-};
+exports.setValue = setValue;
 
 exports.getSensors = function () {
 	var result = [];
-	for (var sensorId in sensors) {
-		result.push(sensors[sensorId]);
-	}
 	if (radio != null) {
 		for (var sensorId in radio.sensorH) {
 			result.push(radio.sensorH[sensorId]);
 		}
+	}
+	for (var sensorId in sensors) {
+		result.push(sensors[sensorId]);
 	}
 	return result;
 };

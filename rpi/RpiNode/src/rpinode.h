@@ -124,9 +124,10 @@ private:
 	TRf24Radio Radio;
 
 	// structures to convert from JS to cpp IDs
-	TStrIntH ValueNmIdH;
-	TStrIntH ValueNmNodeIdH;
-	TIntStrH ValueIdNmH;
+//	TStrIntH ValueNmIdH;
+//	TStrIntH ValueNmNodeIdH;
+	THash<TStr, TIntPr> ValNmNodeIdValIdPrH;
+	THash<TIntPr, TStr> NodeIdValIdPrValNmH;
 
 	v8::Persistent<v8::Function> OnValueCallback;
 
@@ -139,19 +140,22 @@ private:
 	// callbacks
 	JsDeclareFunction(onValue);
 
-	void OnMsgMainThread(const uint8& ValueId, const int& Val);
+	void OnMsgMainThread(const uint16& NodeId, const uint8& ValueId,
+			const int& Val);
 
 public:
-	void OnValue(const int& ValId, const int& Val);
+	void OnValue(const uint16& NodeId, const int& ValId, const int& Val);
 
 	class TOnMsgTask {
 	private:
 		TNodeJsRf24Radio* JsRadio;
+		const uint16 NodeId;
 		const int ValueId;
 		const int Val;
 	public:
-		TOnMsgTask(TNodeJsRf24Radio* _JsRadio, const int& _ValueId, const int& _Val):
+		TOnMsgTask(TNodeJsRf24Radio* _JsRadio, const uint16& _NodeId, const int& _ValueId, const int& _Val):
 			JsRadio(_JsRadio),
+			NodeId(_NodeId),
 			ValueId(_ValueId),
 			Val(_Val) {}
 

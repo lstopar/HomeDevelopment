@@ -318,12 +318,11 @@ TNodeJsRf24Radio* TNodeJsRf24Radio::NewFromArgs(const v8::FunctionCallbackInfo<v
 }
 
 TNodeJsRf24Radio::TNodeJsRf24Radio(const uint16& NodeId, const int& PinCE, const int& PinCSN,
-		const TStrIntH& _ValueNmIdH, const TStrIntH& _ValueNmNodeIdH,
+		const TStrIntH& ValueNmIdH, const TStrIntH& ValueNmNodeIdH,
 		const PNotify& Notify):
 	Radio(NodeId, PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, Notify),
-	ValueNmIdH(_ValueNmIdH),
-	ValueNmNodeIdH(_ValueNmNodeIdH),
-	ValueIdNmH(),
+	ValNmNodeIdValIdPrH(),
+	NodeIdValIdPrValNmH(),
 	OnValueCallback() {
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Setting radio cpp callback ...");
@@ -332,9 +331,13 @@ TNodeJsRf24Radio::TNodeJsRf24Radio(const uint16& NodeId, const int& PinCE, const
 	Notify->OnNotify(TNotifyType::ntInfo, "Initializing Id conversion structures ...");
 	int KeyId = ValueNmIdH.FFirstKeyId();
 	while (ValueNmIdH.FNextKeyId(KeyId)) {
-		const int& ValId = ValueNmIdH[KeyId];
 		const TStr& ValNm = ValueNmIdH.GetKey(KeyId);
-		ValueIdNmH.AddDat(ValId, ValNm);
+
+		const int& ValId = ValueNmIdH[KeyId];
+		const int& NodeId = ValueNmNodeIdH.GetDat(ValNm);
+
+		ValNmNodeIdValIdPrH.AddDat(ValNm, TIntPr(NodeId, ValId));
+		NodeIdValIdPrValNmH.AddDat(TIntPr(NodeId, ValId), ValNm);
 	}
 }
 
@@ -359,11 +362,9 @@ void TNodeJsRf24Radio::get(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
 
 	const TStr ValueNm = TNodeJsUtil::GetArgStr(Args, 0);
+	const TIntPr& NodeIdValIdPr = JsRadio->ValNmNodeIdValIdPrH.GetDat(ValueNm);
 
-	const uint16 NodeId = (uint16) JsRadio->ValueNmNodeIdH.GetDat(ValueNm);
-	const int ValueId = JsRadio->ValueNmIdH.GetDat(ValueNm);
-
-	const bool Success = JsRadio->Radio.Get(NodeId, ValueId);
+	const bool Success = JsRadio->Radio.Get((uint16) NodeIdValIdPr.Val1, NodeIdValIdPr.Val2);
 
 	Args.GetReturnValue().Set(v8::Boolean::New(Isolate, Success));
 }
@@ -378,8 +379,9 @@ void TNodeJsRf24Radio::set(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	const TStr ValueNm = ArgVal->GetObjStr("id");
 	const int Val = ArgVal->GetObjInt("value");
 
-	const uint16 NodeId = (uint16) JsRadio->ValueNmNodeIdH.GetDat(ValueNm);
-	const int ValId = JsRadio->ValueNmIdH.GetDat(ValueNm);
+	const TIntPr& NodeIdValIdPr = JsRadio->ValNmNodeIdValIdPrH.GetDat(ValueNm);
+	const uint16 NodeId = (uint16) NodeIdValIdPr.Val1;
+	const int ValId = NodeIdValIdPr.Val2;
 
 	bool Success = JsRadio->Radio.Set(NodeId, ValId, Val);
 
@@ -410,7 +412,8 @@ void TNodeJsRf24Radio::onValue(const v8::FunctionCallbackInfo<v8::Value>& Args) 
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
-void TNodeJsRf24Radio::OnMsgMainThread(const uint8& ValueId, const int& Val) {
+void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueId,
+		const int& Val) {
 	if (!OnValueCallback.IsEmpty()) {
 		v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 		v8::HandleScope HandleScope(Isolate);
@@ -418,7 +421,7 @@ void TNodeJsRf24Radio::OnMsgMainThread(const uint8& ValueId, const int& Val) {
 		const int ValId = (int) ValueId;
 		printf("Got value to value id %d\n", ValId);
 
-		const TStr ValueNm = ValueIdNmH.GetDat((int) ValueId);
+		const TStr& ValueNm = NodeIdValIdPrValNmH.GetDat(TIntPr(NodeId, (int) ValId));
 
 		PJsonVal JsonVal = TJsonVal::NewObj();
 		JsonVal->AddToObj("id", ValueNm);
@@ -429,13 +432,13 @@ void TNodeJsRf24Radio::OnMsgMainThread(const uint8& ValueId, const int& Val) {
 	}
 }
 
-void TNodeJsRf24Radio::OnValue(const int& ValId, const int& Val) {
+void TNodeJsRf24Radio::OnValue(const uint16& NodeId, const int& ValId, const int& Val) {
 	printf("Executing callback for value id: %d", ValId);
-	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, ValId, Val), true);
+	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, NodeId, ValId, Val), true);
 }
 
 void TNodeJsRf24Radio::TOnMsgTask::Run(TOnMsgTask& Task) {
-	Task.JsRadio->OnMsgMainThread(Task.ValueId, Task.Val);
+	Task.JsRadio->OnMsgMainThread(Task.NodeId, Task.ValueId, Task.Val);
 }
 
 

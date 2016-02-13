@@ -1,5 +1,5 @@
 function tuUiPrecision(val, type) {
-	return val.toFixed();
+	return parseInt(val.toFixed());
 }
 
 function createSlider(sensorId, min, max, val) {

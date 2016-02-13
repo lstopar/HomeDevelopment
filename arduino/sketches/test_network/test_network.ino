@@ -45,11 +45,13 @@ void setup(void)
  
   SPI.begin();
   radio.begin();
-  radio.setDataRate(RF24_2MBPS);
+  radio.setAutoAck(true);
+  radio.setRetries(15, 15);
+  radio.setDataRate(RF24_2MBPS);   // IMPORTANT, doesn't work otherwise!!
+  radio.setPALevel(RF24_PA_HIGH); // set power to high for better range
   network.begin(/*channel*/ 90, /*node address*/ this_node);
 
   radio.printDetails();
-  delay(1000);
   Serial.println("Finished configuration!");
 }
 
