@@ -40,6 +40,9 @@ html, body {
  * BOOTSTRAP MODS
  */
  
+slider.slider-horizontal {
+	width: 100%;
+}
 
 /*
  * ADMIN TEMPLATE
