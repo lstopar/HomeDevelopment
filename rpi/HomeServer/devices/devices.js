@@ -1,4 +1,5 @@
 var MOTION_ID = 'motion-lr';
+var LUMINOSITY_ID = 'lum-lr';
 var DIMMER_ID = 'light-sofa';
 
 module.exports = exports = function (setValue) {
