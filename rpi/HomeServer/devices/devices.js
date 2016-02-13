@@ -46,7 +46,7 @@ module.exports = exports = function (setValue) {
 				    	    	unit: '',
 				    	    	name: 'Motion living room',
 				    	    	description: ''
-				    	    },
+				    	    }/*,
 				    	    {
 				    	    	id: 'motion-val',
 				    	    	internalId: 5,
@@ -54,7 +54,7 @@ module.exports = exports = function (setValue) {
 				    	    	unit: '',
 				    	    	name: 'Motion living room',
 				    	    	description: ''
-				    	    },
+				    	    },*/
 				    	]
 				    }
 				],
