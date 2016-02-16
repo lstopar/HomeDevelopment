@@ -383,6 +383,7 @@ TRf24Radio::TRf24Radio(const uint16& NodeAddr, const uint8& PinCe,
 	Notify->OnNotify(TNotifyType::ntInfo, "Radio and network created!");
 }
 
+
 TRf24Radio::~TRf24Radio() {
 	delete Network;
 	delete Radio;
