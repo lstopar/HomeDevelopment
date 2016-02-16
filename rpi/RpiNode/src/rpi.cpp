@@ -365,6 +365,7 @@ void TRf24Radio::TReadThread::Run() {
 	}
 }
 
+
 TRf24Radio::TRf24Radio(const uint16& NodeAddr, const uint8& PinCe,
 		const uint8_t& PinCs, const uint32& SpiSpeed, const PNotify& _Notify):
 		MyAddr(NodeAddr),

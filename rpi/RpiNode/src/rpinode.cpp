@@ -421,6 +421,7 @@ void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueI
 		const int ValId = (int) ValueId;
 		printf("Got value to value id %d\n", ValId);
 
+
 		const TStr& ValueNm = NodeIdValIdPrValNmH.GetDat(TIntPr(NodeId, (int) ValId));
 
 		PJsonVal JsonVal = TJsonVal::NewObj();
