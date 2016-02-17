@@ -24,7 +24,31 @@ module.exports = exports = function (setValue) {
 				    	    	unit: '%',
 				    	    	name: 'Brightness',
 				    	    	description: 'Dimmer 1'
-				    	    }          
+				    	    },
+				    	    {
+				    	    	id: 'led-blue',
+				    	    	internalId: 5,
+				    	    	type: 'dimmer',
+				    	    	unit: '%',
+				    	    	name: 'LED blue',
+				    	    	description: 'Dimmer 1'
+				    	    },
+				    	    {
+				    	    	id: 'led-red',
+				    	    	internalId: 6,
+				    	    	type: 'dimmer',
+				    	    	unit: '%',
+				    	    	name: 'LED red',
+				    	    	description: 'Dimmer 1'
+				    	    },
+				    	    {
+				    	    	id: 'led-green',
+				    	    	internalId: 9,
+				    	    	type: 'dimmer',
+				    	    	unit: '%',
+				    	    	name: 'LED green',
+				    	    	description: 'Dimmer 1'
+				    	    }
 				    	]
 				    },
 				    {
