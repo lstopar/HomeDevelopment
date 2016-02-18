@@ -9,6 +9,9 @@ $(document).ready(function () {
 		if (type == 'dimmer') {
 			var slider = thumbnail.find('#range-' + id);
 			slider.slider('setValue', tuUiPrecision(val, type));
+		} else if (type == 'actuator') { 
+			var chk = thumbnail.find('#chk-' + id);
+			chk.attr('checked', val == 1);
 		} else {
 			var valSpan = thumbnail.find('#span-val-' + id);
 			valSpan.html(tuUiPrecision(val, type));
@@ -52,9 +55,7 @@ $(document).ready(function () {
 	
 	function initWs() {
 		var address = getWsUrl();
-		
-		var isDrawing = false;
-		
+				
 		console.log('Connecting websocket to address: ' + address); 
 		var ws = new WebSocket(address);
 		

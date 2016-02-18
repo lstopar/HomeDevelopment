@@ -10,23 +10,32 @@
 #include "protocol.h"
 
 const uint16_t MY_ADDRESS = 01;
-const int LED_PIN = 3;
 
+const int LED_PIN = 3;
 const int PIN_BLUE = 5;
 const int PIN_RED = 6;
 const int PIN_GREEN = 9;
+const int MODE_BLINK_RGB = 16;
 
+const int RGB_PINS[3] = { PIN_BLUE, PIN_RED, PIN_GREEN };
+
+int rgbVals[3] = { 0, 0, 0 };
 int pin3Val = 0;
-int pinBlueVal = 0;
-int pinRedVal = 0;
-int pinGreenVal = 0;
+
+bool blinkRgbStrip = false;
+int currIncreaseClrN = 0;
 
 RF24 radio(7,8);
 RF24Network network(radio);
 
+int iterN = 0;
+
 void writeRadio(const uint16_t& recipient, const unsigned char& type, const char* buff, const int& len);
+void resetRgb();
 
 void setup() {
+  bitSet(TCCR1B, WGM12);  // put PWM timer 1 into fast mode
+  
   Serial.begin(9600);
   printf_begin();
   Serial.println("========================================");
@@ -39,9 +48,7 @@ void setup() {
   pinMode(PIN_GREEN, OUTPUT);
 
   analogWrite(LED_PIN, 0);
-  analogWrite(PIN_BLUE, 0);
-  analogWrite(PIN_RED, 0);
-  analogWrite(PIN_GREEN, 0);
+  resetRgb();
  
   SPI.begin();
 
@@ -73,13 +80,13 @@ void processGet(const uint16_t& callerAddr, const byte& valId) {
       val = pin3Val;
       break;
     case PIN_BLUE:
-      val = pinBlueVal;
+      val = rgbVals[0];
       break;
     case PIN_RED:
-      val = pinRedVal;
+      val = rgbVals[1];
       break;
     case PIN_GREEN:
-      val = pinGreenVal;
+      val = rgbVals[2];
       break;
     default:
       Serial.print("Unknown pin: ");
@@ -97,7 +104,13 @@ void processGet(const uint16_t& callerAddr, const byte& valId) {
     TRadioProtocol::GenPushPayload(valId, val, payload);
 
     writeRadio(callerAddr, REQUEST_PUSH, payload, PAYLOAD_LEN);
-  } else {
+  }
+  else if (valId == MODE_BLINK_RGB) {
+    char payload[PAYLOAD_LEN];
+    TRadioProtocol::GenPushPayload(valId, blinkRgbStrip ? 1 : 0, payload);
+    writeRadio(callerAddr, REQUEST_PUSH, payload, PAYLOAD_LEN);
+  } 
+  else {
     Serial.print("Unknown val ID: "); Serial.println(valId);
   }
 }
@@ -112,22 +125,32 @@ void processSet(const uint16_t& callerAddr, const byte& valId, const int& val) {
     processGet(callerAddr, valId);
   }
   else if (valId == PIN_BLUE) {
-     pinBlueVal = (int) (double(val)*2.55);
-     analogWrite(PIN_BLUE, pinBlueVal);
+     rgbVals[0] = (int) (double(val)*2.55);
+     analogWrite(RGB_PINS[0], rgbVals[0]);
      processGet(callerAddr, valId);
   }
   else if (valId == PIN_RED) {
-    pinRedVal = (int) (double(val)*2.55);
-    analogWrite(PIN_RED, pinRedVal);
+    rgbVals[1] = (int) (double(val)*2.55);
+    analogWrite(RGB_PINS[1], rgbVals[1]);
     processGet(callerAddr, valId);
   }
   else if (valId == PIN_GREEN) {
-    pinGreenVal = (int) (double(val)*2.55);
-    analogWrite(PIN_GREEN, pinGreenVal);
+    rgbVals[2] = (int) (double(val)*2.55);
+    analogWrite(RGB_PINS[2], rgbVals[2]);
     processGet(callerAddr, valId);
+  }
+  else if (valId == MODE_BLINK_RGB) {
+    blinkRgbStrip = val == 1;
+    currIncreaseClrN = 0;
   }
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId);
+  }
+}
+
+void resetRgb() {
+  for (int i = 0; i < 3; i++) {
+    analogWrite(RGB_PINS[i], 0);
   }
 }
 
@@ -171,5 +194,19 @@ void loop(void) {
       Serial.println(header.type);
     }
   }
+
+  if (blinkRgbStrip && iterN % 1000 == 0) {
+    rgbVals[currIncreaseClrN]++;
+
+    if (rgbVals[currIncreaseClrN] > 255) {
+      resetRgb();
+      currIncreaseClrN++;
+      currIncreaseClrN = currIncreaseClrN % 3;
+    }
+    
+    analogWrite(RGB_PINS[currIncreaseClrN], rgbVals[currIncreaseClrN]);
+  }
+
+  iterN++;
 }
 

@@ -48,6 +48,14 @@ module.exports = exports = function (setValue) {
 				    	    	unit: '%',
 				    	    	name: 'LED green',
 				    	    	description: 'Dimmer 1'
+				    	    },
+				    	    {
+				    	    	id: 'blink-rgb',
+				    	    	internalId: 16,
+				    	    	type: 'actuator',
+				    	    	unit: '',
+				    	    	name: 'Blink RGB',
+				    	    	description: ''
 				    	    }
 				    	]
 				    },

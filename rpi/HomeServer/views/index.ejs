@@ -69,19 +69,29 @@
 									</div>
 								</div>
 								<div class="caption">
-									<% if (sensor.type != 'dimmer') { %>
-									<h4><%= sensor.name %>: <span class="pull-right"><span id="span-val-<%= sensor.id %>"><%= utils.formatVal(sensor, val); %></span><%= sensor.unit %><span></span></h4>
-									<p><%= sensor.description %></p>
+									<% if (sensor.type == 'actuator') { %>
+										<div class="form-group">
+											<label for="range-<%= sensor.id %>"><%= sensor.name %></label>
+											<input id="chk-<%= sensor.id %>" type="checkbox" class="form-control" checked="<%= val == 1 ? 'checked' : '' %>" />
+										</div>
+										<script type="text/javascript">
+										$(document).ready(function () {
+											createCheckbox('<%= sensor.id %>', 0, 100, <%= val %>);
+										});
+										</script>
+									<% } else if (sensor.type != 'dimmer') { %>
+										<h4><%= sensor.name %>: <span class="pull-right"><span id="span-val-<%= sensor.id %>"><%= utils.formatVal(sensor, val); %></span><%= sensor.unit %><span></span></h4>
+										<p><%= sensor.description %></p>
 									<% } else { %>
-									<div class="form-group">
-										<label for="range-<%= sensor.id %>"><%= sensor.name %></label>
-										<input id="range-<%= sensor.id %>" type="range" class="form-control" />
-									</div>
-									<script type="text/javascript">
-									$(document).ready(function () {
-										createSlider('<%= sensor.id %>', 0, 100, <%= val %>);
-									});
-									</script>
+										<div class="form-group">
+											<label for="range-<%= sensor.id %>"><%= sensor.name %></label>
+											<input id="range-<%= sensor.id %>" type="range" class="form-control" />
+										</div>
+										<script type="text/javascript">
+										$(document).ready(function () {
+											createSlider('<%= sensor.id %>', 0, 100, <%= val %>);
+										});
+										</script>
 									<% } %>
 	      						</div>
 	    					</div>
