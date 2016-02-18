@@ -71,8 +71,8 @@
 								<div class="caption">
 									<% if (sensor.type == 'actuator') { %>
 										<div class="form-group">
-											<label for="range-<%= sensor.id %>"><%= sensor.name %></label>
-											<input id="chk-<%= sensor.id %>" type="checkbox" class="form-control" checked="<%= val == 1 ? 'checked' : '' %>" />
+											<label for="chk-<%= sensor.id %>"><%= sensor.name %></label>
+											<input id="chk-<%= sensor.id %>" type="checkbox" class="form-control" <%= val == 1 ? 'checked="checked"' : ;' %> />
 										</div>
 										<script type="text/javascript">
 										$(document).ready(function () {

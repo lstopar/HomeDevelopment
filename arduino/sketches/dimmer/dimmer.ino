@@ -142,6 +142,7 @@ void processSet(const uint16_t& callerAddr, const byte& valId, const int& val) {
   else if (valId == MODE_BLINK_RGB) {
     blinkRgbStrip = val == 1;
     currIncreaseClrN = 0;
+    processGet(callerAddr, valId);
   }
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId);
@@ -195,7 +196,7 @@ void loop(void) {
     }
   }
 
-  if (blinkRgbStrip && iterN % 1000 == 0) {
+  if (blinkRgbStrip && iterN % 500 == 0) {
     rgbVals[currIncreaseClrN]++;
 
     if (rgbVals[currIncreaseClrN] > 255) {
