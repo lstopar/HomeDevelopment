@@ -13,6 +13,8 @@ module.exports = exports = {
 			return 'img/luminosity.png';	// TODO
 		case 'dimmer':
 			return 'img/bulb.png';
+		case 'actuator':
+			return 'img/bulb.png';
 		default:
 			throw new Error('Unknown sensor type: ' + sensor.type);
 		}
