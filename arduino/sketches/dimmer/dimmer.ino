@@ -15,7 +15,7 @@ const int LED_PIN = 3;
 const int PIN_BLUE = 5;
 const int PIN_RED = 6;
 const int PIN_GREEN = 9;
-const int MODE_BLINK_RGB = 16;
+const int MODE_BLINK_RGB = 15;
 
 const int RGB_PINS[3] = { PIN_BLUE, PIN_RED, PIN_GREEN };
 

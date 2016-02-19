@@ -67,7 +67,7 @@ module.exports = exports = function (setValue) {
 				    	    },
 				    	    {
 				    	    	id: BLINK_RGB_ID,
-				    	    	internalId: 16,
+				    	    	internalId: 15,
 				    	    	type: 'actuator',
 				    	    	unit: '',
 				    	    	name: 'Blink RGB',
