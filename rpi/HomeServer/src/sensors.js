@@ -12,6 +12,7 @@ var devices = [];
 var sensors = {};
 var radio = null;
 var values = {};
+var layoutGroups = [];
 
 
 var callbacks = {
@@ -173,6 +174,39 @@ function createDevice(type, devConfig) {
 	}
 }
 
+function initGroups(devicesConf) {
+	log.info('Constructing layout groups ...');
+	
+	var layout = devicesConf.layout != null ? devicesConf.layout : [];
+	
+	var usedSensorIds = {};
+	
+	for (var groupN = 0; groupN < layout.length; groupN++) {
+		var group = layout[groupN];
+		var sensorIds = group.sensorIds;
+		
+		var layoutGroup = [];
+		
+		for (var sensorId in sensorIds) {
+			if (sensorId in usedSensorIds) {
+				throw new Error('Sensor ID already present in the layout!');
+			}
+			usedSensorIds[sensorId] = true;
+			layoutGroup.push(sensors[sensorId]);
+		}
+		
+		layoutGroups.push(layoutGroup);
+	}
+	
+	for (var sensorId in sensors) {
+		if (!(sensorId in usedSensorIds)) {
+			layoutGroups.push([sensors[sensorId]]);
+		}
+	}
+	
+	log.info('Layout initialized!');
+}
+
 function initSensors() {
 	log.info('Reading devices configuration ...');
 	var devs = require(path.join(__dirname, '../devices', config.devices))(setValue)
@@ -291,6 +325,10 @@ exports.getSensors = function () {
 	}
 	return result;
 };
+
+exports.getLayout = function () {
+	return layoutGroups;
+}
 
 exports.isOnline = function (nodeId) {
 	if (radio == null) return false;

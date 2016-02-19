@@ -55,12 +55,11 @@
     		<div id="tab-home" role="tabpanel" class="tab-pane fade active">
     			<div class="row">
     				<%
-    				var sensorV = sensors.getSensors();
-    				for (var sensorN = 0; sensorN < sensorV.length; sensorN++) { %>
+    				var layout = sensors.getLayout();
+    				for (var groupN = 0; groupN < layout.length; groupN++) { %>
     					<div class="col-xs-12 col-sm-6 col-md-3 col-lg-2">
     						<%
-							var sensor = sensorV[sensorN];
-							var val = sensors.getValue(sensor.id);
+    						var group = layout[groupN];
 							%>
 							<div id="thumb-<%= sensor.id %>" class="thumbnail">
 								<div class="img-thumbnail thumbnail-img-wrapper">
@@ -69,6 +68,11 @@
 									</div>
 								</div>
 								<div class="caption">
+								<% for (var sensorN = 0; sensorN < group.length; sensorN++) { %>
+									<%
+									var sensor = sensorV[sensorN];
+									var val = sensors.getValue(sensor.id);
+									%>
 									<% if (sensor.type == 'actuator') { %>
 										<div class="form-group">
 											<label for="chk-<%= sensor.id %>"><%= sensor.name %></label>
@@ -93,6 +97,7 @@
 										});
 										</script>
 									<% } %>
+								<% } %>
 	      						</div>
 	    					</div>
 	  					</div>

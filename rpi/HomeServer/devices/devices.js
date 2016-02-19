@@ -1,6 +1,10 @@
 var MOTION_ID = 'motion-lr';
 var LUMINOSITY_ID = 'lum-lr';
 var DIMMER_ID = 'light-sofa';
+var LED_BLUE_ID = 'led-blue';
+var LED_RED_ID = 'led-red';
+var LED_GREEN_ID = 'led-green';
+var BLINK_RGB_ID = 'rgb-blink';
 
 module.exports = exports = function (setValue) {
 	return {
@@ -9,6 +13,16 @@ module.exports = exports = function (setValue) {
 				setValue(DIMMER_ID, value == 1 ? 100 : 0);
 			}
 		},
+		layout: [
+		    {
+		    	sensorIds: [
+		    	    LED_BLUE_ID,
+		    	    LED_RED_ID,
+		    	    LED_GREEN_ID,
+		    	    BLINK_RGB_ID
+		    	]
+		    }
+		],
 		devices: [
 			{
 				type: 'Rf24',
@@ -26,7 +40,7 @@ module.exports = exports = function (setValue) {
 				    	    	description: 'Dimmer 1'
 				    	    },
 				    	    {
-				    	    	id: 'led-blue',
+				    	    	id: LED_BLUE_ID,
 				    	    	internalId: 5,
 				    	    	type: 'dimmer',
 				    	    	unit: '%',
@@ -34,7 +48,7 @@ module.exports = exports = function (setValue) {
 				    	    	description: 'Dimmer 1'
 				    	    },
 				    	    {
-				    	    	id: 'led-red',
+				    	    	id: LED_RED_ID,
 				    	    	internalId: 6,
 				    	    	type: 'dimmer',
 				    	    	unit: '%',
@@ -42,7 +56,7 @@ module.exports = exports = function (setValue) {
 				    	    	description: 'Dimmer 1'
 				    	    },
 				    	    {
-				    	    	id: 'led-green',
+				    	    	id: LED_GREEN_ID,
 				    	    	internalId: 9,
 				    	    	type: 'dimmer',
 				    	    	unit: '%',
@@ -50,7 +64,7 @@ module.exports = exports = function (setValue) {
 				    	    	description: 'Dimmer 1'
 				    	    },
 				    	    {
-				    	    	id: 'blink-rgb',
+				    	    	id: BLINK_RGB_ID,
 				    	    	internalId: 16,
 				    	    	type: 'actuator',
 				    	    	unit: '',

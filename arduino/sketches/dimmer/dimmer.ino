@@ -151,7 +151,8 @@ void processSet(const uint16_t& callerAddr, const byte& valId, const int& val) {
 
 void resetRgb() {
   for (int i = 0; i < 3; i++) {
-    analogWrite(RGB_PINS[i], 0);
+    rgbVals[i] = 0;
+    analogWrite(RGB_PINS[i], rgbVals[i]);
   }
 }
 
@@ -199,7 +200,7 @@ void loop(void) {
   if (blinkRgbStrip && iterN % 500 == 0) {
     rgbVals[currIncreaseClrN]++;
 
-    if (rgbVals[currIncreaseClrN] > 255) {
+    if (rgbVals[currIncreaseClrN] == 255) {
       resetRgb();
       currIncreaseClrN++;
       currIncreaseClrN = currIncreaseClrN % 3;
