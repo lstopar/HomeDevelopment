@@ -188,6 +188,7 @@ function initGroups(layout) {
 		
 		var layoutGroup = {
 			id: group.id,
+			img: group.img,
 			sensors: []
 		};
 		
