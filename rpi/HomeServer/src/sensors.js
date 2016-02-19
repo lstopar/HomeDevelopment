@@ -329,6 +329,9 @@ exports.getSensors = function () {
 };
 
 exports.getLayout = function () {
+	if (log.trace()) {
+		log.debug('Returning layout: %s', JSON.stringify(layoutGroups));
+	}
 	return layoutGroups;
 }
 
