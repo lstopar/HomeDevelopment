@@ -411,11 +411,13 @@ bool TRf24Radio::Ping(const uint16& NodeId) {
 }
 
 bool TRf24Radio::Set(const uint16& NodeId, const int& ValId, const int& Val) {
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Calling SET for node %d, valId: %d, value %d ...", NodeId, ValId, Val);
 	TMem Payload;	TRadioProtocol::GenSetPayload(ValId, Val, Payload);
 	return Send(NodeId, REQUEST_SET, Payload);
 }
 
 bool TRf24Radio::Get(const uint16& NodeId, const int& ValId) {
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Calling GET for node %d, valId: %d ...", NodeId, ValId);
 	TMem Payload;	TRadioProtocol::GenGetPayload(ValId, Payload);
 	return Send(NodeId, REQUEST_GET, Payload);
 }

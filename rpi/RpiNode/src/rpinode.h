@@ -131,6 +131,8 @@ private:
 
 	v8::Persistent<v8::Function> OnValueCallback;
 
+	PNotify Notify;
+
 private:
 	JsDeclareFunction(init);
 	JsDeclareFunction(get);

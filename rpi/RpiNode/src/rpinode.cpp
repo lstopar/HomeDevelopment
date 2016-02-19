@@ -319,11 +319,12 @@ TNodeJsRf24Radio* TNodeJsRf24Radio::NewFromArgs(const v8::FunctionCallbackInfo<v
 
 TNodeJsRf24Radio::TNodeJsRf24Radio(const uint16& NodeId, const int& PinCE, const int& PinCSN,
 		const TStrIntH& ValueNmIdH, const TStrIntH& ValueNmNodeIdH,
-		const PNotify& Notify):
-	Radio(NodeId, PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, Notify),
+		const PNotify& _Notify):
+	Radio(NodeId, PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, _Notify),
 	ValNmNodeIdValIdPrH(),
 	NodeIdValIdPrValNmH(),
-	OnValueCallback() {
+	OnValueCallback(),
+	Notify(_Notify) {
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Setting radio cpp callback ...");
 	Radio.SetCallback(this);
@@ -419,7 +420,7 @@ void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueI
 		v8::HandleScope HandleScope(Isolate);
 
 		const int ValId = (int) ValueId;
-		printf("Got value to value id %d\n", ValId);
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got value to value id %d", ValId);
 
 
 		const TStr& ValueNm = NodeIdValIdPrValNmH.GetDat(TIntPr(NodeId, (int) ValId));
@@ -434,7 +435,7 @@ void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueI
 }
 
 void TNodeJsRf24Radio::OnValue(const uint16& NodeId, const int& ValId, const int& Val) {
-	printf("Executing callback for value id: %d", ValId);
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Executing callback for value id: %d", ValId);
 	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, NodeId, ValId, Val), true);
 }
 
