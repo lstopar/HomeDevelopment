@@ -175,7 +175,7 @@ function createDevice(type, devConfig) {
 }
 
 function initGroups(layout) {
-	log.info('Constructing layout groups ...');
+	log.info('Constructing layout groups:\n%s', JSON.stringify(layout, null, '\t'));
 	
 	if (layout == null) { layout = []; }
 	
