@@ -76,12 +76,12 @@
 									%>
 									<% if (sensor.type == 'actuator') { %>
 										<div class="form-group">
-											<label for="chk-<%= sensor.id %>"><%= sensor.name %></label>
-											<input id="chk-<%= sensor.id %>" type="checkbox" class="form-control" <%= val == 1 ? 'checked="checked"' : '' %> />
+											<label for="chk-<%= sensor.id %>"><%= sensor.name %></label><br />
+											<input id="chk-<%= sensor.id %>" type="checkbox" class="form-control" />
 										</div>
 										<script type="text/javascript">
 										$(document).ready(function () {
-											createCheckbox('<%= sensor.id %>');
+											createCheckbox('<%= sensor.id %>', <%= val == 1 %>);
 										});
 										</script>
 									<% } else if (sensor.type != 'dimmer') { %>

@@ -29,6 +29,7 @@ function createCheckbox(sensorId, isChecked) {
 	
 	chk.bootstrapSwitch({
 		state: isChecked,
+		size: 'small',
 		onSwitchChange: function () {
 			var checked = chk.bootstrapSwitch('state');
 			$.ajax('api/set', {
