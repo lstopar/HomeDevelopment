@@ -174,10 +174,10 @@ function createDevice(type, devConfig) {
 	}
 }
 
-function initGroups(devicesConf) {
+function initGroups(layout) {
 	log.info('Constructing layout groups ...');
 	
-	var layout = devicesConf.layout != null ? devicesConf.layout : [];
+	if (layout == null) { layout = []; }
 	
 	var usedSensorIds = {};
 	
@@ -301,6 +301,8 @@ function initSensors() {
 			});
 		}
 	}
+	
+	initGroups(devs.layout);
 }
 
 //=======================================================
