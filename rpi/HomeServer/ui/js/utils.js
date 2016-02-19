@@ -24,20 +24,25 @@ function createSlider(sensorId, min, max, val) {
 	});
 }
 
-function createCheckbox(sensorId) {
-	$('#chk-' + sensorId).change(function () {
-		var checked = $(this).is(':checked');
-		$.ajax('api/set', {
-			method: 'POST',
-			dataType: 'json',
-			data: {
-				id: sensorId,
-				value: checked ? 1 : 0
-			},
-			success: function () {},
-			error: handleAjaxError()
-		})
-	})
+function createCheckbox(sensorId, isChecked) {
+	var chk = $('#chk-' + sensorId);
+	
+	chk.bootstrapSwitch({
+		state: isChecked,
+		onSwitchChange: function () {
+			var checked = chk.bootstrapSwitch('state');
+			$.ajax('api/set', {
+				method: 'POST',
+				dataType: 'json',
+				data: {
+					id: sensorId,
+					value: checked ? 1 : 0
+				},
+				success: function () {},
+				error: handleAjaxError()
+			});
+		}
+	});
 }
 
 function handleAjaxError(alertField, callback) {
