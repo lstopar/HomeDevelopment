@@ -187,7 +187,9 @@ function initGroups(layout) {
 		
 		var layoutGroup = [];
 		
-		for (var sensorId in sensorIds) {
+		for (var sensorN = 0; sensorN < sensorIds.length; sensorN++) {
+			var sensorId = sensorIds[sensorN];
+			
 			if (sensorId in usedSensorIds) {
 				throw new Error('Sensor ID already present in the layout!');
 			}
