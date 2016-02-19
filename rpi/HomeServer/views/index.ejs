@@ -70,7 +70,7 @@
 								<div class="caption">
 								<% for (var sensorN = 0; sensorN < group.length; sensorN++) { %>
 									<%
-									var sensor = sensorV[sensorN];
+									var sensor = group[sensorN];
 									var val = sensors.getValue(sensor.id);
 									%>
 									<% if (sensor.type == 'actuator') { %>
