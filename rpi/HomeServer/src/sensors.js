@@ -222,6 +222,16 @@ function initGroups(layout) {
 		}
 	}
 	
+	for (var sensorId in radio.sensorH) {
+		if (!(sensorId in usedSensorIds)) {
+			layoutGroups.push({
+				id: 'group-' + sensorId,
+				img: utils.getSensorImg(radio.sensorH[sensorId]),
+				sensors: [radio.sensorH[sensorId]]
+			});
+		}
+	}
+	
 	log.info('Layout initialized!');
 }
 
