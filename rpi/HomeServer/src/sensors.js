@@ -2,6 +2,7 @@ var path = require('path');
 var fs = require('fs');
 
 var config = require('../config.js');
+var utils = require('./utils.js');
 var rpi = require('../' + config.rpilib);
 
 //=======================================================
