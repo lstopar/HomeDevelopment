@@ -191,8 +191,15 @@ function initGroups(layout) {
 			if (sensorId in usedSensorIds) {
 				throw new Error('Sensor ID already present in the layout!');
 			}
+			
+			var sensorConf = sensorId in sensors ? sensors[sensorId] : radio.sensorH[sensorId];
+			
+			if (sensorConf == null) {
+				throw new Error('Failed to get configuration of sensor: %s', sensorId);
+			}
+			
 			usedSensorIds[sensorId] = true;
-			layoutGroup.push(sensors[sensorId]);
+			layoutGroup.push(sensorConf);
 		}
 		
 		layoutGroups.push(layoutGroup);
