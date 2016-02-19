@@ -212,7 +212,11 @@ function initGroups(layout) {
 	
 	for (var sensorId in sensors) {
 		if (!(sensorId in usedSensorIds)) {
-			layoutGroups.push({ id: 'group-' + sensorId, sensors: [sensors[sensorId]] });
+			layoutGroups.push({
+				id: 'group-' + sensorId,
+				img: utils.getSensorImg(sensors[sensorId]),
+				sensors: [sensors[sensorId]]
+			});
 		}
 	}
 	

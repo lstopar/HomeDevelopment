@@ -19,7 +19,7 @@ module.exports = exports = {
 			throw new Error('Unknown sensor type: ' + sensor.type);
 		}
 	},
-	
+		
 	formatVal: function (sensor, val) {
 		return val.toFixed();
 	}
