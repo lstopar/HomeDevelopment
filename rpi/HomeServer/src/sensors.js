@@ -185,7 +185,10 @@ function initGroups(layout) {
 		var group = layout[groupN];
 		var sensorIds = group.sensorIds;
 		
-		var layoutGroup = [];
+		var layoutGroup = {
+			id: group.id,
+			sensors: []
+		};
 		
 		for (var sensorN = 0; sensorN < sensorIds.length; sensorN++) {
 			var sensorId = sensorIds[sensorN];
@@ -201,7 +204,7 @@ function initGroups(layout) {
 			}
 			
 			usedSensorIds[sensorId] = true;
-			layoutGroup.push(sensorConf);
+			layoutGroup.sensors.push(sensorConf);
 		}
 		
 		layoutGroups.push(layoutGroup);
@@ -209,7 +212,7 @@ function initGroups(layout) {
 	
 	for (var sensorId in sensors) {
 		if (!(sensorId in usedSensorIds)) {
-			layoutGroups.push([sensors[sensorId]]);
+			layoutGroups.push({ id: 'group-' + sensorId, sensors: [sensors[sensorId]] });
 		}
 	}
 	

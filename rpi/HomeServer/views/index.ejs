@@ -61,16 +61,16 @@
     						<%
     						var group = layout[groupN];
 							%>
-							<div id="thumb-<%= sensor.id %>" class="thumbnail">
+							<div id="thumb-<%= group.id %>" class="thumbnail">
 								<div class="img-thumbnail thumbnail-img-wrapper">
 									<div class="wrapper1">
 										<img id="img-<%= sensor.id %>" src="<%= utils.getSensorImg(sensor); %>" alt="<%= sensor.name %>" />
 									</div>
 								</div>
 								<div class="caption">
-								<% for (var sensorN = 0; sensorN < group.length; sensorN++) { %>
+								<% for (var sensorN = 0; sensorN < group.sensors.length; sensorN++) { %>
 									<%
-									var sensor = group[sensorN];
+									var sensor = group.sensors[sensorN];
 									var val = sensors.getValue(sensor.id);
 									%>
 									<% if (sensor.type == 'actuator') { %>

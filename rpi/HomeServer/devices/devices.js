@@ -15,6 +15,7 @@ module.exports = exports = function (setValue) {
 		},
 		layout: [
 		    {
+		    	id: 'group-rgb',
 		    	sensorIds: [
 		    	    LED_BLUE_ID,
 		    	    LED_RED_ID,
