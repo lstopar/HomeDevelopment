@@ -136,6 +136,7 @@ private:
 private:
 	JsDeclareFunction(init);
 	JsDeclareFunction(get);
+	JsDeclareFunction(getAll);
 	JsDeclareFunction(set);
 	JsDeclareFunction(ping);
 

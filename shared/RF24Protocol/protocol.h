@@ -22,7 +22,7 @@ const uint16_t ADDRESS_RPI = 00;
 const uint16_t ADDRESS_ARDUINO_SOFA = 01;
 const uint16_t ADDRESS_ARDUINO_PIR = 04;
 
-const int VAL_ID_ALL = 0;
+const char VAL_ID_ALL = 0xFF;
 
 const unsigned char COMM_CHANNEL = 0x4C;
 const int PAYLOAD_LEN = 24;

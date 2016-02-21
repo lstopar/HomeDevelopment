@@ -129,16 +129,28 @@ function pingRadios() {
 
 function readRadioDevices() {
 	if (radio != null) {
-		var radioSensorH = radio.sensorH;
-		for (var id in radioSensorH) {
-			var nodeId = radioSensorH[id].nodeId;
-			
-			if (log.debug())
-				log.debug('Calling get on radio ...');
-			
-			var success = radio.radio.get(id);
+		if (log.debug())
+			log.debug('Fetching all values from radio dvices ...');
+		
+		var nodes = radio.nodes;
+		for (var nodeId in nodes) {
+			if (log.trace())
+				log.trace('Fetching all values from node %d', nodeId);
+			var success = radio.radio.getAll(nodeId);
 			onNodeConnected(nodeId, success);
 		}
+//		// TODO
+//		
+//		var radioSensorH = radio.sensorH;
+//		for (var id in radioSensorH) {
+//			var nodeId = radioSensorH[id].nodeId;
+//			
+//			if (log.debug())
+//				log.debug('Calling get on radio ...');
+//			
+//			var success = radio.radio.get(id);
+//			onNodeConnected(nodeId, success);
+//		}
 	}
 }
 

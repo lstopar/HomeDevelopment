@@ -171,6 +171,7 @@ public:
 	bool Ping(const uint16& NodeId);
 	bool Set(const uint16& NodeId, const int& ValId, const int& Val);
 	bool Get(const uint16& NodeId, const int& ValId);
+	bool GetAll(const uint16& NodeId);
 
 	void SetCallback(TRf24RadioCallback* Cb) { Callback = Cb; }
 

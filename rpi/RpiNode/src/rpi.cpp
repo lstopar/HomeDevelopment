@@ -436,6 +436,16 @@ bool TRf24Radio::Get(const uint16& NodeId, const int& ValId) {
 	return Send(NodeId, REQUEST_GET, Payload);
 }
 
+bool TRf24Radio::GetAll(const uint16& NodeId) {
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Calling GET all values for node %d ...", NodeId);
+
+	TChV ValIdV(1,1);
+	ValIdV[0] = VAL_ID_ALL;
+
+	TMem Payload;	TRadioProtocol::GenGetPayload(ValIdV, Payload);
+	return Send(NodeId, REQUEST_GET, Payload);
+}
+
 bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff) {
 	TLock Lock(CriticalSection);
 

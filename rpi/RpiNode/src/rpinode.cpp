@@ -279,6 +279,7 @@ void TNodeJsRf24Radio::Init(v8::Handle<v8::Object> Exports) {
 	// Add all methods, getters and setters here.
 	NODE_SET_PROTOTYPE_METHOD(tpl, "init", _init);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "get", _get);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "getAll", _getAll);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "set", _set);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "ping", _ping);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "onValue", _onValue);
@@ -366,6 +367,18 @@ void TNodeJsRf24Radio::get(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	const TIntPr& NodeIdValIdPr = JsRadio->ValNmNodeIdValIdPrH.GetDat(ValueNm);
 
 	const bool Success = JsRadio->Radio.Get((uint16) NodeIdValIdPr.Val1, NodeIdValIdPr.Val2);
+
+	Args.GetReturnValue().Set(v8::Boolean::New(Isolate, Success));
+}
+
+void TNodeJsRf24Radio::getAll(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
+	const int NodeId = TNodeJsUtil::GetArgInt32(Args, 0);
+
+	const bool Success = JsRadio->Radio.GetAll((uint16) NodeId);
 
 	Args.GetReturnValue().Set(v8::Boolean::New(Isolate, Success));
 }
