@@ -22,7 +22,8 @@ module.exports = exports = function (setValue) {
 		    	    LED_BLUE_ID,
 		    	    LED_RED_ID,
 		    	    LED_GREEN_ID,
-		    	    BLINK_RGB_ID
+		    	    BLINK_RGB_ID,
+		    	    CYCLE_HSL_ID
 		    	]
 		    }
 		],
