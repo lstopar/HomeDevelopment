@@ -336,9 +336,13 @@ void TRf24Radio::TReadThread::Run() {
 						break;
 					} case REQUEST_PUSH: {
 						Notify->OnNotify(TNotifyType::ntInfo, "Received PUSH ...");
-						int ValId, Val;
-						TRadioProtocol::ParsePushPayload(Payload, ValId, Val);
-						Radio->Callback->OnValue(FromNode, ValId, Val);
+						TVec<TRadioValue> ValV;
+						TRadioProtocol::ParsePushPayload(Payload, ValV);
+
+						for (int ValN = 0; ValN < ValV.Len(); ValN++) {
+							Radio->Callback->OnValue(FromNode, ValV[ValN].ValId, ValV[ValN].Val);
+						}
+
 						break;
 					} case REQUEST_GET: {
 						Notify->OnNotify(TNotifyType::ntWarn, "GET not supported!");
@@ -412,13 +416,23 @@ bool TRf24Radio::Ping(const uint16& NodeId) {
 
 bool TRf24Radio::Set(const uint16& NodeId, const int& ValId, const int& Val) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Calling SET for node %d, valId: %d, value %d ...", NodeId, ValId, Val);
-	TMem Payload;	TRadioProtocol::GenSetPayload(ValId, Val, Payload);
+
+	TVec<TRadioValue> ValV(1,1);
+	ValV[0].ValId = (char) ValId;
+	ValV[0].Val = Val;
+
+	TMem Payload;	TRadioProtocol::GenSetPayload(ValV, Payload);
+
 	return Send(NodeId, REQUEST_SET, Payload);
 }
 
 bool TRf24Radio::Get(const uint16& NodeId, const int& ValId) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Calling GET for node %d, valId: %d ...", NodeId, ValId);
-	TMem Payload;	TRadioProtocol::GenGetPayload(ValId, Payload);
+
+	TChV ValIdV(1,1);
+	ValIdV[0] = (char) ValId;
+
+	TMem Payload;	TRadioProtocol::GenGetPayload(ValIdV, Payload);
 	return Send(NodeId, REQUEST_GET, Payload);
 }
 

@@ -131,7 +131,7 @@ class TRf24Radio {
 public:
 	class TRf24RadioCallback {
 	public:
-		virtual void OnValue(const uint16& NodeId, const int& ValId, const int& Val) = 0;
+		virtual void OnValue(const uint16& NodeId, const char& ValId, const int& Val) = 0;
 	};
 
 private:
