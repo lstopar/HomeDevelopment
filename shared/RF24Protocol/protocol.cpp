@@ -13,10 +13,10 @@ bool TRadioProtocol::HasPayload(const unsigned char& Type) {
 }
 
 #ifndef ARDUINO
-void TRadioProtocol::ParseGetPayload(const TMem& Payload, TIntV& ValIdV) {
+void TRadioProtocol::ParseGetPayload(const TMem& Payload, TChV& ValIdV) {
 	EAssertR(Payload.Len() == PAYLOAD_LEN, "ParseGetPayload: invalid payload length: " + TInt::GetStr(Payload.Len()));
 #else
-int TRadioProtocol::parseGetPayload(const char* Payload, int* ValIdV) {
+int TRadioProtocol::parseGetPayload(const char* Payload, char* ValIdV) {
 #endif
 	const int Vals = (int) Payload[0];
 
@@ -25,7 +25,7 @@ int TRadioProtocol::parseGetPayload(const char* Payload, int* ValIdV) {
 #endif
 
 	for (int ValN = 0; ValN < Vals; ValN++) {
-		ValIdV[ValN] = (int) Payload[ValN+1];
+		ValIdV[ValN] = Payload[ValN+1];
 	}
 
 #ifdef ARDUINO
@@ -42,6 +42,8 @@ int TRadioProtocol::parseSetPayload(const char* Payload, TRadioValue* ValV) {
 #endif
 	const int Vals = Payload[0];
 
+	printf("Reading %d values ...\n", Vals);
+
 #ifndef ARDUINO
 	ValV.Gen(Vals);
 #endif
@@ -49,6 +51,7 @@ int TRadioProtocol::parseSetPayload(const char* Payload, TRadioValue* ValV) {
 	const int ValLen = sizeof(TRadioValue);
 	for (int ValN = 0; ValN < Vals; ValN++) {
 		memcpy(&ValV[ValN], &Payload[ValN*ValLen + 1], sizeof(TRadioValue));
+		printf("Read value id: %d, value %d\n", ValV[ValN].ValId, ValV[ValN].Val);
 	}
 
 #ifdef ARDUINO

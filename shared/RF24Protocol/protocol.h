@@ -22,11 +22,16 @@ const uint16_t ADDRESS_RPI = 00;
 const uint16_t ADDRESS_ARDUINO_SOFA = 01;
 const uint16_t ADDRESS_ARDUINO_PIR = 04;
 
+struct TRadioValue {
+	char ValId;
+	int Val;
+};
+
 const char VAL_ID_ALL = 0xFF;
 
 const unsigned char COMM_CHANNEL = 0x4C;
-const int PAYLOAD_LEN = 24;
-const int VALS_PER_PAYLOAD = 4;
+const int PAYLOAD_LEN = MAX_FRAME_SIZE - sizeof(RF24NetworkHeader);
+const int VALS_PER_PAYLOAD = (PAYLOAD_LEN - 1) / sizeof(TRadioValue);
 
 const unsigned char REQUEST_GET = 65;
 const unsigned char REQUEST_SET = 66;
@@ -34,25 +39,20 @@ const unsigned char REQUEST_PUSH = 67;
 const unsigned char REQUEST_PING = 't';				// 116
 const unsigned char REQUEST_CHILD_CONFIG = 'k';		//107
 
-struct TRadioValue {
-	char ValId;
-	int Val;
-};
-
 class TRadioProtocol {
 public:
 	static bool IsValidType(const unsigned char& Type);
 	static bool HasPayload(const unsigned char& Type);
 
 #ifndef ARDUINO
-	static void ParseGetPayload(const TMem& Payload, TIntV& ValIdV);
+	static void ParseGetPayload(const TMem& Payload, TChV& ValIdV);
 	static void ParseSetPayload(const TMem& Payload, TVec<TRadioValue>& ValV);
 	static void ParsePushPayload(const TMem& Payload, TVec<TRadioValue>& ValV) { ParseSetPayload(Payload, ValV); }
 	static void GenGetPayload(const TChV& ValIdV, TMem& Payload);
 	static void GenSetPayload(const TVec<TRadioValue>& ValV, TMem& Payload);
 	static void GenPushPayload(const TVec<TRadioValue>& ValV, TMem& Payload) { GenSetPayload(ValV, Payload); }
 #else
-	static int parseGetPayload(const char* Payload, int* buff);
+	static int parseGetPayload(const char* Payload, char* buff);
 	static int parseSetPayload(const char* Payload, TRadioValue* vals);
 	static int parsePushPayload(const char* Payload, TRadioValue* vals) { return parseSetPayload(Payload, vals); }
 	static void genGetPayload(const int* ValIdV, const int& ValIdVLen, char* Payload);
