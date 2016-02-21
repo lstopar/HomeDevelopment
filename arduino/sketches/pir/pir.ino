@@ -14,6 +14,12 @@ const int PIR_PIN = 4;
 const int LUM_PIN = 3;
 const int VOUT_PIN = 5;
 
+const int N_VAL_IDS = 2;
+const int VAL_IDS[N_VAL_IDS] = {
+  PIR_PIN,
+  LUM_PIN
+};
+
 const int PIR_THRESHOLD = 500;
 
 RF24 radio(7,8);

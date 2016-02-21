@@ -82,18 +82,7 @@ void writeRadio(const uint16_t& recipient, const unsigned char& type, const char
   network.write(header, buff, len);
 }
 
-void push(const uint16_t& to, const TRadioValue* valV, const int& len) {
-  Serial.print("Sending ");
-  Serial.print(len);
-  Serial.println(" values ...");
-
-  for (int valN = 0; valN < len; valN++) {
-    Serial.print("valId: ");
-    Serial.print(valV[valN].ValId, HEX);
-    Serial.print("val: ");
-    Serial.println(valV[valN].Val);
-  }
-  
+void push(const uint16_t& to, const TRadioValue* valV, const int& len) {  
   TRadioProtocol::genPushPayload(valV, len, sendPayload);
   writeRadio(to, REQUEST_PUSH, sendPayload, PAYLOAD_LEN);
 }
@@ -141,10 +130,6 @@ void getRadioVal(const char& valId, TRadioValue& rval) {
 void processGet(const uint16_t& callerAddr, const char& valId) {
   if (valId == VAL_ID_ALL) {
     TRadioValue rvals[VALS_PER_PAYLOAD];
-
-    Serial.print("I have ");
-    Serial.print(N_VAL_IDS);
-    Serial.println(" value IDs");
     
     int nsent = 0;
     int valN;
@@ -157,9 +142,6 @@ void processGet(const uint16_t& callerAddr, const char& valId) {
 
       push(callerAddr, rvals, valN);
       nsent += valN;
-      Serial.print("Sent ");
-      Serial.print(nsent);
-      Serial.println(" values ...");
     }
 
     Serial.println("Sent all values!");

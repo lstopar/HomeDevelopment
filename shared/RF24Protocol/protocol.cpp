@@ -55,13 +55,10 @@ int TRadioProtocol::parseGetPayload(const char* Payload, char* ValIdV) {
 #ifndef ARDUINO
 void TRadioProtocol::ParseSetPayload(const TMem& Payload, TVec<TRadioValue>& ValV) {
 	EAssertR(Payload.Len() == PAYLOAD_LEN, "ParseSetPayload: invalid payload length: " + TInt::GetStr(Payload.Len()));
-	printf("Parsing payload: %s\n", Payload.GetHexStr().CStr());
 #else
 int TRadioProtocol::parseSetPayload(const char* Payload, TRadioValue* ValV) {
 #endif
 	const int Vals = (int) Payload[0];
-
-	printf("Reading %d values ...\n", Vals);
 
 #ifndef ARDUINO
 	ValV.Gen(Vals);
@@ -70,7 +67,6 @@ int TRadioProtocol::parseSetPayload(const char* Payload, TRadioValue* ValV) {
 	for (int ValN = 0; ValN < Vals; ValN++) {
 		TRadioValue& Val = ValV[ValN];
 		Val.ReadFromBuff(&Payload[ValN*TRadioValue::BYTES + 1]);
-		printf("Read value id: %d, value %d\n", ValV[ValN].ValId, ValV[ValN].Val);
 	}
 
 #ifdef ARDUINO
@@ -122,7 +118,7 @@ void TRadioProtocol::InitRadio(RF24& Radio, RF24Network& Network, const uint16_t
 	Radio.begin();
 	Radio.setAutoAck(true);
 	Radio.setRetries(15, 15);
-	Radio.setDataRate(RF24_2MBPS);
+	Radio.setDataRate(RF24_250KBPS);
 	Radio.setPALevel(Power);	// set power to high for better range
 	delay(5);
 	Network.begin(COMM_CHANNEL, Addr);
@@ -171,8 +167,6 @@ void RGBStrip::update() {
 		setRed(r, false);
 		setBlue(b, false);
 		setGreen(g, false);
-
-		printf("r: %d, g: %d, b: %d\n", r, g, b);
 	}
 }
 
