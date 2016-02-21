@@ -69,8 +69,6 @@ public:
 			const rf24_pa_dbm_e& Power=RF24_PA_HIGH);
 };
 
-#define ARDUINO
-
 #ifdef ARDUINO
 
 class RGBStrip {
