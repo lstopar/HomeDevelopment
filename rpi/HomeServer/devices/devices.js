@@ -5,6 +5,7 @@ var LED_BLUE_ID = 'led-blue';
 var LED_RED_ID = 'led-red';
 var LED_GREEN_ID = 'led-green';
 var BLINK_RGB_ID = 'rgb-blink';
+var CYCLE_HSL_ID = 'hsl-cycle';
 
 module.exports = exports = function (setValue) {
 	return {
@@ -67,10 +68,18 @@ module.exports = exports = function (setValue) {
 				    	    },
 				    	    {
 				    	    	id: BLINK_RGB_ID,
-				    	    	internalId: 1,
+				    	    	internalId: 15,
 				    	    	type: 'actuator',
 				    	    	unit: '',
 				    	    	name: 'Blink RGB',
+				    	    	description: ''
+				    	    },
+				    	    {
+				    	    	id: CYCLE_HSL_ID,
+				    	    	internalId: 14,
+				    	    	type: 'actuator',
+				    	    	unit: '',
+				    	    	name: 'Cycle colors',
 				    	    	description: ''
 				    	    }
 				    	]

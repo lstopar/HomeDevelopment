@@ -59,7 +59,7 @@ void TRadioProtocol::ParseSetPayload(const TMem& Payload, TVec<TRadioValue>& Val
 #else
 int TRadioProtocol::parseSetPayload(const char* Payload, TRadioValue* ValV) {
 #endif
-	const int Vals = Payload[0];
+	const int Vals = (int) Payload[0];
 
 	printf("Reading %d values ...\n", Vals);
 
@@ -141,6 +141,8 @@ const int RGBStrip::PIN_BLUE_N = 2;
 RGBStrip::RGBStrip(const int& pinR, const int& pinG, const int& pinB):
 		modeBlink(false),
 		blinkPinN(0),
+		modeCycleHsv(false),
+		currHue(0),
 		iteration(0) {
 	pins[0] = pinR;
 	pins[1] = pinG;
@@ -159,6 +161,15 @@ void RGBStrip::update() {
 			blinkPinN %= 3;
 		}
 	}
+
+	if (modeCycleHsv) {
+		currHue = (currHue + 1) % 360;
+		int r, g, b;
+		hsl2rgb(currHue, 1, 1, r, g, b);
+		setRed(r);
+		setBlue(b);
+		setGreen(g);
+	}
 }
 
 void RGBStrip::blink() {
@@ -166,9 +177,15 @@ void RGBStrip::blink() {
 	modeBlink = true;
 }
 
+void RGBStrip::cycleHsv() {
+	reset();
+	modeCycleHsv = true;
+}
+
 void RGBStrip::reset(const bool& resetModes, const bool& resetPins) {
 	if (resetModes) {
 		modeBlink = false;
+		modeCycleHsv = false;
 	}
 
 	if (resetPins) {

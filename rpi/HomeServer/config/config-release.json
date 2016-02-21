@@ -9,7 +9,7 @@
 	},
 	"log": {
 		"logger": {
-			"level": "debug",
+			"level": "trace",
 			"outputMode": "short",
 			"stream": {
 				"type": "stdout",

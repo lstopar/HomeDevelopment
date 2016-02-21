@@ -15,7 +15,8 @@ const int LED_PIN = 3;
 const int PIN_BLUE = 5;
 const int PIN_RED = 6;
 const int PIN_GREEN = 9;
-const int MODE_BLINK_RGB = 1;
+const int MODE_BLINK_RGB = 15;
+const int MODE_CYCLE_HSV = 14;
 
 const int N_VAL_IDS = 5;
 const int VAL_IDS[N_VAL_IDS] = {
@@ -128,7 +129,10 @@ void getRadioVal(const char& valId, TRadioValue& rval) {
     rval.Val = (int) (val / 2.55);
   } else if (valId == MODE_BLINK_RGB) {
     rval.Val = rgb.isBlinking() ? 1 : 0;
-  } 
+  }
+  else if (valId == MODE_CYCLE_HSV) {
+    rval.Val = rgb.isCyclingHsv() ? 1 : 0;
+  }
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId, HEX);
   }
@@ -137,25 +141,35 @@ void getRadioVal(const char& valId, TRadioValue& rval) {
 void processGet(const uint16_t& callerAddr, const char& valId) {
   if (valId == VAL_ID_ALL) {
     TRadioValue rvals[VALS_PER_PAYLOAD];
+
+    Serial.print("I have ");
+    Serial.print(N_VAL_IDS);
+    Serial.println(" value IDs");
     
     int nsent = 0;
-    int valN = 0;
+    int valN;
     while (nsent < N_VAL_IDS) {
-      while (valN < VALS_PER_PAYLOAD && valN < N_VAL_IDS) {
-        getRadioVal(VAL_IDS[valN], rvals[valN - nsent]);
+      valN = 0;
+      while (valN < VALS_PER_PAYLOAD && nsent + valN < N_VAL_IDS) {
+        getRadioVal(VAL_IDS[nsent + valN], rvals[valN]);
         valN++;
       }
 
-      push(callerAddr, rvals, valN - nsent);
-      nsent = valN;
+      push(callerAddr, rvals, valN);
+      nsent += valN;
+      Serial.print("Sent ");
+      Serial.print(nsent);
+      Serial.println(" values ...");
     }
+
+    Serial.println("Sent all values!");
   }
   else if (valId == LED_PIN || valId == PIN_BLUE || valId == PIN_RED || valId == PIN_GREEN) {
     TRadioValue rval;
     getRadioVal(valId, rval);
     push(callerAddr, rval);
   }
-  else if (valId == MODE_BLINK_RGB) {
+  else if (valId == MODE_BLINK_RGB || valId == MODE_CYCLE_HSV) {
     TRadioValue rval;
     getRadioVal(valId, rval);
     push(callerAddr, rval);
@@ -194,6 +208,13 @@ void processSet(const uint16_t& callerAddr, const char& valId, const int& val) {
     }
     
     processGet(callerAddr, valId);
+  }
+  else if (valId == MODE_CYCLE_HSV) {
+    if (val == 1) {
+      rgb.cycleHsv();
+    } else {
+      rgb.reset();
+    }
   }
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId);

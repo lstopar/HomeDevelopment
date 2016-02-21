@@ -69,6 +69,8 @@ public:
 			const rf24_pa_dbm_e& Power=RF24_PA_HIGH);
 };
 
+#define ARDUINO
+
 #ifdef ARDUINO
 
 class RGBStrip {
@@ -84,6 +86,9 @@ private:
 
 	bool modeBlink;
 	int blinkPinN;
+
+	bool modeCycleHsv;
+	int currHue;
 
 	int iteration;
 
@@ -101,7 +106,10 @@ public:
 	void setBlue(const int& val) { setColor(PIN_BLUE_N, val); }
 
 	void blink();
+	void cycleHsv();
+
 	bool isBlinking() const { return modeBlink; }
+	bool isCyclingHsv() const { return modeCycleHsv; }
 
 	void reset(const bool& resetModes=true, const bool& writePins=true);
 
