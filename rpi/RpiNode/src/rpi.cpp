@@ -400,6 +400,7 @@ void TRf24Radio::Init() {
 	TRadioProtocol::InitRadio(*Radio, *Network, MyAddr, RF24_PA_HIGH);
 
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "My address: %d", MyAddr);
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Values per payload: %d", VALS_PER_PAYLOAD);
 
 	if (MyAddr != 00) {
 		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Contacting parent node: %d", Network->parent());

@@ -84,7 +84,14 @@ void writeRadio(const uint16_t& recipient, const unsigned char& type, const char
 void push(const uint16_t& to, const TRadioValue* valV, const int& len) {
   Serial.print("Sending ");
   Serial.print(len);
-  Serial.print(" values ...");
+  Serial.println(" values ...");
+
+  for (int valN = 0; valN < len; valN++) {
+    Serial.print("valId: ");
+    Serial.print(valV[valN].ValId, HEX);
+    Serial.print("val: ");
+    Serial.println(valV[valN].Val);
+  }
   
   TRadioProtocol::genPushPayload(valV, len, sendPayload);
   writeRadio(to, REQUEST_PUSH, sendPayload, PAYLOAD_LEN);
@@ -95,10 +102,11 @@ void push(const uint16_t& to, const TRadioValue& radioVal) {
 }
 
 void getRadioVal(const char& valId, TRadioValue& rval) {
-  int val;
+  rval.ValId = valId;
 
   if (valId == LED_PIN || valId == PIN_BLUE || valId == PIN_RED || valId == PIN_GREEN) {
     int val;
+    
     switch (valId) {
     case LED_PIN:
       val = pin3Val;
@@ -117,21 +125,13 @@ void getRadioVal(const char& valId, TRadioValue& rval) {
       Serial.println(valId);  
     }
 
-    val = (int) (val / 2.55);
-
-    Serial.print("get valId: ");
-    Serial.print(valId, HEX);
-    Serial.print(", value: ");
-    Serial.println(val);
+    rval.Val = (int) (val / 2.55);
   } else if (valId == MODE_BLINK_RGB) {
-    val = rgb.isBlinking() ? 1 : 0;
+    rval.Val = rgb.isBlinking() ? 1 : 0;
   } 
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId, HEX);
   }
-  
-  rval.ValId = valId;
-  rval.Val = val;
 }
 
 void processGet(const uint16_t& callerAddr, const char& valId) {

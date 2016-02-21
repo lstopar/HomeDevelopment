@@ -433,10 +433,12 @@ void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueI
 		v8::HandleScope HandleScope(Isolate);
 
 		const int ValId = (int) ValueId;
-		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got value to value id %d", ValId);
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got value for value id %d", ValId);
 
+		TIntPr NodeIdValIdPr(NodeId, (int) ValId);
+		EAssertR(NodeIdValIdPrValNmH.IsKey(NodeIdValIdPr), "Node-valueId pair not stored in the structures!");
 
-		const TStr& ValueNm = NodeIdValIdPrValNmH.GetDat(TIntPr(NodeId, (int) ValId));
+		const TStr& ValueNm = NodeIdValIdPrValNmH.GetDat(NodeIdValIdPr);
 
 		PJsonVal JsonVal = TJsonVal::NewObj();
 		JsonVal->AddToObj("id", ValueNm);
@@ -453,7 +455,11 @@ void TNodeJsRf24Radio::OnValue(const uint16& NodeId, const char& ValId, const in
 }
 
 void TNodeJsRf24Radio::TOnMsgTask::Run(TOnMsgTask& Task) {
+	try {
 	Task.JsRadio->OnMsgMainThread(Task.NodeId, Task.ValueId, Task.Val);
+	} catch (const PExcept& Except) {
+		Task.JsRadio->Notify->OnNotifyFmt(TNotifyType::ntErr, "Failed to execute value callback: %s!", Except->GetMsgStr().CStr());
+	}
 }
 
 
