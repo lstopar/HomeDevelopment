@@ -1,5 +1,23 @@
 #include "protocol.h"
 
+const int TRadioValue::BYTES = 5;
+
+void TRadioValue::WriteToBuff(char* Buff) const {
+	Buff[0] = ValId;
+	Buff[1] = (Val >> 24) & 0xFF;
+	Buff[2] = (Val >> 16) & 0xFF;
+	Buff[3] = (Val >> 8) & 0xFF;
+	Buff[4] = Val & 0xFF;
+}
+
+void TRadioValue::ReadFromBuff(const char* Buff) {
+	ValId = Buff[0];
+	Val = (Buff[1] << 24) |
+		  (Buff[2] << 16) |
+		  (Buff[3] << 8) |
+		  Buff[4];
+}
+
 bool TRadioProtocol::IsValidType(const unsigned char& Type) {
 	return Type == REQUEST_PING ||
 			Type == REQUEST_CHILD_CONFIG ||
@@ -49,9 +67,9 @@ int TRadioProtocol::parseSetPayload(const char* Payload, TRadioValue* ValV) {
 	ValV.Gen(Vals);
 #endif
 
-	const int ValLen = sizeof(TRadioValue);
 	for (int ValN = 0; ValN < Vals; ValN++) {
-		memcpy(&ValV[ValN], &Payload[ValN*ValLen + 1], sizeof(TRadioValue));
+		TRadioValue& Val = ValV[ValN];
+		Val.ReadFromBuff(&Payload[ValN*TRadioValue::BYTES + 1]);
 		printf("Read value id: %d, value %d\n", ValV[ValN].ValId, ValV[ValN].Val);
 	}
 
@@ -79,19 +97,24 @@ void TRadioProtocol::genGetPayload(const int* ValIdV, const int& Vals,
 void TRadioProtocol::GenSetPayload(const TVec<TRadioValue>& ValV, TMem& Payload) {
 	if (Payload.Len() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
 	const int& Vals = ValV.Len();
-	EAssert(Vals*sizeof(TRadioValue) + 1 <= PAYLOAD_LEN);
+	EAssert(Vals*TRadioValue::BYTES + 1 <= PAYLOAD_LEN);
 #else
 void TRadioProtocol::genSetPayload(const TRadioValue* ValV, const int& Vals,
 			char* Payload) {
 #endif
 
 	Payload[0] = (char) Vals;
-	const int ValLen = sizeof(TRadioValue);
 	for (int ValN = 0; ValN < Vals; ValN++) {
-		memcpy(&Payload[ValN*ValLen + 1], &ValV[ValN], sizeof(TRadioValue));
+		const TRadioValue& Val = ValV[ValN];
+		Val.WriteToBuff(&Payload[ValN*TRadioValue::BYTES + 1]);
 	}
 
-	printf("Sending payload: %s\n", Payload.GetHexStr().CStr());
+#ifdef ARDUINO
+	for (int i = 0; i < Vals*TRadioValue::BYTES+1; i++) {
+		Serial.print(Payload[i], HEX);
+	}
+	Serial.println("");
+#endif
 }
 
 void TRadioProtocol::InitRadio(RF24& Radio, RF24Network& Network, const uint16_t& Addr,

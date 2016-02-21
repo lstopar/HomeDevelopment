@@ -23,15 +23,20 @@ const uint16_t ADDRESS_ARDUINO_SOFA = 01;
 const uint16_t ADDRESS_ARDUINO_PIR = 04;
 
 struct TRadioValue {
+	static const int BYTES;
+
 	char ValId;
 	int Val;
+
+	void WriteToBuff(char* Buff) const;
+	void ReadFromBuff(const char* Buff);
 };
 
 const char VAL_ID_ALL = 0xFF;
 
 const unsigned char COMM_CHANNEL = 0x4C;
 const int PAYLOAD_LEN = MAX_FRAME_SIZE - sizeof(RF24NetworkHeader);
-const int VALS_PER_PAYLOAD = (PAYLOAD_LEN - 1) / sizeof(TRadioValue);
+const int VALS_PER_PAYLOAD = (PAYLOAD_LEN - 1) / TRadioValue::BYTES;
 
 const unsigned char REQUEST_GET = 65;
 const unsigned char REQUEST_SET = 66;
