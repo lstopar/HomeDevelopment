@@ -31,7 +31,8 @@ bool currPirOn = false;
 int lastPirVal = 0;
 unsigned long lastOnTime = 0;
 
-char payload[PAYLOAD_LEN];
+char recPayload[PAYLOAD_LEN];
+char sendPayload[PAYLOAD_LEN];
 //long int i = 0;
 
 void setup() {
@@ -67,20 +68,28 @@ void setup() {
 //====================================================
 
 void writeRadio(const uint16_t& recipient, const unsigned char& type, const char* buff, const int& len) {
-//  Serial.print("Sending message to ");
-//  Serial.println(recipient);
+  Serial.println("Sending message ...");
   RF24NetworkHeader header(recipient, type);
   network.write(header, buff, len);
 }
 
+void push(const uint16_t& to, const TRadioValue* valV, const int& len) {  
+  TRadioProtocol::genPushPayload(valV, len, sendPayload);
+  writeRadio(to, REQUEST_PUSH, sendPayload, PAYLOAD_LEN);
+}
+
+void push(const uint16_t& to, const TRadioValue& radioVal) {
+  push(to, &radioVal, 1);
+}
+
 void sendPirStatus(const uint16_t& recipient = ADDRESS_RPI) {
-  TRadioProtocol::GenPushPayload(PIR_PIN, currPirOn ? 1 : 0, payload);
-  writeRadio(recipient, REQUEST_PUSH, payload, PAYLOAD_LEN);
+  TRadioValue rval;
+  getRadioVal(PIR_PIN, rval);
+  push(ADDRESS_RPI, rval);
 }
 
 void readPIR() {
   int pirVal = analogRead(PIR_PIN);
-  //Serial.println(pirVal);
   bool isOn = pirVal >= PIR_THRESHOLD;
 
 //  Serial.println(pirVal);
@@ -109,27 +118,50 @@ void readPIR() {
   }
 
   lastPirVal = pirVal;
+}
 
-//  if (i++ % 1000 == 0) {
-////    Serial.println(lastPirVal);
-//    TRadioProtocol::GenPushPayload(5, lastPirVal, payload);
-//    writeRadio(ADDRESS_RPI, REQUEST_PUSH, payload, PAYLOAD_LEN);
-//  }
+void getRadioVal(const char& valId, TRadioValue& rval) {
+  rval.ValId = valId;
+
+  if (valId == PIR_PIN) {
+    rval.Val = currPirOn ? 1 : 0;
+  }
+  else if (valId == LUM_PIN) {
+    rval.Val = analogRead(LUM_PIN);
+  }
+  else {
+    Serial.print("Unknown val ID: "); Serial.println(valId, HEX);
+  }
 }
 
 void processGet(const uint16_t& callerAddr, const byte& valId) {
-  if (valId == PIR_PIN) {
+  if (valId == VAL_ID_ALL) {
+    TRadioValue rvals[VALS_PER_PAYLOAD];
+    
+    int nsent = 0;
+    int valN;
+    while (nsent < N_VAL_IDS) {
+      valN = 0;
+      while (valN < VALS_PER_PAYLOAD && nsent + valN < N_VAL_IDS) {
+        getRadioVal(VAL_IDS[nsent + valN], rvals[valN]);
+        valN++;
+      }
+
+      push(callerAddr, rvals, valN);
+      nsent += valN;
+    }
+
+    Serial.println("Sent all values!");
+  }
+  else if (valId == PIR_PIN) {
      sendPirStatus(callerAddr);
-  } else if (valId == 5) {
-    TRadioProtocol::GenPushPayload(5, lastPirVal, payload);
-    writeRadio(callerAddr, REQUEST_PUSH, payload, PAYLOAD_LEN);
-  } else if (valId == LUM_PIN) { 
-    int lumVal = analogRead(LUM_PIN);
-    Serial.print("Lum val: ");
-    Serial.println(lumVal);
-    TRadioProtocol::GenPushPayload(valId, int(lumVal / 10.23), payload);
-    writeRadio(callerAddr, REQUEST_PUSH, payload, PAYLOAD_LEN);
-  } else {
+  } 
+  else if (valId == LUM_PIN) {
+    TRadioValue radioVal;
+    getRadioVal(valId, radioVal);
+    push(callerAddr, radioVal);
+  } 
+  else {
     Serial.print("Unknown val ID: "); Serial.println(valId);
   }
 }
@@ -157,11 +189,14 @@ void loop(void) {
     } else if (header.type == REQUEST_GET) {
       Serial.println("Received GET request ...");
       
-      network.read(header, payload, PAYLOAD_LEN);
-      
-      int valId;  TRadioProtocol::ParseGetPayload(payload, valId);
-      
-      processGet(fromAddr, valId);
+      network.read(header, recPayload, PAYLOAD_LEN);
+
+      char buff[VALS_PER_PAYLOAD];
+      int nVals = TRadioProtocol::parseGetPayload(recPayload, buff);
+      for (int valN = 0; valN < nVals; valN++) {
+        const char& valId = buff[valN];
+        processGet(fromAddr, valId);
+      }
     } else {
       Serial.print("Unknown header type: ");
       Serial.println(header.type);
