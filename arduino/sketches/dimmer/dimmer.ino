@@ -18,13 +18,14 @@ const int PIN_GREEN = 9;
 const int MODE_BLINK_RGB = 15;
 const int MODE_CYCLE_HSV = 14;
 
-const int N_VAL_IDS = 5;
+const int N_VAL_IDS = 6;
 const int VAL_IDS[N_VAL_IDS] = {
   LED_PIN,
   PIN_BLUE,
   PIN_RED,
   PIN_GREEN,
-  MODE_BLINK_RGB
+  MODE_BLINK_RGB,
+  MODE_CYCLE_HSV
 };
 
 int pin3Val = 0;
@@ -197,6 +198,8 @@ void processSet(const uint16_t& callerAddr, const char& valId, const int& val) {
     } else {
       rgb.reset();
     }
+
+    processGet(callerAddr, valId);
   }
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId);

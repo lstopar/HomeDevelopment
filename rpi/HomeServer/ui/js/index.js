@@ -9,7 +9,7 @@ $(document).ready(function () {
 			slider.slider('setValue', tuUiPrecision(val, type));
 		} else if (type == 'actuator') { 
 			var chk = $('#chk-' + id);
-			chk.attr('checked', val == 1);
+			chk.bootstrapSwitch('state', val == 1);
 		} else {
 			var valSpan = $('#span-val-' + id);
 			valSpan.html(tuUiPrecision(val, type));
