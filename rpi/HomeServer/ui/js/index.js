@@ -3,17 +3,15 @@ $(document).ready(function () {
 		var id = reading.id;
 		var val = reading.value;
 		var type = reading.type;
-		
-		var thumbnail = $('#thumb-' + id);
-		
+				
 		if (type == 'dimmer') {
-			var slider = thumbnail.find('#range-' + id);
+			var slider = $('#range-' + id);
 			slider.slider('setValue', tuUiPrecision(val, type));
 		} else if (type == 'actuator') { 
-			var chk = thumbnail.find('#chk-' + id);
+			var chk = $('#chk-' + id);
 			chk.attr('checked', val == 1);
 		} else {
-			var valSpan = thumbnail.find('#span-val-' + id);
+			var valSpan = $('#span-val-' + id);
 			valSpan.html(tuUiPrecision(val, type));
 		}
 	}

@@ -99,9 +99,9 @@ public:
 	int getGreen() const { return pinVals[PIN_GREEN_N]; }
 	int getBlue() const { return pinVals[PIN_BLUE_N]; }
 
-	void setRed(const int& val) { setColor(PIN_RED_N, val); }
-	void setGreen(const int& val) { setColor(PIN_GREEN_N, val); }
-	void setBlue(const int& val) { setColor(PIN_BLUE_N, val); }
+	void setRed(const int& val, const bool& resetModes=true) { setColor(PIN_RED_N, val, resetModes); }
+	void setGreen(const int& val, const bool& resetModes=true) { setColor(PIN_GREEN_N, val, resetModes); }
+	void setBlue(const int& val, const bool& resetModes=true) { setColor(PIN_BLUE_N, val, resetModes); }
 
 	void blink();
 	void cycleHsv();

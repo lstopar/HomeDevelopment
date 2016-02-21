@@ -160,26 +160,32 @@ void RGBStrip::update() {
 			blinkPinN++;
 			blinkPinN %= 3;
 		}
+
+		setColor(blinkPinN, pinVals[blinkPinN], false);
 	}
 
 	if (modeCycleHsv) {
 		currHue = (currHue + 1) % 360;
 		int r, g, b;
 		hsl2rgb(currHue, 1, 1, r, g, b);
-		setRed(r);
-		setBlue(b);
-		setGreen(g);
+		setRed(r, false);
+		setBlue(b, false);
+		setGreen(g, false);
+
+		printf("r: %d, g: %d, b: %d\n", r, g, b);
 	}
 }
 
 void RGBStrip::blink() {
 	reset();
 	modeBlink = true;
+	blinkPinN = 0;
 }
 
 void RGBStrip::cycleHsv() {
 	reset();
 	modeCycleHsv = true;
+	currHue = 0;
 }
 
 void RGBStrip::reset(const bool& resetModes, const bool& resetPins) {
@@ -210,10 +216,10 @@ void RGBStrip::setColor(const int& colorN, const int& val, const bool& resetMode
 
 void RGBStrip::hsl2rgb(const float& _h, const float& _s, const float& _l,
 		int& r, int& g, int& b) {
-	float h = fmod(h,360); // cycle H around to 0-360 degrees
+	float h = fmod(_h,360); // cycle H around to 0-360 degrees
 	h = 3.14159*h/(float)180; // Convert to radians.
-	float s = s>0?(s<1?s:1):0; // clamp S and I to interval [0,1]
-	float l = l>0?(l<1?l:1):0;
+	float s = _s>0?(_s<1?_s:1):0; // clamp S and I to interval [0,1]
+	float l = _l>0?(_l<1?_l:1):0;
 
 	// Math! Thanks in part to Kyle Miller.
 	if (h < 2.09439) {
