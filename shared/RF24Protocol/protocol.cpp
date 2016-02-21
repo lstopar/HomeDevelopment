@@ -37,6 +37,7 @@ int TRadioProtocol::parseGetPayload(const char* Payload, char* ValIdV) {
 #ifndef ARDUINO
 void TRadioProtocol::ParseSetPayload(const TMem& Payload, TVec<TRadioValue>& ValV) {
 	EAssertR(Payload.Len() == PAYLOAD_LEN, "ParseSetPayload: invalid payload length: " + TInt::GetStr(Payload.Len()));
+	printf("Parsing payload: %s\n", Payload.GetHexStr().CStr());
 #else
 int TRadioProtocol::parseSetPayload(const char* Payload, TRadioValue* ValV) {
 #endif
@@ -89,6 +90,8 @@ void TRadioProtocol::genSetPayload(const TRadioValue* ValV, const int& Vals,
 	for (int ValN = 0; ValN < Vals; ValN++) {
 		memcpy(&Payload[ValN*ValLen + 1], &ValV[ValN], sizeof(TRadioValue));
 	}
+
+	printf("Sending payload: %s\n", Payload.GetHexStr().CStr());
 }
 
 void TRadioProtocol::InitRadio(RF24& Radio, RF24Network& Network, const uint16_t& Addr,
