@@ -136,7 +136,7 @@ function readRadioDevices() {
 		for (var nodeId in nodes) {
 			if (log.trace())
 				log.trace('Fetching all values from node %d', nodeId);
-			var success = radio.radio.getAll(nodeId);
+			var success = radio.radio.getAll(parseInt(nodeId));
 			onNodeConnected(nodeId, success);
 		}
 //		// TODO
