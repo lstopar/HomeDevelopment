@@ -233,4 +233,99 @@ void RGBStrip::hsl2rgb(const float& _h, const float& _s, const float& _l,
 	}
 }
 
+
+TManualDimmer::TManualDimmer(const int& _VOutPin, const int& _ReadPin, const int& _PwmPin,
+			const int& _MnVal, const int& _MxVal):
+		vOutPin(_VOutPin),
+		readPin(_ReadPin),
+		pwmPin(_PwmPin),
+		mnVal(_MnVal),
+		mxVal(_MxVal),
+		currVal(0) {}
+
+
+void TManualDimmer::init() {
+	pinMode(vOutPin, OUTPUT);
+	pinMode(readPin, INPUT);
+	pinMode(pwmPin, OUTPUT);
+
+	update();
+}
+
+void TManualDimmer::update() {
+	float perc = float(readInput() - mnVal) / (mxVal - mnVal);
+
+	if (perc < 0) perc = 0;
+	if (perc > 1) perc = 1;
+
+	const int outVal = int(perc*255);
+
+	if (abs(currVal - outVal) > THRESHOLD ||
+			(outVal == 255 && currVal != 255) ||
+			(outVal == 0 && currVal != 0)) {
+		currVal = outVal;
+		analogWrite(pwmPin, currVal);
+	}
+}
+
+int TManualDimmer::readInput() const {
+	digitalWrite(vOutPin, HIGH);
+	int result = analogRead(readPin);
+	digitalWrite(vOutPin, LOW);
+//	Serial.println(result);
+	return result;
+}
+
+TManualSwitch::TManualSwitch(const int& _vOutPin, const int& _readPin,
+		const int& _switchPin):
+	vOutPin(_vOutPin),
+	readPin(_readPin),
+	outputPin(_switchPin),
+	inputOn(false),
+	outputOn(false) {}
+
+void TManualSwitch::init() {
+	pinMode(vOutPin, OUTPUT);
+	pinMode(readPin, INPUT);
+	pinMode(outputPin, OUTPUT);
+
+	digitalWrite(outputPin, LOW);
+}
+
+void TManualSwitch::update() {
+	const bool newInputOn = readSwitch();
+
+	if (newInputOn != inputOn) {
+		inputOn = newInputOn;
+		toggle();
+	}
+}
+
+void TManualSwitch::on() {
+	setOutput(true);
+}
+
+void TManualSwitch::off() {
+	setOutput(false);
+}
+
+void TManualSwitch::toggle() {
+	setOutput(!isOn());
+}
+
+void TManualSwitch::setOutput(const bool& on) {
+	if (on != outputOn) {
+		digitalWrite(outputPin, isOn() ? HIGH : LOW);
+	}
+	outputOn = on;
+}
+
+bool TManualSwitch::readSwitch() {
+	digitalWrite(vOutPin, HIGH);
+	delay(1);
+	const int result = digitalRead(readPin);
+	digitalWrite(vOutPin, LOW);
+	return result == HIGH;
+}
+
 #endif

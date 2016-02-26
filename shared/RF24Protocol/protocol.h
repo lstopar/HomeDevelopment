@@ -119,6 +119,57 @@ private:
 			int& r, int& g, int& b);
 };
 
+class TManualDimmer {
+private:
+	static const int THRESHOLD = 5;
+
+	const int vOutPin;
+	const int readPin;
+	const int pwmPin;
+
+	const int mnVal;
+	const int mxVal;
+
+	int currVal;
+
+public:
+	TManualDimmer(const int& vOutPin, const int& readPin, const int& pwmPin,
+			const int& mnVal = 100, const int& mxVal=1000);
+
+	void init();
+	void update();
+	int getVal() const { return currVal; }
+
+private:
+	int readInput() const;
+};
+
+class TManualSwitch {
+private:
+	const int vOutPin;
+	const int readPin;
+	const int outputPin;
+
+	bool inputOn;
+	bool outputOn;
+
+public:
+	TManualSwitch(const int& vOutPin, const int& readPin, const int& switchPin);
+
+	void init();
+	void update();
+
+	bool isOn() const { return outputOn; }
+
+	void on();
+	void off();
+	void toggle();
+
+private:
+	void setOutput(const bool& on);
+	bool readSwitch();
+};
+
 #endif
 
 #endif

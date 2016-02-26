@@ -14,16 +14,23 @@ const int PIR_PIN = 4;
 const int LUM_PIN = 3;
 const int VOUT_PIN = 5;
 
-const int N_VAL_IDS = 2;
+const int LIGHT_SWITCH_PIN = 6;
+const int LIGHT_VOUT_PIN = 7;
+const int LIGHT_READ_PIN = 8;
+
+const int N_VAL_IDS = 3;
 const int VAL_IDS[N_VAL_IDS] = {
   PIR_PIN,
-  LUM_PIN
+  LUM_PIN,
+  LIGHT_SWITCH_PIN
 };
 
 const int PIR_THRESHOLD = 500;
 
 RF24 radio(7,8);
 RF24Network network(radio);
+
+TManualSwitch lightSwitch(LIGHT_VOUT_PIN, LIGHT_READ_PIN, LIGHT_SWITCH_PIN);
 
 void writeRadio(const uint16_t& recipient, const unsigned char& type, const char* buff, const int& len);
 
@@ -33,6 +40,7 @@ unsigned long lastOnTime = 0;
 
 char recPayload[PAYLOAD_LEN];
 char sendPayload[PAYLOAD_LEN];
+
 //long int i = 0;
 
 void setup() {
@@ -48,6 +56,8 @@ void setup() {
   pinMode(VOUT_PIN, OUTPUT);
 
   digitalWrite(VOUT_PIN, HIGH);
+
+  lightSwitch.init();
  
   SPI.begin();
 
@@ -129,6 +139,9 @@ void getRadioVal(const char& valId, TRadioValue& rval) {
   else if (valId == LUM_PIN) {
     rval.Val = analogRead(LUM_PIN);
   }
+  else if (valId == LIGHT_SWITCH_PIN) {
+    rval.Val = lightSwitch.isOn() ? 1 : 0;
+  }
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId, HEX);
   }
@@ -160,9 +173,27 @@ void processGet(const uint16_t& callerAddr, const byte& valId) {
     TRadioValue radioVal;
     getRadioVal(valId, radioVal);
     push(callerAddr, radioVal);
-  } 
+  }
+  else if (valId == LIGHT_SWITCH_PIN) {
+    TRadioValue radioVal;
+    getRadioVal(valId, radioVal);
+    push(callerAddr, radioVal);
+  }
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId);
+  }
+}
+
+void processSet(const uint16_t& callerAddr, const char& valId, const int& val) {
+  if (valId == LIGHT_SWITCH_PIN) {
+    if (val == 1) {
+      lightSwitch.on();
+    } else {
+      lightSwitch.off();
+    }
+    processGet(callerAddr, valId);
+  } else {
+    Serial.print("Unknown valId for SET: ");  Serial.println(valId);
   }
 }
 
@@ -183,10 +214,12 @@ void loop(void) {
     if (header.type == REQUEST_CHILD_CONFIG) {
       network.read(header, NULL, 0);
       Serial.println("Received configuration message, ignoring ...");
-    } else if (header.type == REQUEST_PING) {
+    } 
+    else if (header.type == REQUEST_PING) {
       network.read(header, NULL, 0);
       Serial.println("Received ping, ignoring ...");
-    } else if (header.type == REQUEST_GET) {
+    } 
+    else if (header.type == REQUEST_GET) {
       Serial.println("Received GET request ...");
       
       network.read(header, recPayload, PAYLOAD_LEN);
@@ -197,11 +230,25 @@ void loop(void) {
         const char& valId = buff[valN];
         processGet(fromAddr, valId);
       }
-    } else {
+    }
+    else if (header.type == REQUEST_SET) {
+      Serial.println("Received SET request ...");
+      network.read(header, recPayload, PAYLOAD_LEN);
+
+      TRadioValue receiveBuff[VALS_PER_PAYLOAD];
+      int vals = TRadioProtocol::parseSetPayload(recPayload, receiveBuff);
+      for (int valN = 0; valN < vals; valN++) {
+        const TRadioValue& val = receiveBuff[valN];
+        processSet(fromAddr, val.ValId, val.Val);
+      }
+    }
+    else {
       Serial.print("Unknown header type: ");
       Serial.println(header.type);
       network.read(header, NULL, 0);
     }
   }
+
+  lightSwitch.update();
 }
 

@@ -104,15 +104,15 @@ module.exports = exports = function (setValue) {
 				    	    	unit: '',
 				    	    	name: 'Motion living room',
 				    	    	description: ''
-				    	    }/*,
+				    	    },
 				    	    {
-				    	    	id: 'motion-val',
-				    	    	internalId: 5,
-				    	    	type: 'pir',
+				    	    	id: AMBIENT_LIGHT_ID,
+				    	    	internalId: 6,
+				    	    	type: 'actuator',
 				    	    	unit: '',
-				    	    	name: 'Motion living room',
+				    	    	name: 'Ambient light',
 				    	    	description: ''
-				    	    },*/
+				    	    }
 				    	]
 				    }
 				],
