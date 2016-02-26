@@ -20,6 +20,7 @@ module.exports = exports = function (setValue) {
 		    	id: 'group-rgb',
 		    	img: 'img/bulb.png',
 		    	sensorIds: [
+		    	    AMBIENT_LIGHT_ID,
 		    	    LED_BLUE_ID,
 		    	    LED_RED_ID,
 		    	    LED_GREEN_ID,
