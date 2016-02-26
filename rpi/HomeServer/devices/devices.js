@@ -1,9 +1,10 @@
 var MOTION_ID = 'motion-lr';
 var LUMINOSITY_ID = 'lum-lr';
-var DIMMER_ID = 'light-sofa';
+var DIMMER_ID = 'led-test';
 var LED_BLUE_ID = 'led-blue';
 var LED_RED_ID = 'led-red';
 var LED_GREEN_ID = 'led-green';
+var AMBIENT_LIGHT_ID = 'light-door';
 var BLINK_RGB_ID = 'rgb-blink';
 var CYCLE_HSL_ID = 'hsl-cycle';
 
