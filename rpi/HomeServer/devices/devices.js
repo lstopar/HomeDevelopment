@@ -98,7 +98,12 @@ module.exports = exports = function (setValue) {
 								unit: '%',
 								name: 'Luminosity living room',
 								description: '',
-								transform: function (val) { return val / 1023; }
+								transform: function (val) {
+									log.debug('transforming luminosity %d', val);
+									var result = val / 1023;
+									log.debug('Got result %d', result);
+									return result;
+								}
 							},
 				    	    {
 				    	    	id: MOTION_ID,
