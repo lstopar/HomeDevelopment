@@ -340,10 +340,11 @@ function initSensors() {
 				if (log.debug()) 
 					log.debug('Received value from the radio: %s', JSON.stringify(val));
 				
-				var transformed = transformH[val.id](val.value);
+				var transFun = transformH[val.id];
+				var trans = transFun(val.value);
 				
-				updateValue(val.id, transformed);
-				onValueCb(val.id, transformed);
+				updateValue(val.id, trans);
+				onValueCb(val.id, trans);
 			});
 		}
 	}
