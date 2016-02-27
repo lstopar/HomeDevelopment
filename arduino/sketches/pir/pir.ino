@@ -15,8 +15,8 @@ const int LUM_PIN = 3;
 const int VOUT_PIN = 5;
 
 const int LIGHT_SWITCH_PIN = 6;
-const int LIGHT_VOUT_PIN = 7;
-const int LIGHT_READ_PIN = 8;
+const int LIGHT_VOUT_PIN = 9;
+const int LIGHT_READ_PIN = 2;
 
 const int N_VAL_IDS = 3;
 const int VAL_IDS[N_VAL_IDS] = {
@@ -147,7 +147,7 @@ void getRadioVal(const char& valId, TRadioValue& rval) {
   }
 }
 
-void processGet(const uint16_t& callerAddr, const byte& valId) {
+void processGet(const uint16_t& callerAddr, const char& valId) {
   if (valId == VAL_ID_ALL) {
     TRadioValue rvals[VALS_PER_PAYLOAD];
     
@@ -249,6 +249,11 @@ void loop(void) {
     }
   }
 
+  const bool isLightOn = lightSwitch.isOn();
   lightSwitch.update();
+
+  if (lightSwitch.isOn() != isLightOn) {
+    processGet(ADDRESS_RPI, LIGHT_SWITCH_PIN);
+  }
 }
 

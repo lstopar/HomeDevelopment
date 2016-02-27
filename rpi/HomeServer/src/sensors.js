@@ -296,6 +296,7 @@ function initSensors() {
 			var radioSensorH = {};
 			var radioConf = [];
 			var nodeIdH = {};
+			var transformH = {};
 			
 			for (var nodeN = 0; nodeN < nodes.length; nodeN++) {
 				var node = nodes[nodeN];
@@ -312,7 +313,9 @@ function initSensors() {
 						id: sensorConf.id,
 						internalId: sensorConf.internalId,
 						nodeId: nodeId
-					})
+					});
+					transformH[sensorConf.id] = sensorConf.transform != null ? 
+							sensorConf.transform : function (val) { return val; }
 				}
 				
 				nodeIdH[nodeId] = {
@@ -336,8 +339,11 @@ function initSensors() {
 			radio.radio.onValue(function (val) {	// TODO move this somewhere, make a common interface
 				if (log.debug()) 
 					log.debug('Received value from the radio: %s', JSON.stringify(val));
-				updateValue(val.id, val.value);
-				onValueCb(val.id, val.value);
+				
+				var transformed = transformH[val.id](val.value);
+				
+				updateValue(val.id, transformed);
+				onValueCb(val.id, transformed);
 			});
 		}
 	}

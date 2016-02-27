@@ -104,13 +104,6 @@ void TRadioProtocol::genSetPayload(const TRadioValue* ValV, const int& Vals,
 		const TRadioValue& Val = ValV[ValN];
 		Val.WriteToBuff(&Payload[ValN*TRadioValue::BYTES + 1]);
 	}
-
-#ifdef ARDUINO
-	for (int i = 0; i < Vals*TRadioValue::BYTES+1; i++) {
-		Serial.print(Payload[i], HEX);
-	}
-	Serial.println("");
-#endif
 }
 
 void TRadioProtocol::InitRadio(RF24& Radio, RF24Network& Network, const uint16_t& Addr,
@@ -322,8 +315,9 @@ void TManualSwitch::setOutput(const bool& on) {
 
 bool TManualSwitch::readSwitch() {
 	digitalWrite(vOutPin, HIGH);
-	delay(1);
+	delay(3);
 	const int result = digitalRead(readPin);
+	Serial.println(result);
 	digitalWrite(vOutPin, LOW);
 	return result == HIGH;
 }
