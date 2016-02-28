@@ -189,7 +189,7 @@ module.exports = exports = function (_getValue, _setValue) {
 		    },
 		    {
 		    	id: 'group-motion',
-		    	img: 'img/bulb.png',
+		    	img: 'img/motion.svg',
 		    	sensorIds: [
 		    	    MOTION_TV_ID,
 		    	    MOTION_SOFA_ID
@@ -335,7 +335,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				    {
 				    	id: TV_ID,
 				    	type: 'binary',
-				    	img: 'img/bulb.png',
+				    	img: 'img/tv.svg',
 				    	unit: '',
 				    	name: 'TV',
 				    	description: 'Television',
