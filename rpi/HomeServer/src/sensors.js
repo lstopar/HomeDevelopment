@@ -321,7 +321,8 @@ function initSensors() {
 				if (devSensor.name == null) throw new Error('Sensor name is not defined!');
 				
 				var device = {
-					read: devSensor.read
+					read: devSensor.read,
+					init: function () {}
 				};
 				
 				devices.push(device);
