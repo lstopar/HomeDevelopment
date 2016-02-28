@@ -8,6 +8,8 @@ var MOTION_SOFA_ID = 'motion-sofa';
 var MOTION_TV_ID = 'motion-tv';
 var TV_ID = 'lr-tv';
 var LUMINOSITY_ID = 'lum-lr';
+var TEMPERATURE_ID = 'lr-temp';
+var HUMIDITY_ID = 'lr-lum';
 var INDICATOR_LED_ID = 'led-test';
 var LED_BLUE_ID = 'led-blue';
 var LED_RED_ID = 'led-red';
@@ -194,6 +196,15 @@ module.exports = exports = function (_getValue, _setValue) {
 		    	    MOTION_TV_ID,
 		    	    MOTION_SOFA_ID
 		    	]
+		    },
+		    {
+		    	id: 'group-ambient',
+		    	img: 'img/ambient.svg',
+		    	sensorIds: [
+		    	    LUMINOSITY_ID,
+		    	    TEMPERATURE_ID,
+		    	    HUMIDITY_ID
+		    	]
 		    }
 		],
 		devices: [
@@ -307,14 +318,14 @@ module.exports = exports = function (_getValue, _setValue) {
 				type: "DHT11",
 				sensors: [
 					{
-						id: "lr-temp",
+						id: TEMPERATURE_ID,
 						type: "temperature",
 						unit: "\u2103",
 						name: "Temperature",
 						description: "Temperature in the living room"
 					},
 					{
-						id: "lr-hum",
+						id: HUMIDITY_ID,
 						type: "humidity",
 						unit: "%",
 						name: "Humidity",
@@ -323,8 +334,8 @@ module.exports = exports = function (_getValue, _setValue) {
 				],
 				configuration: {
 					pin: 4,
-					temperatureId: "lr-temp",
-					humidityId: "lr-hum",
+					temperatureId: TEMPERATURE_ID,
+					humidityId: HUMIDITY_ID,
 					timeout: 10000,
 					verbose: true
 				}
