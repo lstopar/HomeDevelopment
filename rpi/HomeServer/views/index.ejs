@@ -86,7 +86,6 @@
 										</script>
 									<% } else if (sensor.type != 'dimmer') { %>
 										<h4><%= sensor.name %>: <span class="pull-right"><span id="span-val-<%= sensor.id %>"><%= utils.formatVal(sensor, val); %></span><%= sensor.unit %><span></span></h4>
-										<p><%= sensor.description %></p>
 									<% } else { %>
 										<div class="form-group">
 											<label for="range-<%= sensor.id %>"><%= sensor.name %></label>

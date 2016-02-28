@@ -283,7 +283,7 @@ module.exports = exports = function (_getValue, _setValue) {
 								internalId: 3,
 								type: 'luminosity',
 								unit: '%',
-								name: 'Luminosity living room',
+								name: 'Luminosity',
 								description: '',
 								transform: function (val) {
 									return val / 10.23;
