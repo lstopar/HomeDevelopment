@@ -42,11 +42,7 @@ module.exports = exports = function (getValue, setValue) {
 	}
 	
 	return {
-		onValue: function (sensorId, value) {
-			if (sensorId == MOTION_SOFA_ID) {
-				setValue(INDICATOR_LED_ID, value == 1 ? 100 : 0);
-			}
-		},
+		onValue: onValue,
 		layout: [
 		    {
 		    	id: 'group-lights',
