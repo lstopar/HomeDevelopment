@@ -325,7 +325,10 @@ function initSensors() {
 					init: function () {}
 				};
 				
-				devices.push(device);
+				devices.push({
+					device: device,
+					type: type
+				});
 				devSensor.device = device;
 				
 				sensors[devSensor.id] = devSensor;
