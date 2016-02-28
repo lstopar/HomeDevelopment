@@ -43,8 +43,8 @@ function setValue(sensorId, value) {
 
 function updateValue(sensorId, value) {
 	try {
-		if (log.trace())
-			log.trace('Setting value for sensor "%s" to %d ...', sensorId, value);
+		if (log.debug())
+			log.debug('Updating value for sensor "%s" to %d ...', sensorId, value);
 		
 		var type = sensorId in sensors ? sensors[sensorId] : radio.sensorH[sensorId].type;
 		
@@ -56,6 +56,9 @@ function updateValue(sensorId, value) {
 		});
 		
 		if (devices.onValue != null) {
+			if (log.debug())
+				log.debug('Calling callback ...');
+			
 			devices.onValue(sensorId, value);
 		}
 	} catch (e) {
@@ -104,7 +107,7 @@ function readDevices() {
 				var trans = transform != null ? transform(vals) : vals;
 				
 				if (log.debug())
-					log.debug('Read values: %s', JSON.stringify(trans));
+					log.debug('Read values: %s, updating ...', JSON.stringify(trans));
 				
 				for (var sensorId in trans)
 					updateValue(sensorId, trans[sensorId]);
