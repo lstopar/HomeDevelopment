@@ -273,6 +273,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				    {
 				    	id: 'lr-tv',
 				    	type: 'binary',
+				    	img: 'img/bulb.png',
 				    	unit: '',
 				    	name: 'TV',
 				    	description: 'Television',

@@ -2,6 +2,8 @@ var config = require('../config.js');
 
 module.exports = exports = {
 	getSensorImg: function (sensor) {
+		if (sensor.img != null) { return sensor.img; }
+		
 		switch (sensor.type) {
 		case 'temperature':
 			return 'img/temperature.png';
