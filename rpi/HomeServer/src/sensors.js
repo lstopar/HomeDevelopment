@@ -45,8 +45,8 @@ function setValue(sensorId, value) {
 
 function updateValue(sensorId, value) {
 	try {
-		if (log.debug())
-			log.debug('Updating value for sensor "%s" to %d ...', sensorId, value);
+		if (log.trace())
+			log.trace('Updating value for sensor "%s" to %d ...', sensorId, value);
 		
 		var type = sensorId in sensors ? sensors[sensorId] : radio.sensorH[sensorId].type;
 		
