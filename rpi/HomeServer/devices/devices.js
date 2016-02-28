@@ -1,3 +1,5 @@
+var ping = require('ping');
+
 var MOTION_SOFA_ID = 'motion-sofa';
 var MOTION_TV_ID = 'motion-tv';
 var LUMINOSITY_ID = 'lum-lr';
@@ -67,7 +69,7 @@ function periodicCheck() {
 //=======================================================
 
 var MotionDetector = function () {
-	var EMPTY_ROOM_THRESHOLD = 1000*60*5;	// 30 mins TODO
+	var EMPTY_ROOM_THRESHOLD = 1000*60*15;	// 15 mins
 	var LUMINOSITY_THRESHOLD = 10;
 	
 	var lastMotionTime = new Date().getTime();
@@ -264,6 +266,23 @@ module.exports = exports = function (_getValue, _setValue) {
 					timeout: 10000,
 					verbose: true
 				}
+			},
+			{
+				type: 'virtual',
+				sensors: [
+				    {
+				    	id: 'lr-tv',
+				    	type: 'binary',
+				    	unit: '',
+				    	name: 'TV',
+				    	description: 'Television',
+				    	read: function (callback) {
+				    		ping.sys.probe('tv.home', function(isAlive) {
+				    			callback(undefined, isAlive ? 1 : 0);
+				    	    });
+				    	}
+				    }      
+				]
 			}
 		]
 	} 

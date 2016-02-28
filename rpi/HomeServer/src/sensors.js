@@ -253,34 +253,7 @@ function initSensors() {
 		var deviceConf = devicesConf[deviceN];
 		
 		var type = deviceConf.type;
-		if (type != 'Rf24') {
-			var conf = deviceConf.configuration;
-			var deviceSensors = deviceConf.sensors;
-			var transform = deviceConf.transform;
-			
-			var device = null;
-			
-			if (config.mode != 'debug') {
-				device = createDevice(type, conf);
-				
-				devices.push({
-					device: device,
-					type: type,
-					transform: transform
-				});
-			}
-			
-			for (var sensorN = 0; sensorN < deviceSensors.length; sensorN++) {
-				var devSensor = deviceSensors[sensorN];
-				
-				if (devSensor.id == null) throw new Error('Sensor ID is not defined!');
-				if (devSensor.name == null) throw new Error('Sensor name is not defined!');
-				
-				devSensor.device = device;
-				
-				sensors[devSensor.id] = devSensor;
-			}
-		} else {
+		if (type == 'Rf24') {
 			log.info('Initializing radio ...');
 			
 			var nodes = deviceConf.nodes;
@@ -338,6 +311,51 @@ function initSensors() {
 				updateValue(val.id, trans);
 				onValueCb(val.id, trans);
 			});
+		} else if (type == 'virtual') {
+			var deviceSensors = deviceConf.sensors;
+			
+			for (var sensorN = 0; sensorN < deviceSensors.length; sensorN++) {
+				var devSensor = deviceSensors[sensorN];
+				
+				if (devSensor.id == null) throw new Error('Sensor ID is not defined!');
+				if (devSensor.name == null) throw new Error('Sensor name is not defined!');
+				
+				var device = {
+					read: devSensor.read
+				};
+				
+				devices.push(device);
+				devSensor.device = device;
+				
+				sensors[devSensor.id] = devSensor;
+			}
+		} else {
+			var conf = deviceConf.configuration;
+			var deviceSensors = deviceConf.sensors;
+			var transform = deviceConf.transform;
+			
+			var device = null;
+			
+			if (config.mode != 'debug') {
+				device = createDevice(type, conf);
+				
+				devices.push({
+					device: device,
+					type: type,
+					transform: transform
+				});
+			}
+			
+			for (var sensorN = 0; sensorN < deviceSensors.length; sensorN++) {
+				var devSensor = deviceSensors[sensorN];
+				
+				if (devSensor.id == null) throw new Error('Sensor ID is not defined!');
+				if (devSensor.name == null) throw new Error('Sensor name is not defined!');
+				
+				devSensor.device = device;
+				
+				sensors[devSensor.id] = devSensor;
+			}
 		}
 	}
 	
