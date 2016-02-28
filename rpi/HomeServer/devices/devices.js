@@ -58,11 +58,11 @@ function isAmbientOn() {
 }
 
 function ambientOn() {
-	setValue(AMBIENT_LIGHT_ID, 1);
+	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 1 });
 }
 
 function ambientOff() {
-	setValue(AMBIENT_LIGHT_ID, 0);
+	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 0 });
 }
 
 function ledStripOff() {
@@ -103,7 +103,7 @@ var MotionDetector = function () {
 	var that = {
 		onMotion: function (sensorId, motion) {
 			if (getMotion()) {
-				setValue(INDICATOR_LED_ID, 100);
+				setValue({ sensorId: INDICATOR_LED_ID, value: 100 });
 								
 				if (getLuminosity() < LUMINOSITY_THRESHOLD && that.timeSinceMotion() > EMPTY_ROOM_THRESHOLD) {
 					ambientOn();
@@ -111,7 +111,7 @@ var MotionDetector = function () {
 				
 				lastMotionTime = new Date().getTime();
 			} else {
-				setValue(INDICATOR_LED_ID, 0);
+				setValue({ sensorId: INDICATOR_LED_ID, value: 0 });
 			}
 		},
 		timeSinceMotion: function () {

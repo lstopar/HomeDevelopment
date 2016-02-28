@@ -98,7 +98,7 @@ function initApi() {
 			if (log.debug())
 				log.debug('Setting value of %s to %s', sensorId, value);
 			
-			sensors.setValue(sensorId, value);
+			sensors.setValue({ sensorId: sensorId, value: value });
 			
 			res.status(204);	// no content
 			res.end();

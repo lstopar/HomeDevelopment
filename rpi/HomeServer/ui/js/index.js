@@ -1,3 +1,50 @@
+var manualSetTimeH = {};
+
+function createSlider(sensorId, min, max, val) {
+	$('#range-' + sensorId).slider({
+		min: min,
+		max: max,
+		step: 1,
+		value: val
+	}).on('slideStop', function (event) {
+		var value = event.value;
+				
+		$.ajax('api/set', {
+			method: 'POST',
+			dataType: 'json',
+			data: {
+				id: sensorId,
+				value: parseInt(value)
+			},
+			success: function () {},
+			error: handleAjaxError()
+		})
+	});
+}
+
+function createCheckbox(sensorId, isChecked) {
+	var chk = $('#chk-' + sensorId);
+	
+	chk.bootstrapSwitch({
+		state: isChecked,
+		size: 'small',
+		onSwitchChange: function () {
+			var checked = chk.bootstrapSwitch('state');
+						
+			$.ajax('api/set', {
+				method: 'POST',
+				dataType: 'json',
+				data: {
+					id: sensorId,
+					value: checked ? 1 : 0
+				},
+				success: function () {},
+				error: handleAjaxError()
+			});
+		}
+	});
+}
+
 $(document).ready(function () {
 	function onReading(reading) {
 		var id = reading.id;
@@ -9,7 +56,7 @@ $(document).ready(function () {
 			slider.slider('setValue', tuUiPrecision(val, type));
 		} else if (type == 'actuator') { 
 			var chk = $('#chk-' + id);
-			chk.bootstrapSwitch('state', val == 1);
+			chk.bootstrapSwitch('state', val == 1, true);
 		} else {
 			var valSpan = $('#span-val-' + id);
 			valSpan.html(tuUiPrecision(val, type));

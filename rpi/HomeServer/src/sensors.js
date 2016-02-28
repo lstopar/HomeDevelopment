@@ -31,7 +31,10 @@ function getValue(sensorId) {
 	return sensorId in values ? values[sensorId] : 0;
 }
 
-function setValue(sensorId, value) {
+function setValue(opts) {
+	var sensorId = opts.sensorId;
+	var value = opts.value;
+	
 	if (sensorId in sensors) {
 		var device = sensors[sensorId].device;
 		device.set({ id: sensorId, value: value });
@@ -318,7 +321,6 @@ function initSensors() {
 				var trans = transFun(val.value);
 				
 				updateValue(val.id, trans);
-//				onValueCb(val.id, trans);
 			});
 		} else if (type == 'virtual') {
 			var deviceSensors = deviceConf.sensors;
