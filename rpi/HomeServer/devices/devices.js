@@ -24,8 +24,10 @@ module.exports = exports = function (getValue, setValue) {
 			}
 		}
 		
-		if (sensorId == MOTION_TV_ID) {
+		if (sensorId == MOTION_TV_ID && val == 1) {
 			setValue(AMBIENT_LIGHT_ID, 1);
+		} else if (sensorId == MOTION_TV_ID) {
+			setValue(AMBIENT_LIGHT_ID, 0);
 		}
 	}
 	
@@ -73,7 +75,7 @@ module.exports = exports = function (getValue, setValue) {
 				    	sensors: [
 							{
 								id: MOTION_TV_ID,
-								internalId: 10,
+								internalId: 4,
 								type: 'pir',
 								unit: '',
 								name: 'Motion TV',
