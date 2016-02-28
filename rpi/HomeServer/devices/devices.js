@@ -1,5 +1,9 @@
 var ping = require('ping');
 
+//=======================================================
+// IDs
+//=======================================================
+
 var MOTION_SOFA_ID = 'motion-sofa';
 var MOTION_TV_ID = 'motion-tv';
 var TV_ID = 'lr-tv';
@@ -12,9 +16,20 @@ var AMBIENT_LIGHT_ID = 'light-door';
 var BLINK_RGB_ID = 'rgb-blink';
 var CYCLE_HSL_ID = 'hsl-cycle';
 
+//=======================================================
+// CONSTANTS
+//=======================================================
+
+var LUMINOSITY_THRESHOLD = 10;
+
+//=======================================================
+// OTHER VARIABLES
+//=======================================================
+
 var getValue = null;
 var setValue = null;
 var motionDetector = null;
+var tv = null;
 
 //=======================================================
 // GET/SET FUNCTIONS
@@ -34,6 +49,10 @@ function getMotionSofa() {
 
 function getMotion() {
 	return getMotionTv() || getMotionSofa()	;
+}
+
+function isAmbientOn() {
+	return getValue(AMBIENT_LIGHT_ID) == 1;
 }
 
 function ambientOn() {
@@ -66,12 +85,12 @@ function periodicCheck() {
 }
 
 //=======================================================
-// MOTION
+// CONTROLLERS
 //=======================================================
 
 var MotionDetector = function () {
 	var EMPTY_ROOM_THRESHOLD = 1000*60*15;	// 15 mins
-	var LUMINOSITY_THRESHOLD = 10;
+	
 	
 	var lastMotionTime = new Date().getTime();
 	
@@ -97,17 +116,49 @@ var MotionDetector = function () {
 	return that;
 }
 
+var TvController = function () {
+	
+	var isOn = false;
+	
+	var that = {
+		onValue: function (_isOn) {
+			if (_isOn != isOn) {
+				if (log.debug())
+					log.debug('TV status changed to ' + _isOn);
+				
+				if (_isOn) {
+					if (isAmbientOn()) {
+						ambientOff();
+					}
+				} else {
+					if (getLuminosity() < LUMINOSITY_THRESHOLD && !isAmbientOn()) {
+						ambientOn();
+					}
+				}
+				
+				isOn = _isOn;
+			}
+		}
+	}
+	
+	return that;
+}
+
 module.exports = exports = function (_getValue, _setValue) {
 	getValue = _getValue;
 	setValue = _setValue;
 	
 	motionDetector = MotionDetector();
+	tv = TvController();
 	
 	setInterval(periodicCheck, 1000*60);
 	
 	function onValue(sensorId, value) {
 		if (sensorId == MOTION_TV_ID || sensorId == MOTION_SOFA_ID) {
 			motionDetector.onMotion(sensorId, value == 1);
+		}
+		else if (sensorId == TV_ID) {
+			tv.onValue(value == 1);
 		}
 	}
 	
