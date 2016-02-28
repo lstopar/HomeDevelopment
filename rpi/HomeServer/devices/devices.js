@@ -2,6 +2,7 @@ var ping = require('ping');
 
 var MOTION_SOFA_ID = 'motion-sofa';
 var MOTION_TV_ID = 'motion-tv';
+var TV_ID = 'lr-tv';
 var LUMINOSITY_ID = 'lum-lr';
 var INDICATOR_LED_ID = 'led-test';
 var LED_BLUE_ID = 'led-blue';
@@ -271,7 +272,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				type: 'virtual',
 				sensors: [
 				    {
-				    	id: 'lr-tv',
+				    	id: TV_ID,
 				    	type: 'binary',
 				    	img: 'img/bulb.png',
 				    	unit: '',
@@ -279,7 +280,9 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	description: 'Television',
 				    	read: function (callback) {
 				    		ping.sys.probe('tv.home', function(isAlive) {
-				    			callback(undefined, isAlive ? 1 : 0);
+				    			var result = {};
+				    			result[TV_ID] = isAlive ? 1 : 0;
+				    			callback(undefined, result);
 				    	    });
 				    	}
 				    }      
