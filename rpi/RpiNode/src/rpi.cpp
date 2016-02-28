@@ -362,7 +362,7 @@ void TRf24Radio::TReadThread::Run() {
 				}
 			}
 
-			delayMicroseconds(500);
+			delayMicroseconds(200);
 		} catch (const PExcept& Except) {
 			Notify->OnNotifyFmt(TNotifyType::ntErr, "Error on the read thread: %s", Except->GetMsgStr().CStr());
 		}
@@ -463,6 +463,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 		if (Success) { break; }
 
 		RetryN++;
+		TSysProc::Sleep(RETRY_DELAY);
 	} while (RetryN < RetryCount);
 
 	if (!Success) {

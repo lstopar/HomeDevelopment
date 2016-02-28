@@ -150,7 +150,7 @@ private:
 		void Run();
 	};
 
-	const uint64 RETRY_DELAY;
+	static const uint64 RETRY_DELAY;
 
 	const uint16 MyAddr;
 	RF24* Radio;
