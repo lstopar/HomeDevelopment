@@ -67,7 +67,7 @@ function periodicCheck() {
 //=======================================================
 
 var MotionDetector = function () {
-	var EMPTY_ROOM_THRESHOLD = 1000*60*30;
+	var EMPTY_ROOM_THRESHOLD = 1000*60*5;	// 30 mins TODO
 	var LUMINOSITY_THRESHOLD = 10;
 	
 	var lastMotionTime = new Date().getTime();
