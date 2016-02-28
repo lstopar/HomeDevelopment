@@ -11,6 +11,7 @@
 
 const uint16_t MY_ADDRESS = 01;
 
+const int PIR_PIN = 2;
 const int LED_PIN = 3;
 const int PIN_BLUE = 5;
 const int PIN_RED = 6;
@@ -18,8 +19,9 @@ const int PIN_GREEN = 9;
 const int MODE_BLINK_RGB = 15;
 const int MODE_CYCLE_HSV = 14;
 
-const int N_VAL_IDS = 6;
+const int N_VAL_IDS = 7;
 const int VAL_IDS[N_VAL_IDS] = {
+  PIR_PIN,
   LED_PIN,
   PIN_BLUE,
   PIN_RED,
@@ -31,14 +33,16 @@ const int VAL_IDS[N_VAL_IDS] = {
 int pin3Val = 0;
 
 RGBStrip rgb(PIN_RED, PIN_GREEN, PIN_BLUE);
+TDigitalPir pir(PIR_PIN);
 
 RF24 radio(7,8);
 RF24Network network(radio);
 
-void writeRadio(const uint16_t& recipient, const unsigned char& type, const char* buff, const int& len);
-
 char recPayload[PAYLOAD_LEN];
 char sendPayload[PAYLOAD_LEN];
+
+void writeRadio(const uint16_t& recipient, const unsigned char& type, const char* buff, const int& len);
+void onPirEvent(const bool& motion);
 
 void setup() {
   bitSet(TCCR1B, WGM12);  // put PWM timer 1 into fast mode
@@ -56,6 +60,7 @@ void setup() {
 
   analogWrite(LED_PIN, 0);
   rgb.reset();
+  pir.init();
  
   SPI.begin();
 
@@ -71,6 +76,8 @@ void setup() {
   if (MY_ADDRESS != 00) {
     writeRadio(network.parent(), REQUEST_CHILD_CONFIG, NULL, 0);
   }
+
+  pir.setCallback(onPirEvent);
 }
 
 //====================================================
@@ -92,7 +99,11 @@ void push(const uint16_t& to, const TRadioValue& radioVal) {
   push(to, &radioVal, 1);
 }
 
-void getRadioVal(const char& valId, TRadioValue& rval) {
+//====================================================
+// GET/SET FUNCTIONS
+//====================================================
+
+bool getRadioVal(const char& valId, TRadioValue& rval) {
   rval.ValId = valId;
 
   if (valId == LED_PIN || valId == PIN_BLUE || valId == PIN_RED || valId == PIN_GREEN) {
@@ -123,9 +134,15 @@ void getRadioVal(const char& valId, TRadioValue& rval) {
   else if (valId == MODE_CYCLE_HSV) {
     rval.Val = rgb.isCyclingHsv() ? 1 : 0;
   }
+  else if (valId == PIR_PIN) {
+    rval.Val = pir.isOn() ? 1 : 0;
+  }
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId, HEX);
+    return false;
   }
+
+  return true;
 }
 
 void processGet(const uint16_t& callerAddr, const char& valId) {
@@ -146,19 +163,12 @@ void processGet(const uint16_t& callerAddr, const char& valId) {
     }
 
     Serial.println("Sent all values!");
-  }
-  else if (valId == LED_PIN || valId == PIN_BLUE || valId == PIN_RED || valId == PIN_GREEN) {
+  } else {
     TRadioValue rval;
-    getRadioVal(valId, rval);
-    push(callerAddr, rval);
-  }
-  else if (valId == MODE_BLINK_RGB || valId == MODE_CYCLE_HSV) {
-    TRadioValue rval;
-    getRadioVal(valId, rval);
-    push(callerAddr, rval);
-  } 
-  else {
-    Serial.print("Unknown val ID: "); Serial.println(valId, HEX);
+    const bool isValid = getRadioVal(valId, rval);
+    if (isValid) {
+      push(callerAddr, rval);
+    }
   }
 }
 
@@ -206,6 +216,18 @@ void processSet(const uint16_t& callerAddr, const char& valId, const int& val) {
   }
 }
 
+//====================================================
+// CALLBACK FUNCTIONS
+//====================================================
+
+void onPirEvent(const bool& motion) {
+  processGet(ADDRESS_RPI, PIR_PIN);
+}
+
+//====================================================
+// MAIN LOOP
+//====================================================
+
 void loop(void) {
   network.update();
 
@@ -251,5 +273,6 @@ void loop(void) {
   }
 
   rgb.update();
+  pir.update();
 }
 

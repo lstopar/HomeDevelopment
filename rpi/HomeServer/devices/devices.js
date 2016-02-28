@@ -1,4 +1,5 @@
-var MOTION_ID = 'motion-lr';
+var MOTION_SOFA_ID = 'motion-sofa';
+var MOTION_TV_ID = 'motion-tv';
 var LUMINOSITY_ID = 'lum-lr';
 var DIMMER_ID = 'led-test';
 var LED_BLUE_ID = 'led-blue';
@@ -11,13 +12,13 @@ var CYCLE_HSL_ID = 'hsl-cycle';
 module.exports = exports = function (setValue) {
 	return {
 		onValue: function (sensorId, value) {
-			if (sensorId == MOTION_ID) {
+			if (sensorId == MOTION_SOFA_ID) {
 				setValue(DIMMER_ID, value == 1 ? 100 : 0);
 			}
 		},
 		layout: [
 		    {
-		    	id: 'group-rgb',
+		    	id: 'group-lights',
 		    	img: 'img/bulb.png',
 		    	sensorIds: [
 		    	    AMBIENT_LIGHT_ID,
@@ -27,6 +28,14 @@ module.exports = exports = function (setValue) {
 		    	    BLINK_RGB_ID,
 		    	    CYCLE_HSL_ID
 		    	]
+		    },
+		    {
+		    	id: 'group-motion',
+		    	img: 'img/bulb.png',
+		    	sensorIds: [
+		    	    MOTION_TV_ID,
+		    	    MOTION_SOFA_ID
+		    	]
 		    }
 		],
 		devices: [
@@ -35,8 +44,16 @@ module.exports = exports = function (setValue) {
 				nodes: [
 				    {
 				    	id: 01,
-				    	name: 'Arduino - sofa',
+				    	name: 'Arduino - TV',
 				    	sensors: [
+							{
+								id: MOTION_TV_ID,
+								internalId: 2,
+								type: 'pir',
+								unit: '',
+								name: 'Motion TV',
+								description: ''
+							},
 				    	    {
 				    	    	id: DIMMER_ID,
 				    	    	internalId: 3,
@@ -89,7 +106,7 @@ module.exports = exports = function (setValue) {
 				    },
 				    {
 				    	id: 02,
-				    	name: 'Arduino - motion',
+				    	name: 'Arduino - Sofa',
 				    	sensors: [
 							{
 								id: LUMINOSITY_ID,
@@ -103,7 +120,7 @@ module.exports = exports = function (setValue) {
 								}
 							},
 				    	    {
-				    	    	id: MOTION_ID,
+				    	    	id: MOTION_SOFA_ID,
 				    	    	internalId: 4,
 				    	    	type: 'pir',
 				    	    	unit: '',

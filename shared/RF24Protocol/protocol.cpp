@@ -317,9 +317,35 @@ bool TManualSwitch::readSwitch() {
 	digitalWrite(vOutPin, HIGH);
 	delay(3);
 	const int result = digitalRead(readPin);
-	Serial.println(result);
 	digitalWrite(vOutPin, LOW);
 	return result == HIGH;
+}
+
+///////////////////////////////////////
+// Digital PIR sensor
+TDigitalPir::TDigitalPir(const int& _readPin):
+		readPin(_readPin),
+		motionDetected(false),
+		onStateChanged(nullptr) {}
+
+void TDigitalPir::init() {
+	pinMode(readPin, INPUT);
+}
+
+void TDigitalPir::update() {
+	const bool newStatus = readInput();
+
+	if (newStatus != motionDetected) {
+		motionDetected = newStatus;
+
+		if (onStateChanged != nullptr) {
+			onStateChanged(motionDetected);
+		}
+	}
+}
+
+bool TDigitalPir::readInput() const {
+	return digitalRead(readPin) == HIGH;
 }
 
 #endif

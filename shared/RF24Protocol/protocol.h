@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define ARDUINO
+
 #ifdef ARDUINO
 
 #include "Arduino.h"
@@ -134,7 +136,7 @@ private:
 
 public:
 	TManualDimmer(const int& vOutPin, const int& readPin, const int& pwmPin,
-			const int& mnVal = 100, const int& mxVal=1000);
+			const int& mnVal=100, const int& mxVal=1000);
 
 	void init();
 	void update();
@@ -144,6 +146,9 @@ private:
 	int readInput() const;
 };
 
+///////////////////////////////////////
+// Switch which can be toggled either by clicking
+// or programatically
 class TManualSwitch {
 private:
 	const int vOutPin;
@@ -168,6 +173,31 @@ public:
 private:
 	void setOutput(const bool& on);
 	bool readSwitch();
+};
+
+
+///////////////////////////////////////
+// Digital PIR sensor
+class TDigitalPir {
+private:
+	const int readPin;
+
+	bool motionDetected;
+
+	void (*onStateChanged)(const bool&);
+
+public:
+	TDigitalPir(const int& readPin);
+
+	void init();
+	void update();
+
+	bool isOn() const { return motionDetected; }
+
+	void setCallback(void (*_onStateChanged)(const bool&)) { onStateChanged = _onStateChanged; }
+
+private:
+	bool readInput() const;
 };
 
 #endif
