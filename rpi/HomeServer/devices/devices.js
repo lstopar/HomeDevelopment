@@ -67,6 +67,11 @@ function ledStripOff() {
 	// TODO
 }
 
+function lightsOff() {
+	ambientOff();
+	ledStripOff();
+}
+
 //=======================================================
 // CHECKUP
 //=======================================================
@@ -76,8 +81,7 @@ function periodicCheck() {
 		log.info('Performing periodic check ...');
 		
 		if (motionDetector.timeSinceMotion() > 1000*60*30) {
-			ambientOff();
-			ledStripOff();
+			lightsOff();
 		}
 	} catch (e) {
 		log.error(e, 'Exception while performing periodic check!');
@@ -122,6 +126,9 @@ var TvController = function () {
 	
 	var that = {
 		onValue: function (_isOn) {
+			if (log.debug())
+				log.debug('Received TV value: ' + _isOn);
+			
 			if (_isOn != isOn) {
 				if (log.debug())
 					log.debug('TV status changed to ' + _isOn);

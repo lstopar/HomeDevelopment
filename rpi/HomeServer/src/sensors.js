@@ -302,8 +302,8 @@ function initSensors() {
 			
 			log.info('Setting callback ...');
 			radio.radio.onValue(function (val) {	// TODO move this somewhere, make a common interface
-				if (log.debug()) 
-					log.debug('Received value from the radio: %s', JSON.stringify(val));
+				if (log.trace()) 
+					log.trace('Received value from the radio: %s', JSON.stringify(val));
 				
 				var transFun = transformH[val.id];
 				var trans = transFun(val.value);
