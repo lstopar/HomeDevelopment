@@ -126,8 +126,8 @@ var TvController = function () {
 	
 	var that = {
 		onValue: function (_isOn) {
-			if (log.debug())
-				log.debug('Received TV value: ' + _isOn);
+			if (log.trace())
+				log.trace('Received TV value: ' + _isOn);
 			
 			if (_isOn != isOn) {
 				if (log.debug())
