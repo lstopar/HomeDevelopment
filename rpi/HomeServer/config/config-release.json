@@ -1,5 +1,5 @@
 {
-	"rpilib": "../RpiNode/build/Release/rpinode.node",
+	"rpilib": "../RpiNode/build/Debug/rpinode.node",
 	"server": {
 		"port": 80
 	},
@@ -17,7 +17,7 @@
 			}
 		}
 	},
-	"samplingInterval": 3000,
+	"samplingInterval": 8000,
 	"pingInterval": 10000,
 	"devices": "devices.js",
 	"mode": "release"
