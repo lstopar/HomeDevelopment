@@ -25,6 +25,10 @@ var callbacks = {
 // SENSOR FUNCTIONS
 //=======================================================
 
+function getValue(sensorId) {
+	return sensorId in values ? values[sensorId] : 0;
+}
+
 function setValue(sensorId, value) {
 	if (sensorId in sensors) {
 		var device = sensors[sensorId].device;
@@ -139,18 +143,6 @@ function readRadioDevices() {
 			var success = radio.radio.getAll(parseInt(nodeId));
 			onNodeConnected(nodeId, success);
 		}
-//		// TODO
-//		
-//		var radioSensorH = radio.sensorH;
-//		for (var id in radioSensorH) {
-//			var nodeId = radioSensorH[id].nodeId;
-//			
-//			if (log.debug())
-//				log.debug('Calling get on radio ...');
-//			
-//			var success = radio.radio.get(id);
-//			onNodeConnected(nodeId, success);
-//		}
 	}
 }
 
@@ -249,7 +241,7 @@ function initGroups(layout) {
 
 function initSensors() {
 	log.info('Reading devices configuration ...');
-	var devs = require(path.join(__dirname, '../devices', config.devices))(setValue)
+	var devs = require(path.join(__dirname, '../devices', config.devices))(getValue, setValue)
 	var devicesConf = devs.devices;
 	var onValueCb = devs.onValue != null ? devs.onValue : function () {};
 	
@@ -356,10 +348,7 @@ function initSensors() {
 // EXPORTS
 //=======================================================
 
-exports.getValue = function (sensorId) {
-	return sensorId in values ? values[sensorId] : 0;
-};
-
+exports.getValue = getValue;
 exports.setValue = setValue;
 
 exports.getSensors = function () {

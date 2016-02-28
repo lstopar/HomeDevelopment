@@ -73,7 +73,7 @@ public:
 
 #ifdef ARDUINO
 
-class RGBStrip {
+class TRgbStrip {
 private:
 	static const int UPDATE_INTERVAL;
 
@@ -93,7 +93,7 @@ private:
 	int iteration;
 
 public:
-	RGBStrip(const int& pinR, const int& pinG, const int& pinB);
+	TRgbStrip(const int& pinR, const int& pinG, const int& pinB);
 
 	void update();
 

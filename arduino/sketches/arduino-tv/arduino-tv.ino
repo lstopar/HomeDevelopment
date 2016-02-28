@@ -11,7 +11,7 @@
 
 const uint16_t MY_ADDRESS = 01;
 
-const int PIR_PIN = 2;
+const int PIR_TV_PIN = 2;
 const int LED_PIN = 3;
 const int PIN_BLUE = 5;
 const int PIN_RED = 6;
@@ -21,7 +21,7 @@ const int MODE_CYCLE_HSV = 14;
 
 const int N_VAL_IDS = 7;
 const int VAL_IDS[N_VAL_IDS] = {
-  PIR_PIN,
+  PIR_TV_PIN,
   LED_PIN,
   PIN_BLUE,
   PIN_RED,
@@ -32,8 +32,8 @@ const int VAL_IDS[N_VAL_IDS] = {
 
 int pin3Val = 0;
 
-RGBStrip rgb(PIN_RED, PIN_GREEN, PIN_BLUE);
-TDigitalPir pir(PIR_PIN);
+TRgbStrip rgb(PIN_RED, PIN_GREEN, PIN_BLUE);
+TDigitalPir pir(PIR_TV_PIN);
 
 RF24 radio(7,8);
 RF24Network network(radio);
@@ -134,7 +134,7 @@ bool getRadioVal(const char& valId, TRadioValue& rval) {
   else if (valId == MODE_CYCLE_HSV) {
     rval.Val = rgb.isCyclingHsv() ? 1 : 0;
   }
-  else if (valId == PIR_PIN) {
+  else if (valId == PIR_TV_PIN) {
     rval.Val = pir.isOn() ? 1 : 0;
   }
   else {
@@ -221,7 +221,7 @@ void processSet(const uint16_t& callerAddr, const char& valId, const int& val) {
 //====================================================
 
 void onPirEvent(const bool& motion) {
-  processGet(ADDRESS_RPI, PIR_PIN);
+  processGet(ADDRESS_RPI, PIR_TV_PIN);
 }
 
 //====================================================
@@ -232,12 +232,8 @@ void loop(void) {
   network.update();
 
   while (network.available()) {
-    Serial.println("Reading message ...");
-    
     RF24NetworkHeader header;
     network.peek(header);
-
-    Serial.println("Received message ...");
 
     const uint16_t& fromAddr = header.from_node;
     if (header.type == REQUEST_CHILD_CONFIG) {

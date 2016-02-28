@@ -1,7 +1,7 @@
 var MOTION_SOFA_ID = 'motion-sofa';
 var MOTION_TV_ID = 'motion-tv';
 var LUMINOSITY_ID = 'lum-lr';
-var DIMMER_ID = 'led-test';
+var INDICATOR_LED_ID = 'led-test';
 var LED_BLUE_ID = 'led-blue';
 var LED_RED_ID = 'led-red';
 var LED_GREEN_ID = 'led-green';
@@ -9,11 +9,32 @@ var AMBIENT_LIGHT_ID = 'light-door';
 var BLINK_RGB_ID = 'rgb-blink';
 var CYCLE_HSL_ID = 'hsl-cycle';
 
-module.exports = exports = function (setValue) {
+module.exports = exports = function (getValue, setValue) {
+	
+	function onMotion(sensorId, value) {
+		if (value == 1) {
+			setValue(INDICATOR_LED_ID, 100);
+		}
+		else {
+			var motionTvVal = getValue(MOTION_TV_ID);
+			var motionSofaVal = getValue(MOTION_SOFA_ID);
+			
+			if (motionTvVal == 0 && motionSofaVal == 0) {
+				setValue(INDICATOR_LED_ID, 0);
+			}
+		}
+	}
+	
+	function onValue(sensorId, value) {
+		if (sensorId == MOTION_TV_ID || sensorId == MOTION_SOFA_ID) {
+			onMotion(sensorId, value);
+		}
+	}
+	
 	return {
 		onValue: function (sensorId, value) {
 			if (sensorId == MOTION_SOFA_ID) {
-				setValue(DIMMER_ID, value == 1 ? 100 : 0);
+				setValue(INDICATOR_LED_ID, value == 1 ? 100 : 0);
 			}
 		},
 		layout: [
@@ -55,7 +76,7 @@ module.exports = exports = function (setValue) {
 								description: ''
 							},
 				    	    {
-				    	    	id: DIMMER_ID,
+				    	    	id: INDICATOR_LED_ID,
 				    	    	internalId: 3,
 				    	    	type: 'dimmer',
 				    	    	unit: '%',

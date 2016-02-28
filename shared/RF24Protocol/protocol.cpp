@@ -121,13 +121,13 @@ void TRadioProtocol::InitRadio(RF24& Radio, RF24Network& Network, const uint16_t
 
 #ifdef ARDUINO
 
-const int RGBStrip::UPDATE_INTERVAL = 500;
+const int TRgbStrip::UPDATE_INTERVAL = 500;
 
-const int RGBStrip::PIN_RED_N = 0;
-const int RGBStrip::PIN_GREEN_N = 1;
-const int RGBStrip::PIN_BLUE_N = 2;
+const int TRgbStrip::PIN_RED_N = 0;
+const int TRgbStrip::PIN_GREEN_N = 1;
+const int TRgbStrip::PIN_BLUE_N = 2;
 
-RGBStrip::RGBStrip(const int& pinR, const int& pinG, const int& pinB):
+TRgbStrip::TRgbStrip(const int& pinR, const int& pinG, const int& pinB):
 		modeBlink(false),
 		blinkPinN(0),
 		modeCycleHsv(false),
@@ -139,7 +139,7 @@ RGBStrip::RGBStrip(const int& pinR, const int& pinG, const int& pinB):
 	reset();
 }
 
-void RGBStrip::update() {
+void TRgbStrip::update() {
 	if (iteration++ % UPDATE_INTERVAL != 0) { return; }
 
 	if (modeBlink) {
@@ -163,19 +163,19 @@ void RGBStrip::update() {
 	}
 }
 
-void RGBStrip::blink() {
+void TRgbStrip::blink() {
 	reset();
 	modeBlink = true;
 	blinkPinN = 0;
 }
 
-void RGBStrip::cycleHsv() {
+void TRgbStrip::cycleHsv() {
 	reset();
 	modeCycleHsv = true;
 	currHue = 0;
 }
 
-void RGBStrip::reset(const bool& resetModes, const bool& resetPins) {
+void TRgbStrip::reset(const bool& resetModes, const bool& resetPins) {
 	if (resetModes) {
 		modeBlink = false;
 		modeCycleHsv = false;
@@ -188,11 +188,11 @@ void RGBStrip::reset(const bool& resetModes, const bool& resetPins) {
 	}
 }
 
-int RGBStrip::getColor(const int& colorN) const {
+int TRgbStrip::getColor(const int& colorN) const {
 	return pinVals[colorN];
 }
 
-void RGBStrip::setColor(const int& colorN, const int& val, const bool& resetModes) {
+void TRgbStrip::setColor(const int& colorN, const int& val, const bool& resetModes) {
 	if (resetModes) {
 		reset(true, false);
 	}
@@ -201,7 +201,7 @@ void RGBStrip::setColor(const int& colorN, const int& val, const bool& resetMode
 	analogWrite(pins[colorN], pinVals[colorN]);
 }
 
-void RGBStrip::hsl2rgb(const float& _h, const float& _s, const float& _l,
+void TRgbStrip::hsl2rgb(const float& _h, const float& _s, const float& _l,
 		int& r, int& g, int& b) {
 	float h = fmod(_h,360); // cycle H around to 0-360 degrees
 	h = 3.14159*h/(float)180; // Convert to radians.
