@@ -179,7 +179,7 @@ module.exports = exports = function (_getValue, _setValue) {
 		layout: [
 		    {
 		    	id: 'group-lights',
-		    	img: 'img/bulb.png',
+		    	img: 'img/bulb.svg',
 		    	sensorIds: [
 		    	    AMBIENT_LIGHT_ID,
 		    	    LED_BLUE_ID,
