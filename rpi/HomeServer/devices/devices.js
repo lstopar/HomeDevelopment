@@ -25,8 +25,12 @@ module.exports = exports = function (getValue, setValue) {
 		}
 		
 		if (sensorId == MOTION_TV_ID && val == 1) {
+			if (log.debug())
+				log.debug('Motion on the TV triggered ...');
 			setValue(AMBIENT_LIGHT_ID, 1);
 		} else if (sensorId == MOTION_TV_ID) {
+			if (log.debug())
+				log.debug('Motion on the TV dissapeared ...');
 			setValue(AMBIENT_LIGHT_ID, 0);
 		}
 	}

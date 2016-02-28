@@ -44,6 +44,7 @@ RF24NetworkHeader header;
 char recPayload[PAYLOAD_LEN];
 char sendPayload[PAYLOAD_LEN];
 TRadioValue* setValV = new TRadioValue[VALS_PER_PAYLOAD];
+char* getBuff = new char[VALS_PER_PAYLOAD];
 
 //====================================================
 // INITIALIZATION
@@ -179,9 +180,7 @@ void processGet(const uint16_t& callerAddr, const char& valId) {
 }
 
 void processSet(const uint16_t& callerAddr, const char& valId, const int& val) {
-  if (valId == LED_PIN) {
-    Serial.print("Setting LED ...");
-    
+  if (valId == LED_PIN) {    
     int transVal = (int) (double(val)*2.55);
     analogWrite(LED_PIN, transVal);
     pin3Val = transVal;
@@ -249,18 +248,19 @@ void loop(void) {
       network.read(header, NULL, 0);
       Serial.println("Received ping, ignoring ...");
     } else if (header.type == REQUEST_GET) {
-      Serial.println("Received GET request ...");
-      
       network.read(header, recPayload, PAYLOAD_LEN);
 
-      char buff[VALS_PER_PAYLOAD];
-      int nVals = TRadioProtocol::parseGetPayload(recPayload, buff);
+      Serial.println("Received GET request ...");
+
+      int nVals = TRadioProtocol::parseGetPayload(recPayload, getBuff);
       for (int valN = 0; valN < nVals; valN++) {
-        const char& valId = buff[valN];
+        const char& valId = getBuff[valN];
         processGet(fromAddr, valId);
       }
     } else if (header.type == REQUEST_SET) {
       network.read(header, recPayload, PAYLOAD_LEN);
+
+      Serial.println("Received SET ...");
 
       const int vals = TRadioProtocol::parseSetPayload(recPayload, setValV);
       for (int valN = 0; valN < vals; valN++) {
@@ -270,6 +270,7 @@ void loop(void) {
     } else {
       Serial.print("Unknown header type: ");
       Serial.println(header.type);
+      network.read(header, NULL, 0);
     }
   }
 
