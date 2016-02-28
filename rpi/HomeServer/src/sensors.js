@@ -218,20 +218,28 @@ function initGroups(layout) {
 	
 	for (var sensorId in sensors) {
 		if (!(sensorId in usedSensorIds)) {
+			var sensor = sensors[sensorId];
+			
+			if (sensor.hidden) continue;
+			
 			layoutGroups.push({
 				id: 'group-' + sensorId,
-				img: utils.getSensorImg(sensors[sensorId]),
-				sensors: [sensors[sensorId]]
+				img: utils.getSensorImg(sensor),
+				sensors: [sensor]
 			});
 		}
 	}
 	
 	for (var sensorId in radio.sensorH) {
 		if (!(sensorId in usedSensorIds)) {
+			var sensor = radio.sensorH[sensorId];
+			
+			if (sensor.hidden) continue;
+			
 			layoutGroups.push({
 				id: 'group-' + sensorId,
-				img: utils.getSensorImg(radio.sensorH[sensorId]),
-				sensors: [radio.sensorH[sensorId]]
+				img: utils.getSensorImg(sensor),
+				sensors: [sensor]
 			});
 		}
 	}
@@ -388,9 +396,8 @@ exports.getSensors = function () {
 };
 
 exports.getLayout = function () {
-	if (log.trace()) {
-		log.debug('Returning layout: %s', JSON.stringify(layoutGroups));
-	}
+	if (log.trace())
+		log.trace('Returning layout: %s', JSON.stringify(layoutGroups));
 	return layoutGroups;
 }
 

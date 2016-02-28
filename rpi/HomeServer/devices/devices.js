@@ -229,7 +229,8 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	    	type: 'dimmer',
 				    	    	unit: '%',
 				    	    	name: 'Brightness',
-				    	    	description: 'Dimmer 1'
+				    	    	description: 'Dimmer 1',
+				    	    	hidden: true
 				    	    },
 				    	    {
 				    	    	id: LED_BLUE_ID,
