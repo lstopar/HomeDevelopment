@@ -9,35 +9,102 @@ var AMBIENT_LIGHT_ID = 'light-door';
 var BLINK_RGB_ID = 'rgb-blink';
 var CYCLE_HSL_ID = 'hsl-cycle';
 
-module.exports = exports = function (getValue, setValue) {
-	
-	function onMotion(sensorId, value) {
-		if (value == 1) {
-			setValue(INDICATOR_LED_ID, 100);
+var getValue = null;
+var setValue = null;
+var motionDetector = null;
+
+//=======================================================
+// GET/SET FUNCTIONS
+//=======================================================
+
+function getLuminosity() {
+	return getValue(LUMINOSITY_ID);
+}
+
+function getMotionTv() {
+	return getValue(MOTION_TV_ID) == 1;
+}
+
+function getMotionSofa() {
+	return getValue(MOTION_SOFA_ID) == 1;
+}
+
+function getMotion() {
+	return getMotionTv() || getMotionSofa()	;
+}
+
+function ambientOn() {
+	setValue(AMBIENT_LIGHT_ID, 1);
+}
+
+function ambientOff() {
+	setValue(AMBIENT_LIGHT_ID, 0);
+}
+
+function ledStripOff() {
+	// TODO
+}
+
+//=======================================================
+// CHECKUP
+//=======================================================
+
+function periodicCheck() {
+	try {
+		log.info('Performing periodic check ...');
+		
+		if (motionDetector.timeSinceMotion() > 1000*60*30) {
+			ambientOff();
+			ledStripOff();
 		}
-		else {
-			var motionTvVal = getValue(MOTION_TV_ID);
-			var motionSofaVal = getValue(MOTION_SOFA_ID);
-			
-			if (motionTvVal == 0 && motionSofaVal == 0) {
+	} catch (e) {
+		log.error(e, 'Exception while performing periodic check!');
+	}
+}
+
+//=======================================================
+// MOTION
+//=======================================================
+
+var MotionDetector = function () {
+	var EMPTY_ROOM_THRESHOLD = 1000*60*30;
+	var LUMINOSITY_THRESHOLD = 10;
+	
+	var lastMotionTime = new Date().getTime();
+	
+	var that = {
+		onMotion: function (sensorId, motion) {
+			if (getMotion()) {
+				setValue(INDICATOR_LED_ID, 100);
+								
+				if (getLuminosity() < LUMINOSITY_THRESHOLD && that.timeSinceMotion() > EMPTY_ROOM_THRESHOLD) {
+					ambientOn();
+				}
+				
+				lastMotionTime = new Date().getTime();
+			} else {
 				setValue(INDICATOR_LED_ID, 0);
 			}
-		}
-		
-		if (sensorId == MOTION_TV_ID && value == 1) {
-			if (log.debug())
-				log.debug('Motion on the TV triggered ...');
-			setValue(AMBIENT_LIGHT_ID, 1);
-		} else if (sensorId == MOTION_TV_ID) {
-			if (log.debug())
-				log.debug('Motion on the TV dissapeared ...');
-			setValue(AMBIENT_LIGHT_ID, 0);
+		},
+		timeSinceMotion: function () {
+			return new Date().getTime() - lastMotionTime;
 		}
 	}
 	
+	return that;
+}
+
+module.exports = exports = function (_getValue, _setValue) {
+	getValue = _getValue;
+	setValue = _setValue;
+	
+	motionDetector = MotionDetector();
+	
+	setInterval(periodicCheck, 1000*60);
+	
 	function onValue(sensorId, value) {
 		if (sensorId == MOTION_TV_ID || sensorId == MOTION_SOFA_ID) {
-			onMotion(sensorId, value);
+			motionDetector.onMotion(sensorId, value == 1);
 		}
 	}
 	
