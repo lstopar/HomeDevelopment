@@ -15,6 +15,8 @@ var radio = null;
 var values = {};
 var layoutGroups = [];
 
+var onValueCallback = function () {};
+
 
 var callbacks = {
 	onValueReceived: function () {},
@@ -55,12 +57,7 @@ function updateValue(sensorId, value) {
 			type: type
 		});
 		
-		if (devices.onValue != null) {
-			if (log.debug())
-				log.debug('Calling callback ...');
-			
-			devices.onValue(sensorId, value);
-		}
+		onValueCallback(sensorId, value);
 	} catch (e) {
 		log.error(e, 'Exception while setting value of sensor: %s', sensorId);
 	}
@@ -246,7 +243,8 @@ function initSensors() {
 	log.info('Reading devices configuration ...');
 	var devs = require(path.join(__dirname, '../devices', config.devices))(getValue, setValue)
 	var devicesConf = devs.devices;
-	var onValueCb = devs.onValue != null ? devs.onValue : function () {};
+	
+	onValueCallback = devs.onValue != null ? devs.onValue : function () {};
 	
 	if (log.info())
 		log.info('Using device configuration:\n%s', JSON.stringify(devicesConf, null, '\t'));
@@ -312,7 +310,7 @@ function initSensors() {
 				var trans = transFun(val.value);
 				
 				updateValue(val.id, trans);
-				onValueCb(val.id, trans);
+//				onValueCb(val.id, trans);
 			});
 		} else if (type == 'virtual') {
 			var deviceSensors = deviceConf.sensors;
