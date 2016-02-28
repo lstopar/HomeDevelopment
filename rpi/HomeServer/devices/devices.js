@@ -23,6 +23,10 @@ module.exports = exports = function (getValue, setValue) {
 				setValue(INDICATOR_LED_ID, 0);
 			}
 		}
+		
+		if (sensorId == MOTION_TV_ID) {
+			setValue(AMBIENT_LIGHT_ID, 1);
+		}
 	}
 	
 	function onValue(sensorId, value) {
