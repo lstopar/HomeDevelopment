@@ -150,12 +150,14 @@ private:
 		void Run();
 	};
 
-	static const rf24_pa_dbm_e POWER_LEVEL;
+	const uint64 RETRY_DELAY;
 
 	const uint16 MyAddr;
 	RF24* Radio;
 	RF24Network* Network;
 	TReadThread ReadThread;
+
+	const int RetryCount;
 
 	TRf24RadioCallback* Callback;
 

@@ -309,7 +309,7 @@ void TYL40Adc::CleanUp() {
 
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
-const rf24_pa_dbm_e TRf24Radio::POWER_LEVEL = rf24_pa_dbm_e::RF24_PA_LOW;
+const uint64 TRf24Radio::RETRY_DELAY = 30;
 
 void TRf24Radio::TReadThread::Run() {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
@@ -376,6 +376,7 @@ TRf24Radio::TRf24Radio(const uint16& NodeAddr, const uint8& PinCe,
 		Radio(nullptr),
 		Network(nullptr),
 		ReadThread(),
+		RetryCount(3),
 		Callback(nullptr),
 		Notify(_Notify) {
 
@@ -453,7 +454,16 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message to node %d ...", NodeAddr);
 
 	RF24NetworkHeader Header(NodeAddr, Command);
-	bool Success = Network->write(Header, Buff(), Buff.Len());
+
+	int RetryN = 0;
+	bool Success = false;
+	do {
+		Success = Network->write(Header, Buff(), Buff.Len());
+
+		if (Success) { break; }
+
+		RetryN++;
+	} while (RetryN < RetryCount);
 
 	if (!Success) {
 		Notify->OnNotify(TNotifyType::ntWarn, "Failed to send message!");
