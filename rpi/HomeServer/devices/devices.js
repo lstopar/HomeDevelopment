@@ -69,7 +69,7 @@ module.exports = exports = function (getValue, setValue) {
 				    	sensors: [
 							{
 								id: MOTION_TV_ID,
-								internalId: 2,
+								internalId: 10,
 								type: 'pir',
 								unit: '',
 								name: 'Motion TV',

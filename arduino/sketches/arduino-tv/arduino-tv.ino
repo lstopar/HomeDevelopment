@@ -11,21 +11,22 @@
 
 const uint16_t MY_ADDRESS = 01;
 
-const int PIR_TV_PIN = 2;
+
 const int LED_PIN = 3;
 const int PIN_BLUE = 5;
 const int PIN_RED = 6;
 const int PIN_GREEN = 9;
+const int PIR_TV_PIN = 10;
 const int MODE_BLINK_RGB = 15;
 const int MODE_CYCLE_HSV = 14;
 
 const int N_VAL_IDS = 7;
 const int VAL_IDS[N_VAL_IDS] = {
-  PIR_TV_PIN,
   LED_PIN,
   PIN_BLUE,
   PIN_RED,
   PIN_GREEN,
+  PIR_TV_PIN,
   MODE_BLINK_RGB,
   MODE_CYCLE_HSV
 };
@@ -38,8 +39,15 @@ TDigitalPir pir(PIR_TV_PIN);
 RF24 radio(7,8);
 RF24Network network(radio);
 
+RF24NetworkHeader header;
+
 char recPayload[PAYLOAD_LEN];
 char sendPayload[PAYLOAD_LEN];
+TRadioValue* setValV = new TRadioValue[VALS_PER_PAYLOAD];
+
+//====================================================
+// INITIALIZATION
+//====================================================
 
 void writeRadio(const uint16_t& recipient, const unsigned char& type, const char* buff, const int& len);
 void onPirEvent(const bool& motion);
@@ -85,7 +93,6 @@ void setup() {
 //====================================================
 
 void writeRadio(const uint16_t& recipient, const unsigned char& type, const char* buff, const int& len) {
-  Serial.println("Sending message ...");
   RF24NetworkHeader header(recipient, type);
   network.write(header, buff, len);
 }
@@ -165,8 +172,7 @@ void processGet(const uint16_t& callerAddr, const char& valId) {
     Serial.println("Sent all values!");
   } else {
     TRadioValue rval;
-    const bool isValid = getRadioVal(valId, rval);
-    if (isValid) {
+    if (getRadioVal(valId, rval)) {
       push(callerAddr, rval);
     }
   }
@@ -212,7 +218,8 @@ void processSet(const uint16_t& callerAddr, const char& valId, const int& val) {
     processGet(callerAddr, valId);
   }
   else {
-    Serial.print("Unknown val ID: "); Serial.println(valId);
+    Serial.print("Unknown val ID: ");
+    Serial.println(valId);
   }
 }
 
@@ -232,7 +239,6 @@ void loop(void) {
   network.update();
 
   while (network.available()) {
-    RF24NetworkHeader header;
     network.peek(header);
 
     const uint16_t& fromAddr = header.from_node;
@@ -256,10 +262,9 @@ void loop(void) {
     } else if (header.type == REQUEST_SET) {
       network.read(header, recPayload, PAYLOAD_LEN);
 
-      TRadioValue valV[VALS_PER_PAYLOAD];
-      int vals = TRadioProtocol::parseSetPayload(recPayload, valV);
+      const int vals = TRadioProtocol::parseSetPayload(recPayload, setValV);
       for (int valN = 0; valN < vals; valN++) {
-        const TRadioValue& val = valV[valN];
+        const TRadioValue& val = setValV[valN];
         processSet(fromAddr, val.ValId, val.Val);
       }
     } else {
