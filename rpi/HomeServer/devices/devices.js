@@ -124,7 +124,33 @@ var MotionDetector = function () {
 
 var TvController = function () {
 	
+	var TV_SAMPLE_TIME = 3000;
+	
 	var isOn = false;
+	var push = function () {}
+	
+	function constructStatus() {
+		var result = {};
+		result[TV_ID] = isOn;
+		return result;
+	}
+	
+	function readTv() {
+		var readTime = new Date().getTime();
+		
+		ping.sys.probe('tv.home', function(isAlive) {
+			try {
+				if (isOn != isAlive) {
+					push({ id: TV_ID, value: isAlive ? 1 : 0 });
+				}
+				
+				var duration = new Date().getTime() - readTime;
+				setTimeout(readTv, Math.max(10, TV_SAMPLE_TIME - duration))
+			} catch (e) {
+				log.error(e, 'Exception while processing TV state!');
+			}
+	    });
+	}
 	
 	var that = {
 		onValue: function (_isOn) {
@@ -147,6 +173,15 @@ var TvController = function () {
 				
 				isOn = _isOn;
 			}
+		},
+		init: function () {
+			setTimeout(readTv, TV_SAMPLE_TIME);
+		},
+		read: function (callback) {
+			callback(undefined, constructStatus());
+		},
+		setPushCallback: function (callback) {
+			push = callback;
 		}
 	}
 	
@@ -351,13 +386,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	unit: '',
 				    	name: 'TV',
 				    	description: 'Television',
-				    	read: function (callback) {
-				    		ping.sys.probe('tv.home', function(isAlive) {
-				    			var result = {};
-				    			result[TV_ID] = isAlive ? 1 : 0;
-				    			callback(undefined, result);
-				    	    });
-				    	}
+				    	controller: tv
 				    }      
 				]
 			}

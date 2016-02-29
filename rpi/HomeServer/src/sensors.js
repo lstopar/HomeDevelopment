@@ -326,23 +326,34 @@ function initSensors() {
 			var deviceSensors = deviceConf.sensors;
 			
 			for (var sensorN = 0; sensorN < deviceSensors.length; sensorN++) {
-				var devSensor = deviceSensors[sensorN];
-				
-				if (devSensor.id == null) throw new Error('Sensor ID is not defined!');
-				if (devSensor.name == null) throw new Error('Sensor name is not defined!');
-				
-				var device = {
-					read: devSensor.read,
-					init: function () {}
-				};
-				
-				devices.push({
-					device: device,
-					type: type
-				});
-				devSensor.device = device;
-				
-				sensors[devSensor.id] = devSensor;
+				(function () {
+					var devSensor = deviceSensors[sensorN];
+					var controller = devSensor.controller;
+					
+					if (devSensor.id == null) throw new Error('Sensor ID is not defined!');
+					if (devSensor.name == null) throw new Error('Sensor name is not defined!');
+					if (controller == null) throw new Error('Controller not defined for virtual sensor %s', devSensor.name);
+					if (controller.read == null) throw new Error('Read is not defined for virtual sensor %s!', devSensor.name);
+					
+					controller.setPushCallback(function (val) {
+						if (log.debug())
+							log.debug('Received virtual sensor value %s', JSON.stringify(val));
+						updateValue(val.id, val.value);
+					});
+					
+					var device = {
+						read: controller.read,
+						init: controller.init != null ? controller.init : function () {}
+					};
+					
+					devices.push({
+						device: device,
+						type: type
+					});
+					devSensor.device = device;
+					
+					sensors[devSensor.id] = devSensor;
+				})();
 			}
 		} else {
 			var conf = deviceConf.configuration;
