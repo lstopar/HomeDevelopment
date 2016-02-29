@@ -7,6 +7,9 @@ module.exports = exports = {
 	},
 		
 	formatVal: function (sensor, val) {
+		if (log.trace())
+			log.trace('Transforming value ' + val);
+		
 		return val.toFixed();
 	}
 };

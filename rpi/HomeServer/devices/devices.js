@@ -129,27 +129,25 @@ var TvController = function () {
 	var isOn = false;
 	var push = function () {}
 	
-	function constructStatus() {
-		var result = {};
-		result[TV_ID] = isOn;
-		return result;
-	}
-	
 	function readTv() {
 		var readTime = new Date().getTime();
 		
-		ping.sys.probe('tv.home', function(isAlive) {
-			try {
-				if (isOn != isAlive) {
-					push({ id: TV_ID, value: isAlive ? 1 : 0 });
+		try {
+			ping.sys.probe('tv.home', function(isAlive) {
+				try {
+					if (isOn != isAlive) {
+						push({ id: TV_ID, value: isAlive ? 1 : 0 });
+					}
+					
+					var duration = new Date().getTime() - readTime;
+					setTimeout(readTv, Math.max(10, TV_SAMPLE_TIME - duration))
+				} catch (e) {
+					log.error(e, 'Exception while processing TV state!');
 				}
-				
-				var duration = new Date().getTime() - readTime;
-				setTimeout(readTv, Math.max(10, TV_SAMPLE_TIME - duration))
-			} catch (e) {
-				log.error(e, 'Exception while processing TV state!');
-			}
-	    });
+		    });
+		} catch (e) {
+			log.error(e, 'Exception while pinging TV!');
+		}
 	}
 	
 	var that = {
@@ -175,10 +173,13 @@ var TvController = function () {
 			}
 		},
 		init: function () {
+			log.info('Initializing TV ...');
 			setTimeout(readTv, TV_SAMPLE_TIME);
 		},
 		read: function (callback) {
-			callback(undefined, constructStatus());
+			var result = {};
+			result[TV_ID] = isOn;
+			callback(undefined, result);
 		},
 		setPushCallback: function (callback) {
 			push = callback;
