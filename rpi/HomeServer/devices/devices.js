@@ -184,7 +184,7 @@ var TvController = function () {
 		},
 		read: function (callback) {
 			var result = {};
-			result[TV_ID] = isOn;
+			result[TV_ID] = isOn ? 1 : 0;
 			callback(undefined, result);
 		},
 		setPushCallback: function (callback) {
