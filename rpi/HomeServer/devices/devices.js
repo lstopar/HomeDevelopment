@@ -133,8 +133,14 @@ var TvController = function () {
 		var readTime = new Date().getTime();
 		
 		try {
+			if (log.trace())
+				log.trace('Pinging TV ...');
+			
 			ping.sys.probe('tv.home', function(isAlive) {
 				try {
+					if (log.trace())
+						log.trace('Received response from TV: ' + isAlive);
+					
 					if (isOn != isAlive) {
 						push({ id: TV_ID, value: isAlive ? 1 : 0 });
 					}
