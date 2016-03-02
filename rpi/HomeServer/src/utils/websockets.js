@@ -41,19 +41,23 @@ exports.WebSocketWrapper = function (opts) {
 	}
 
 	function closeClient(id) {
-		if (!(id in sockets)) return;
-		
-		var socket = sockets[id].client;
-		
-		if (socket.readyState == WebSocket.CLOSING || socket.readyState == WebSocket.CLOSED)
+		try {
+			if (!(id in sockets)) return;
+			
+			var socket = sockets[id].client;
+			
+			if (socket.readyState == WebSocket.CLOSING || socket.readyState == WebSocket.CLOSED)
+				delSocket(id);
+				return;
+			
+			if (log.debug())
+				log.debug("Closing client %d", id);
+			
+			sockets[id].client.close();
 			delSocket(id);
-			return;
-		
-		if (log.debug())
-			log.debug("Closing client %d", id);
-		
-		sockets[id].client.close();
-		delSocket(id);
+		} catch (e) {
+			log.error(e, 'Exception while closing the web socket client!');
+		}
 	}
 	
 	function removeIdle() {
@@ -86,7 +90,12 @@ exports.WebSocketWrapper = function (opts) {
 			sessionStore.get(sessionId, function (e1, session) {
 				if (log.info())
 					log.info('Got session for web socket %d ...', id);
-				connectedCb(id, sessionId, session);
+				
+				try {
+					connectedCb(id, sessionId, session);
+				} catch (e) {
+					log.error(e, 'Exception while getting the session!');
+				}
 			});
 		});
 		

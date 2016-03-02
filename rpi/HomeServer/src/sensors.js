@@ -32,17 +32,21 @@ function getValue(sensorId) {
 }
 
 function setValue(opts) {
-	var sensorId = opts.sensorId;
-	var value = opts.value;
-	
-	if (sensorId in sensors) {
-		var device = sensors[sensorId].device;
-		device.set({ id: sensorId, value: value });
-	} else if (sensorId in radio.sensorH) {
-		var success = radio.radio.set({ id: sensorId, value: value });
-		onNodeConnected(radio.sensorH[sensorId].nodeId, success);
+	if (variable.constructor === Array) {
+		log.warn('Setting multiple values not supported yet!!');
 	} else {
-		throw new Error('Could not find sensor: ' + sensorId);
+		var sensorId = opts.sensorId;
+		var value = opts.value;
+		
+		if (sensorId in sensors) {
+			var device = sensors[sensorId].device;
+			device.set({ id: sensorId, value: value });
+		} else if (sensorId in radio.sensorH) {
+			var success = radio.radio.set({ id: sensorId, value: value });
+			onNodeConnected(radio.sensorH[sensorId].nodeId, success);
+		} else {
+			throw new Error('Could not find sensor: ' + sensorId);
+		}
 	}
 }
 

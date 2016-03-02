@@ -14,7 +14,7 @@ var INDICATOR_LED_ID = 'led-test';
 var LED_BLUE_ID = 'led-blue';
 var LED_RED_ID = 'led-red';
 var LED_GREEN_ID = 'led-green';
-var AMBIENT_LIGHT_ID = 'light-door';
+var AMBIENT_LIGHT_ID = 'light-ambient';
 var BLINK_RGB_ID = 'rgb-blink';
 var CYCLE_HSL_ID = 'hsl-cycle';
 

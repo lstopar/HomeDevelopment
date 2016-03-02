@@ -454,11 +454,11 @@ void TNodeJsRf24Radio::OnValue(const uint16& NodeId, const char& ValId, const in
 	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, NodeId, (int) ValId, Val), true);
 }
 
-void TNodeJsRf24Radio::TOnMsgTask::Run(TOnMsgTask& Task) {
+void TNodeJsRf24Radio::TOnMsgTask::Run() {
 	try {
-	Task.JsRadio->OnMsgMainThread(Task.NodeId, Task.ValueId, Task.Val);
+		JsRadio->OnMsgMainThread(NodeId, ValueId, Val);
 	} catch (const PExcept& Except) {
-		Task.JsRadio->Notify->OnNotifyFmt(TNotifyType::ntErr, "Failed to execute value callback: %s!", Except->GetMsgStr().CStr());
+		JsRadio->Notify->OnNotifyFmt(TNotifyType::ntErr, "Failed to execute value callback: %s!", Except->GetMsgStr().CStr());
 	}
 }
 

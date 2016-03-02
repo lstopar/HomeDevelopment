@@ -149,7 +149,7 @@ private:
 public:
 	void OnValue(const uint16& NodeId, const char& ValId, const int& Val);
 
-	class TOnMsgTask {
+	class TOnMsgTask: public TMainThreadTask {
 	private:
 		TNodeJsRf24Radio* JsRadio;
 		const uint16 NodeId;
@@ -157,11 +157,13 @@ public:
 		const int Val;
 	public:
 		TOnMsgTask(TNodeJsRf24Radio* _JsRadio, const uint16& _NodeId, const int& _ValueId, const int& _Val):
+			TMainThreadTask(),
 			JsRadio(_JsRadio),
 			NodeId(_NodeId),
 			ValueId(_ValueId),
 			Val(_Val) {}
 
+		void Run();
 		static void Run(TOnMsgTask& Task);
 	};
 };

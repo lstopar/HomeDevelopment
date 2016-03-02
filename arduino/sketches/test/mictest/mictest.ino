@@ -9,13 +9,14 @@ visualizing the data.
 */
 
 // do #defines BEFORE #includes
-#define LOG_OUT 1 // use the log output function
-#define FFT_N 256 // set to 256 point fft
+#define LIN_OUT8 1 // use the log output function
+#define FFT_N 32 // set to 256 point fft
 
 #include <FFT.h> // include the library
 
 void setup() {
   Serial.begin(9600); // use the serial port
+  Serial.println("Started");
   TIMSK0 = 0; // turn off timer0 for lower jitter - delay() and millis() killed
   ADCSRA = 0xe5; // set the adc to free running mode
   ADMUX = 0x40; // use adc0
@@ -40,11 +41,11 @@ void loop() {
     fft_window(); // window the data for better frequency response
     fft_reorder(); // reorder the data before doing the fft
     fft_run(); // process the data in the fft
-    fft_mag_log(); // take the output of the fft
+    fft_mag_lin8(); // take the output of the fft
     sei(); // turn interrupts back on
     Serial.write(255); // send a start byte
     //Serial.write(fft_log_out, 128); // send out the data
-    Serial.write(fft_log_out, 128);
+    Serial.write(fft_lin_out8, FFT_N / 2);
     Serial.println();
   }
 }
