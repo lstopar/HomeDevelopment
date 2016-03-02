@@ -79,13 +79,18 @@ private:
 	static const int PIN_GREEN_N;
 	static const int PIN_BLUE_N;
 
+	enum TRgbMode {
+		rmDefault,
+		rmBlink,
+		rmCycleHsv
+	};
+
 	int pins[3];
 	int pinVals[3];
 
-	bool modeBlink;
-	int blinkPinN;
+	TRgbMode mode;
 
-	bool modeCycleHsv;
+	int blinkPinN;
 	int currHue;
 
 	int iteration;
@@ -106,8 +111,8 @@ public:
 	void blink();
 	void cycleHsv();
 
-	bool isBlinking() const { return modeBlink; }
-	bool isCyclingHsv() const { return modeCycleHsv; }
+	bool isBlinking() const { return mode == TRgbMode::rmBlink; }
+	bool isCyclingHsv() const { return mode == TRgbMode::rmCycleHsv; }
 
 	void reset(const bool& resetModes=true, const bool& writePins=true);
 

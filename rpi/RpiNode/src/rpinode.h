@@ -157,7 +157,6 @@ public:
 		const int Val;
 	public:
 		TOnMsgTask(TNodeJsRf24Radio* _JsRadio, const uint16& _NodeId, const int& _ValueId, const int& _Val):
-			TMainThreadTask(),
 			JsRadio(_JsRadio),
 			NodeId(_NodeId),
 			ValueId(_ValueId),

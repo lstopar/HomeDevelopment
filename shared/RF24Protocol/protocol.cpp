@@ -128,9 +128,8 @@ const int TRgbStrip::PIN_GREEN_N = 1;
 const int TRgbStrip::PIN_BLUE_N = 2;
 
 TRgbStrip::TRgbStrip(const int& pinR, const int& pinG, const int& pinB):
-		modeBlink(false),
+		mode(TRgbMode::rmDefault),
 		blinkPinN(0),
-		modeCycleHsv(false),
 		currHue(0),
 		iteration(0) {
 	pins[0] = pinR;
@@ -142,7 +141,7 @@ TRgbStrip::TRgbStrip(const int& pinR, const int& pinG, const int& pinB):
 void TRgbStrip::update() {
 	if (iteration++ % UPDATE_INTERVAL != 0) { return; }
 
-	if (modeBlink) {
+	if (mode == TRgbMode::rmBlink) {
 		pinVals[blinkPinN]++;
 		if (pinVals[blinkPinN] > 255) {
 			reset(false, true);
@@ -151,9 +150,7 @@ void TRgbStrip::update() {
 		}
 
 		setColor(blinkPinN, pinVals[blinkPinN], false);
-	}
-
-	if (modeCycleHsv) {
+	} else if (mode == TRgbMode::rmCycleHsv) {
 		currHue = (currHue + 1) % 360;
 		int r, g, b;
 		hsl2rgb(currHue, 1, 1, r, g, b);
@@ -165,20 +162,19 @@ void TRgbStrip::update() {
 
 void TRgbStrip::blink() {
 	reset();
-	modeBlink = true;
+	mode = TRgbMode::rmBlink;
 	blinkPinN = 0;
 }
 
 void TRgbStrip::cycleHsv() {
 	reset();
-	modeCycleHsv = true;
+	mode = TRgbMode::rmCycleHsv;
 	currHue = 0;
 }
 
 void TRgbStrip::reset(const bool& resetModes, const bool& resetPins) {
 	if (resetModes) {
-		modeBlink = false;
-		modeCycleHsv = false;
+		mode = TRgbMode::rmDefault;
 	}
 
 	if (resetPins) {
@@ -265,7 +261,6 @@ int TManualDimmer::readInput() const {
 	digitalWrite(vOutPin, HIGH);
 	int result = analogRead(readPin);
 	digitalWrite(vOutPin, LOW);
-//	Serial.println(result);
 	return result;
 }
 
