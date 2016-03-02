@@ -31,12 +31,12 @@ function getValue(sensorId) {
 	return sensorId in values ? values[sensorId] : 0;
 }
 
-function setValue(opts) {
-	if (variable.constructor === Array) {
+function setValue(vals) {
+	if (vals.constructor === Array) {
 		log.warn('Setting multiple values not supported yet!!');
 	} else {
-		var sensorId = opts.sensorId;
-		var value = opts.value;
+		var sensorId = vals.sensorId;
+		var value = vals.value;
 		
 		if (sensorId in sensors) {
 			var device = sensors[sensorId].device;
@@ -285,13 +285,16 @@ function initSensors() {
 				
 				for (var sensorN = 0; sensorN < node.sensors.length; sensorN++) {
 					var sensorConf = node.sensors[sensorN];
+					var id = sensorConf.id;
+					
+					log.info('Initializing sensor %s ...', id);
 					
 					// add the node ID, so it can be quickly accessed later
 					sensorConf.nodeId = nodeId;
 					
-					radioSensorH[sensorConf.id] = sensorConf;
+					radioSensorH[id] = sensorConf;
 					radioConf.push({
-						id: sensorConf.id,
+						id: id,
 						internalId: sensorConf.internalId,
 						nodeId: nodeId
 					});
@@ -332,12 +335,15 @@ function initSensors() {
 			for (var sensorN = 0; sensorN < deviceSensors.length; sensorN++) {
 				(function () {
 					var devSensor = deviceSensors[sensorN];
+					var id = devSensor.id;
 					var controller = devSensor.controller;
 					
-					if (devSensor.id == null) throw new Error('Sensor ID is not defined!');
+					if (id == null) throw new Error('Sensor ID is not defined!');
 					if (devSensor.name == null) throw new Error('Sensor name is not defined!');
 					if (controller == null) throw new Error('Controller not defined for virtual sensor %s', devSensor.name);
 					if (controller.read == null) throw new Error('Read is not defined for virtual sensor %s!', devSensor.name);
+					
+					log.info('Initializing sensor %s ...', id);
 					
 					controller.setPushCallback(function (val) {
 						if (log.debug())
@@ -356,7 +362,7 @@ function initSensors() {
 					});
 					devSensor.device = device;
 					
-					sensors[devSensor.id] = devSensor;
+					sensors[id] = devSensor;
 				})();
 			}
 		} else {
@@ -378,9 +384,12 @@ function initSensors() {
 			
 			for (var sensorN = 0; sensorN < deviceSensors.length; sensorN++) {
 				var devSensor = deviceSensors[sensorN];
+				var id = devSensor.id;
 				
-				if (devSensor.id == null) throw new Error('Sensor ID is not defined!');
+				if (id == null) throw new Error('Sensor ID is not defined!');
 				if (devSensor.name == null) throw new Error('Sensor name is not defined!');
+				
+				log.info('Initializing sensor %s ...', id);
 				
 				devSensor.device = device;
 				

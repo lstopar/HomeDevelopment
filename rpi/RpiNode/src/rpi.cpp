@@ -362,7 +362,7 @@ void TRf24Radio::TReadThread::Run() {
 				}
 			}
 
-			delayMicroseconds(200);
+			delayMicroseconds(500);
 		} catch (const PExcept& Except) {
 			Notify->OnNotifyFmt(TNotifyType::ntErr, "Error on the read thread: %s", Except->GetMsgStr().CStr());
 		}
@@ -451,26 +451,31 @@ bool TRf24Radio::GetAll(const uint16& NodeId) {
 bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff) {
 	TLock Lock(CriticalSection);
 
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message to node %d ...", NodeAddr);
+	try {
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message to node %d ...", NodeAddr);
 
-	RF24NetworkHeader Header(NodeAddr, Command);
+		RF24NetworkHeader Header(NodeAddr, Command);
 
-	int RetryN = 0;
-	bool Success = false;
-	do {
-		Success = Network->write(Header, Buff(), Buff.Len());
+		int RetryN = 0;
+		bool Success = false;
+		do {
+			Success = Network->write(Header, Buff(), Buff.Len());
 
-		if (Success) { break; }
+			if (Success) { break; }
 
-		RetryN++;
-		TSysProc::Sleep(RETRY_DELAY);
-	} while (RetryN < RetryCount);
+			RetryN++;
+			TSysProc::Sleep(RETRY_DELAY);
+		} while (RetryN < RetryCount);
 
-	if (!Success) {
-		Notify->OnNotify(TNotifyType::ntWarn, "Failed to send message!");
+		if (!Success) {
+			Notify->OnNotify(TNotifyType::ntWarn, "Failed to send message!");
+		}
+
+		return Success;
+	} catch (const PExcept& Except) {
+		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception when sending!");
+		return false;
 	}
-
-	return Success;
 }
 
 void TRf24Radio::UpdateNetwork() {
