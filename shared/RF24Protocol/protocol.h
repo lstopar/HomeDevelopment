@@ -22,11 +22,22 @@ const uint16_t ADDRESS_RPI = 00;
 const uint16_t ADDRESS_ARDUINO_SOFA = 01;
 const uint16_t ADDRESS_ARDUINO_PIR = 04;
 
-struct TRadioValue {
+class TRadioValue {
+public:
 	static const int BYTES;
 
+private:
 	char ValId;
 	int Val;
+
+public:
+	const char& GetValId() const { return ValId; }
+	const int& GetValInt() const { return Val; }
+	const bool GetValBool() const { return Val == 1; }
+
+	void SetValId(const char& _ValId) { ValId = _ValId; }
+	void SetVal(const bool& BoolVal);
+	void SetVal(const int& IntVal);
 
 	void WriteToBuff(char* Buff) const;
 	void ReadFromBuff(const char* Buff);

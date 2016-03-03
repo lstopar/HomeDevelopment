@@ -2,6 +2,14 @@
 
 const int TRadioValue::BYTES = 2;
 
+void TRadioValue::SetVal(const bool& BoolVal) {
+	Val = BoolVal ? 1 : 0;
+}
+
+void TRadioValue::SetVal(const int& IntVal) {
+	Val = IntVal;
+}
+
 void TRadioValue::WriteToBuff(char* Buff) const {
 	Buff[0] = ValId;
 	Buff[1] = Val & 0xFF;

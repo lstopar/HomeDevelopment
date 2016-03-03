@@ -112,7 +112,7 @@ void push(const uint16_t& to, const TRadioValue& radioVal) {
 //====================================================
 
 bool getRadioVal(const char& valId, TRadioValue& rval) {
-  rval.ValId = valId;
+  rval.SetValId(valId);
 
   if (valId == LED_PIN || valId == PIN_BLUE || valId == PIN_RED || valId == PIN_GREEN) {
     int val;
@@ -135,15 +135,15 @@ bool getRadioVal(const char& valId, TRadioValue& rval) {
       Serial.println(valId);  
     }
 
-    rval.Val = (int) (val / 2.55);
+    rval.SetVal((int) (val / 2.55));
   } else if (valId == MODE_BLINK_RGB) {
-    rval.Val = rgb.isBlinking() ? 1 : 0;
+    rval.SetVal(rgb.isBlinking());
   }
   else if (valId == MODE_CYCLE_HSV) {
-    rval.Val = rgb.isCyclingHsv() ? 1 : 0;
+    rval.SetVal(rgb.isCyclingHsv());
   }
   else if (valId == PIR_TV_PIN) {
-    rval.Val = pir.isOn() ? 1 : 0;
+    rval.SetVal(pir.isOn());
   }
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId, HEX);
@@ -179,27 +179,29 @@ void processGet(const uint16_t& callerAddr, const char& valId) {
   }
 }
 
-void processSet(const uint16_t& callerAddr, const char& valId, const int& val) {
+void processSet(const uint16_t& callerAddr, const TRadioValue& rval) {
+  const char valId = rval.GetValId();
+  
   if (valId == LED_PIN) {    
-    int transVal = (int) (double(val)*2.55);
+    int transVal = (int) (double(rval.GetValInt())*2.55);
     analogWrite(LED_PIN, transVal);
     pin3Val = transVal;
     processGet(callerAddr, valId);
   }
   else if (valId == PIN_BLUE) {
-    rgb.setBlue((int) (double(val)*2.55));
+    rgb.setBlue((int) (double(rval.GetValInt())*2.55));
     processGet(callerAddr, valId);
   }
   else if (valId == PIN_RED) {
-    rgb.setRed((int) (double(val)*2.55));
+    rgb.setRed((int) (double(rval.GetValInt())*2.55));
     processGet(callerAddr, valId);
   }
   else if (valId == PIN_GREEN) {
-    rgb.setGreen((int) (double(val)*2.55));
+    rgb.setGreen((int) (double(rval.GetValInt())*2.55));
     processGet(callerAddr, valId);
   }
   else if (valId == MODE_BLINK_RGB) {
-    if (val == 1) {
+    if (rval.GetValBool()) {
       rgb.blink();
     } else {
       rgb.reset();
@@ -208,7 +210,7 @@ void processSet(const uint16_t& callerAddr, const char& valId, const int& val) {
     processGet(callerAddr, valId);
   }
   else if (valId == MODE_CYCLE_HSV) {
-    if (val == 1) {
+    if (rval.GetValBool()) {
       rgb.cycleHsv();
     } else {
       rgb.reset();
@@ -265,7 +267,7 @@ void loop(void) {
       const int vals = TRadioProtocol::parseSetPayload(recPayload, setValV);
       for (int valN = 0; valN < vals; valN++) {
         const TRadioValue& val = setValV[valN];
-        processSet(fromAddr, val.ValId, val.Val);
+        processSet(fromAddr, val);
       }
     } else {
       Serial.print("Unknown header type: ");

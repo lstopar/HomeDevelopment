@@ -369,7 +369,7 @@ function initSensors() {
 					sensors[id] = devSensor;
 				})();
 			}
-		} else {
+		} else {	// normal device
 			var conf = deviceConf.configuration;
 			var deviceSensors = deviceConf.sensors;
 			var transform = deviceConf.transform;

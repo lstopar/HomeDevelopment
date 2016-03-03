@@ -97,16 +97,16 @@ void push(const uint16_t& to, const TRadioValue& radioVal) {
 //====================================================
 
 bool getRadioVal(const char& valId, TRadioValue& rval) {
-  rval.ValId = valId;
+  rval.SetValId(valId);
 
   if (valId == PIR_PIN) {
-    rval.Val = pir.isOn() ? 1 : 0;
+    rval.SetVal(pir.isOn());
   }
   else if (valId == LUM_PIN) {
-    rval.Val = analogRead(LUM_PIN) >> 2;
+    rval.SetVal(analogRead(LUM_PIN) >> 2);
   }
   else if (valId == LIGHT_SWITCH_PIN) {
-    rval.Val = lightSwitch.isOn() ? 1 : 0;
+    rval.SetVal(lightSwitch.isOn());
   }
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId, HEX);
@@ -142,9 +142,11 @@ void processGet(const uint16_t& callerAddr, const char& valId) {
   }
 }
 
-void processSet(const uint16_t& callerAddr, const char& valId, const int& val) {
+void processSet(const uint16_t& callerAddr, const TRadioValue& rval) {
+  const char valId = rval.GetValId();
+  
   if (valId == LIGHT_SWITCH_PIN) {
-    if (val == 1) {
+    if (rval.GetValBool()) {
       lightSwitch.on();
     } else {
       lightSwitch.off();
@@ -207,7 +209,7 @@ void loop(void) {
       int vals = TRadioProtocol::parseSetPayload(recPayload, receiveBuff);
       for (int valN = 0; valN < vals; valN++) {
         const TRadioValue& val = receiveBuff[valN];
-        processSet(fromAddr, val.ValId, val.Val);
+        processSet(fromAddr, val);
       }
     }
     else {
