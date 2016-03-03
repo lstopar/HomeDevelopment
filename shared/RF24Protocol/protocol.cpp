@@ -73,12 +73,13 @@ int TRadioProtocol::parseSetPayload(const char* Payload, TRadioValue* ValV) {
 void TRadioProtocol::GenGetPayload(const TChV& ValIdV, TMem& Payload) {
 	if (Payload.Len() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
 	const int& Vals = ValIdV.Len();
+	EAssertR(Vals <= VALS_PER_PAYLOAD, "Tried to send too many values!");
 #else
 void TRadioProtocol::genGetPayload(const int* ValIdV, const int& Vals,
 		char* Payload) {
 #endif
 
-	Payload[0] = Vals;
+	Payload[0] = (char) Vals;
 	for (int ValN = 0; ValN < Vals; ValN++) {
 		Payload[ValN+1] = ValIdV[ValN];
 	}
