@@ -55,16 +55,20 @@ function updateValue(sensorId, value) {
 		if (log.trace())
 			log.trace('Updating value for sensor "%s" to %d ...', sensorId, value);
 		
-		var type = sensorId in sensors ? sensors[sensorId] : radio.sensorH[sensorId].type;
+		var previousVal = values[sensorId]; 
 		
-		values[sensorId] = value;
-		callbacks.onValueReceived({
-			id: sensorId,
-			value: value,
-			type: type
-		});
-		
-		onValueCallback(sensorId, value);
+		if (value != previousVal) {
+			values[sensorId] = value;
+			
+			// web sockets callback
+			callbacks.onValueReceived({
+				id: sensorId,
+				value: value,
+				type: sensorId in sensors ? sensors[sensorId] : radio.sensorH[sensorId].type
+			});
+			// devices callback
+			onValueCallback(sensorId, value);
+		}
 	} catch (e) {
 		log.error(e, 'Exception while setting value of sensor: %s', sensorId);
 	}

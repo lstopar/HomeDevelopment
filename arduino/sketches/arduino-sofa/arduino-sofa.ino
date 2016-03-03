@@ -25,23 +25,18 @@ const int VAL_IDS[N_VAL_IDS] = {
   LIGHT_SWITCH_PIN
 };
 
-const int PIR_THRESHOLD = 500;
-
 RF24 radio(7,8);
 RF24Network network(radio);
 
+TAnalogPir pir(PIR_PIN, 1000, 500);
 TManualSwitch lightSwitch(LIGHT_VOUT_PIN, LIGHT_READ_PIN, LIGHT_SWITCH_PIN);
 
 void writeRadio(const uint16_t& recipient, const unsigned char& type, const char* buff, const int& len);
-
-bool currPirOn = false;
-int lastPirVal = 0;
-unsigned long lastOnTime = 0;
+void onPirEvent(const bool& motion);
+void onSwitchEvent(const bool& isOn);
 
 char recPayload[PAYLOAD_LEN];
 char sendPayload[PAYLOAD_LEN];
-
-//long int i = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -57,6 +52,7 @@ void setup() {
 
   digitalWrite(VOUT_PIN, HIGH);
 
+  pir.init();
   lightSwitch.init();
  
   SPI.begin();
@@ -71,6 +67,10 @@ void setup() {
     Serial.println(network.parent());
     writeRadio(network.parent(), REQUEST_CHILD_CONFIG, NULL, 0);
   }
+
+  // set callbacks
+  pir.setCallback(onPirEvent);
+  lightSwitch.setCallback(onSwitchEvent);
 }
 
 //====================================================
@@ -92,59 +92,34 @@ void push(const uint16_t& to, const TRadioValue& radioVal) {
   push(to, &radioVal, 1);
 }
 
+//====================================================
+// GET/SET FUNCTIONS
+//====================================================
+
 void sendPirStatus(const uint16_t& recipient = ADDRESS_RPI) {
   TRadioValue rval;
   getRadioVal(PIR_PIN, rval);
   push(ADDRESS_RPI, rval);
 }
 
-void readPIR() {
-  int pirVal = analogRead(PIR_PIN);
-  bool isOn = pirVal >= PIR_THRESHOLD;
-
-//  Serial.println(pirVal);
-
-  bool changed = false;
-
-  if (isOn) {
-    lastOnTime = millis();
-    
-    if (isOn != currPirOn) {
-      Serial.println("Motion detected!");
-      changed = true;
-    }
-    currPirOn = true; 
-  } else if (isOn != currPirOn) {
-    // the status has changed and the sensor is off
-    if (millis() - lastOnTime > 1000) {
-      currPirOn = false;
-      Serial.println("Stopped detecting!");
-      changed = true;
-    }
-  }
-
-  if (changed) {
-    sendPirStatus();
-  }
-
-  lastPirVal = pirVal;
-}
-
-void getRadioVal(const char& valId, TRadioValue& rval) {
+bool getRadioVal(const char& valId, TRadioValue& rval) {
   rval.ValId = valId;
 
   if (valId == PIR_PIN) {
-    rval.Val = currPirOn ? 1 : 0;
+    rval.Val = pir.isOn() ? 1 : 0;
   }
   else if (valId == LUM_PIN) {
-    rval.Val = analogRead(LUM_PIN);
+    rval.Val = analogRead(LUM_PIN) >> 2;
   }
   else if (valId == LIGHT_SWITCH_PIN) {
     rval.Val = lightSwitch.isOn() ? 1 : 0;
   }
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId, HEX);
+    return false;
   }
+
+  return true;
 }
 
 void processGet(const uint16_t& callerAddr, const char& valId) {
@@ -165,22 +140,11 @@ void processGet(const uint16_t& callerAddr, const char& valId) {
     }
 
     Serial.println("Sent all values!");
-  }
-  else if (valId == PIR_PIN) {
-     sendPirStatus(callerAddr);
-  } 
-  else if (valId == LUM_PIN) {
+  } else {
     TRadioValue radioVal;
-    getRadioVal(valId, radioVal);
-    push(callerAddr, radioVal);
-  }
-  else if (valId == LIGHT_SWITCH_PIN) {
-    TRadioValue radioVal;
-    getRadioVal(valId, radioVal);
-    push(callerAddr, radioVal);
-  }
-  else {
-    Serial.print("Unknown val ID: "); Serial.println(valId);
+    if (getRadioVal(valId, radioVal)) {
+      push(callerAddr, radioVal);
+    }
   }
 }
 
@@ -197,10 +161,20 @@ void processSet(const uint16_t& callerAddr, const char& valId, const int& val) {
   }
 }
 
+//====================================================
+// CALLBACK FUNCTIONS
+//====================================================
+
+void onPirEvent(const bool& motion) {
+  processGet(ADDRESS_RPI, PIR_PIN);
+}
+
+void onSwitchEvent(const bool& isOn) {
+  processGet(ADDRESS_RPI, LIGHT_SWITCH_PIN);
+}
+
 void loop(void) {
   network.update();
-
-  readPIR();
 
   while (network.available()) {
     Serial.println("Reading message ...");
@@ -249,11 +223,7 @@ void loop(void) {
     }
   }
 
-  const bool isLightOn = lightSwitch.isOn();
+  pir.update();
   lightSwitch.update();
-
-  if (lightSwitch.isOn() != isLightOn) {
-    processGet(ADDRESS_RPI, LIGHT_SWITCH_PIN);
-  }
 }
 

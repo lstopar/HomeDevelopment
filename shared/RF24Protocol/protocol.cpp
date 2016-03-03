@@ -1,21 +1,15 @@
 #include "protocol.h"
 
-const int TRadioValue::BYTES = 5;
+const int TRadioValue::BYTES = 2;
 
 void TRadioValue::WriteToBuff(char* Buff) const {
 	Buff[0] = ValId;
-	Buff[1] = (Val >> 24) & 0xFF;
-	Buff[2] = (Val >> 16) & 0xFF;
-	Buff[3] = (Val >> 8) & 0xFF;
-	Buff[4] = Val & 0xFF;
+	Buff[1] = Val & 0xFF;
 }
 
 void TRadioValue::ReadFromBuff(const char* Buff) {
 	ValId = Buff[0];
-	Val = (Buff[1] << 24) |
-		  (Buff[2] << 16) |
-		  (Buff[3] << 8) |
-		  Buff[4];
+	Val = (int) Buff[1];
 }
 
 bool TRadioProtocol::IsValidType(const unsigned char& Type) {
@@ -113,6 +107,7 @@ void TRadioProtocol::InitRadio(RF24& Radio, RF24Network& Network, const uint16_t
 	Radio.setRetries(20, 30);
 	Radio.setDataRate(RF24_2MBPS);
 	Radio.setPALevel(Power);	// set power to high for better range
+	Radio.setCRCLength(rf24_crclength_e::RF24_CRC_8);
 	delay(5);
 	Network.begin(COMM_CHANNEL, Addr);
 	Radio.printDetails();
@@ -270,7 +265,8 @@ TManualSwitch::TManualSwitch(const int& _vOutPin, const int& _readPin,
 	readPin(_readPin),
 	outputPin(_switchPin),
 	inputOn(false),
-	outputOn(false) {}
+	outputOn(false),
+	onStateChanged(nullptr) {}
 
 void TManualSwitch::init() {
 	pinMode(vOutPin, OUTPUT);
@@ -303,9 +299,12 @@ void TManualSwitch::toggle() {
 
 void TManualSwitch::setOutput(const bool& on) {
 	if (on != outputOn) {
+		outputOn = on;
 		digitalWrite(outputPin, isOn() ? HIGH : LOW);
+		if (onStateChanged != nullptr) {
+			onStateChanged(outputOn);
+		}
 	}
-	outputOn = on;
 }
 
 bool TManualSwitch::readSwitch() {
@@ -339,8 +338,35 @@ void TDigitalPir::update() {
 	}
 }
 
-bool TDigitalPir::readInput() const {
+bool TDigitalPir::readInput() {
 	return digitalRead(readPin) == HIGH;
+}
+
+///////////////////////////////////////
+// Analog PIR sensor
+TAnalogPir::TAnalogPir(const int& readPin, const uint64_t& _onTime, const int& _threshold):
+		TDigitalPir(readPin),
+		threshold(_threshold),
+		onTime(_onTime),
+		lastOnTime(0) {}
+
+bool TAnalogPir::readInput() {
+	const int pirVal = analogRead(readPin);
+	const bool isOn = pirVal >= threshold;
+
+	if (isOn) {
+		// the motion is detected
+		lastOnTime = millis();
+		return true;
+	}
+	else {
+		// motion is not detected, check if less time than the threshold has elapsed
+		if (millis() - lastOnTime > onTime) {
+			return true;
+		}
+
+		return false;
+	}
 }
 
 #endif

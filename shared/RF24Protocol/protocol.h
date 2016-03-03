@@ -161,6 +161,8 @@ private:
 	bool inputOn;
 	bool outputOn;
 
+	void (*onStateChanged)(const bool&);
+
 public:
 	TManualSwitch(const int& vOutPin, const int& readPin, const int& switchPin);
 
@@ -173,6 +175,8 @@ public:
 	void off();
 	void toggle();
 
+	void setCallback(void (*_onStateChanged)(const bool&)) { onStateChanged = _onStateChanged; }
+
 private:
 	void setOutput(const bool& on);
 	bool readSwitch();
@@ -182,15 +186,17 @@ private:
 ///////////////////////////////////////
 // Digital PIR sensor
 class TDigitalPir {
-private:
+protected:
 	const int readPin;
 
+private:
 	bool motionDetected;
 
 	void (*onStateChanged)(const bool&);
 
 public:
 	TDigitalPir(const int& readPin);
+	virtual ~TDigitalPir() {}
 
 	void init();
 	void update();
@@ -199,8 +205,24 @@ public:
 
 	void setCallback(void (*_onStateChanged)(const bool&)) { onStateChanged = _onStateChanged; }
 
+protected:
+	virtual bool readInput();
+};
+
+///////////////////////////////////////
+// Analog PIR sensor
+class TAnalogPir: public TDigitalPir {
 private:
-	bool readInput() const;
+	const int threshold;
+	const uint64_t onTime;
+
+	uint64_t lastOnTime;
+
+public:
+	TAnalogPir(const int& readPin, const uint64_t& onTime, const int& threshold);
+
+protected:
+	bool readInput();
 };
 
 #endif

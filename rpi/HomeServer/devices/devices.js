@@ -123,20 +123,23 @@ var MotionDetector = function () {
 }
 
 var TvController = function () {
-	
 	var TV_SAMPLE_TIME = 3000;
 	
 	var isOn = false;
+	var isReading = false;
+	
 	var push = function () {}
 	
 	function readTv() {
-		var readTime = new Date().getTime();
+		if (isReading) return;
+		
+		isReading = true;
 		
 		try {
 			if (log.trace())
 				log.trace('Pinging TV ...');
 			
-			ping.sys.probe('tv.home', function(isAlive) {
+			ping.sys.probe('tv.home', function (isAlive) {
 				try {
 					if (log.trace())
 						log.trace('Received response from TV: ' + isAlive);
@@ -144,12 +147,11 @@ var TvController = function () {
 					if (isOn != isAlive) {
 						push({ id: TV_ID, value: isAlive ? 1 : 0 });
 					}
-					
-					var duration = new Date().getTime() - readTime;
-					setTimeout(readTv, Math.max(10, TV_SAMPLE_TIME - duration))
 				} catch (e) {
 					log.error(e, 'Exception while processing TV state!');
 				}
+				
+				isReading = false;
 		    });
 		} catch (e) {
 			log.error(e, 'Exception while pinging TV!');
@@ -180,7 +182,7 @@ var TvController = function () {
 		},
 		init: function () {
 			log.info('Initializing TV ...');
-			setTimeout(readTv, TV_SAMPLE_TIME);
+			setInterval(readTv, TV_SAMPLE_TIME);
 		},
 		read: function (callback) {
 			var result = {};
