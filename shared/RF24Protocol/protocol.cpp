@@ -300,7 +300,7 @@ void TManualSwitch::toggle() {
 void TManualSwitch::setOutput(const bool& on) {
 	if (on != outputOn) {
 		outputOn = on;
-		digitalWrite(outputPin, isOn() ? HIGH : LOW);
+		digitalWrite(outputPin, isOn() ? LOW : HIGH);	// TODO change LOW and HIGH, check the wiring
 		if (onStateChanged != nullptr) {
 			onStateChanged(outputOn);
 		}

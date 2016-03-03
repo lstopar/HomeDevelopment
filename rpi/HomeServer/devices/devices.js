@@ -123,7 +123,7 @@ var MotionDetector = function () {
 }
 
 var TvController = function () {
-	var TV_SAMPLE_TIME = 3000;
+	var TV_SAMPLE_TIME = 5000;
 	
 	var isOn = false;
 	var isReading = false;
@@ -330,7 +330,7 @@ module.exports = exports = function (_getValue, _setValue) {
 								name: 'Luminosity',
 								description: '',
 								transform: function (val) {
-									return val / 10.23;
+									return val / 2.55;
 								}
 							},
 				    	    {
