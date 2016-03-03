@@ -337,10 +337,10 @@ void TDigitalPir::init() {
 }
 
 void TDigitalPir::update() {
-	const bool newStatus = readInput();
+	const bool isOn = readInput();
 
-	if (newStatus != motionDetected) {
-		motionDetected = newStatus;
+	if (isOn != motionDetected) {
+		motionDetected = isOn;
 
 		if (onStateChanged != nullptr) {
 			onStateChanged(motionDetected);

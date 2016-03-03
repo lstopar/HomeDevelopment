@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define ARDUINO
+
 #ifdef ARDUINO
 
 #include "Arduino.h"

@@ -338,7 +338,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	    	internalId: 4,
 				    	    	type: 'pir',
 				    	    	unit: '',
-				    	    	name: 'Motion living room',
+				    	    	name: 'Motion sofa',
 				    	    	description: ''
 				    	    },
 				    	    {
