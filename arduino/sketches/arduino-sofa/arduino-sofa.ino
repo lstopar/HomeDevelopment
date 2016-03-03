@@ -96,12 +96,6 @@ void push(const uint16_t& to, const TRadioValue& radioVal) {
 // GET/SET FUNCTIONS
 //====================================================
 
-void sendPirStatus(const uint16_t& recipient = ADDRESS_RPI) {
-  TRadioValue rval;
-  getRadioVal(PIR_PIN, rval);
-  push(ADDRESS_RPI, rval);
-}
-
 bool getRadioVal(const char& valId, TRadioValue& rval) {
   rval.ValId = valId;
 
