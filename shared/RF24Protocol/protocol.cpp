@@ -31,6 +31,7 @@ void TRadioProtocol::ParseGetPayload(const TMem& Payload, TChV& ValIdV) {
 int TRadioProtocol::parseGetPayload(const char* Payload, char* ValIdV) {
 #endif
 	const int Vals = (int) Payload[0];
+	EAssertR(Vals <= VALS_PER_PAYLOAD, "Invalid number of values in payload: " + TInt::GetStr(Vals));
 
 #ifndef ARDUINO
 	ValIdV.Gen(Vals);
