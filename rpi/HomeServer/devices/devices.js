@@ -182,7 +182,7 @@ var TvController = function () {
 		},
 		init: function () {
 			log.info('Initializing TV ...');
-			setInterval(readTv, TV_SAMPLE_TIME);
+//			setInterval(readTv, TV_SAMPLE_TIME);
 		},
 		read: function (callback) {
 			var result = {};
