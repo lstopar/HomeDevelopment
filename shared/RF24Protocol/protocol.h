@@ -33,7 +33,7 @@ private:
 public:
 	const char& GetValId() const { return ValId; }
 	const int& GetValInt() const { return Val; }
-	const bool GetValBool() const { return Val == 1; }
+	bool GetValBool() const { return Val == 1; }
 
 	void SetValId(const char& _ValId) { ValId = _ValId; }
 	void SetVal(const bool& BoolVal);
