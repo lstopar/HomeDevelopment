@@ -340,7 +340,7 @@ void TRf24Radio::TReadThread::Run() {
 						TRadioProtocol::ParsePushPayload(Payload, ValV);
 
 						for (int ValN = 0; ValN < ValV.Len(); ValN++) {
-							Radio->Callback->OnValue(FromNode, ValV[ValN].ValId, ValV[ValN].Val);
+							Radio->Callback->OnValue(FromNode, ValV[ValN].GetValId(), ValV[ValN].GetValInt());
 						}
 
 						break;
@@ -420,8 +420,8 @@ bool TRf24Radio::Set(const uint16& NodeId, const int& ValId, const int& Val) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Calling SET for node %d, valId: %d, value %d ...", NodeId, ValId, Val);
 
 	TVec<TRadioValue> ValV(1,1);
-	ValV[0].ValId = (char) ValId;
-	ValV[0].Val = Val;
+	ValV[0].SetValId((char) ValId);
+	ValV[0].SetVal(Val);
 
 	TMem Payload;	TRadioProtocol::GenSetPayload(ValV, Payload);
 
