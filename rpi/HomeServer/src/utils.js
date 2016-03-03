@@ -1,3 +1,4 @@
+var exec = require('child_process').exec;
 var config = require('../config.js');
 
 module.exports = exports = {
@@ -11,5 +12,11 @@ module.exports = exports = {
 			log.trace('Transforming value ' + val);
 		
 		return val.toFixed();
+	},
+	
+	ping: function (host, callback) {
+		exec('ping -c 1 -q ' + host, function (e, stdout, stderr) {
+			callback(e != null);
+		});
 	}
 };

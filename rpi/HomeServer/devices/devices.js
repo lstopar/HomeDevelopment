@@ -1,4 +1,4 @@
-var ping = require('ping');
+var utils = require('../src/utils.js');
 
 //=======================================================
 // IDs
@@ -139,7 +139,7 @@ var TvController = function () {
 			if (log.trace())
 				log.trace('Pinging TV ...');
 			
-			ping.sys.probe('tv.home', function (isAlive) {
+			utils.ping('tv.home', function (isAlive) {
 				try {
 					if (log.trace())
 						log.trace('Received response from TV: ' + isAlive);
@@ -182,7 +182,7 @@ var TvController = function () {
 		},
 		init: function () {
 			log.info('Initializing TV ...');
-//			setInterval(readTv, TV_SAMPLE_TIME);
+			setInterval(readTv, TV_SAMPLE_TIME);
 		},
 		read: function (callback) {
 			var result = {};
