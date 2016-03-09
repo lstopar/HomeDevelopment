@@ -95,8 +95,7 @@ function periodicCheck() {
 //=======================================================
 
 var MotionDetector = function () {
-	var EMPTY_ROOM_THRESHOLD = 1000*60*15;	// 15 mins
-	
+	var EMPTY_ROOM_THRESHOLD = 1000*60*30;	// 15 mins
 	
 	var lastMotionTime = new Date().getTime();
 	
