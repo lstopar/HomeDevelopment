@@ -278,7 +278,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	    },
 				    	    {
 				    	    	id: LED_BLUE_ID,
-				    	    	internalId: 5,
+				    	    	internalId: 6,
 				    	    	type: 'dimmer',
 				    	    	unit: '%',
 				    	    	name: 'LED blue',
@@ -286,7 +286,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	    },
 				    	    {
 				    	    	id: LED_RED_ID,
-				    	    	internalId: 6,
+				    	    	internalId: 9,
 				    	    	type: 'dimmer',
 				    	    	unit: '%',
 				    	    	name: 'LED red',
@@ -294,7 +294,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	    },
 				    	    {
 				    	    	id: LED_GREEN_ID,
-				    	    	internalId: 9,
+				    	    	internalId: 5,
 				    	    	type: 'dimmer',
 				    	    	unit: '%',
 				    	    	name: 'LED green',
