@@ -15,7 +15,7 @@ module.exports = exports = {
 	},
 	
 	ping: function (host, callback) {
-		exec('ping -c 2 -q ' + host, function (e, stdout, stderr) {
+		exec('ping -c 3 -q ' + host, function (e, stdout, stderr) {
 			callback(e == null);
 		});
 	}
