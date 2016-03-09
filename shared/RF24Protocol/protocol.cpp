@@ -329,7 +329,7 @@ bool TManualSwitch::readSwitch() {
 // Digital PIR sensor
 TDigitalPir::TDigitalPir(const int& _readPin):
 		readPin(_readPin),
-		motionDetected(false),
+		isMotionDetected(false),
 		onStateChanged(nullptr) {}
 
 void TDigitalPir::init() {
@@ -339,11 +339,11 @@ void TDigitalPir::init() {
 void TDigitalPir::update() {
 	const bool isOn = readInput();
 
-	if (isOn != motionDetected) {
-		motionDetected = isOn;
+	if (isOn != isMotionDetected) {
+		isMotionDetected = isOn;
 
 		if (onStateChanged != nullptr) {
-			onStateChanged(motionDetected);
+			onStateChanged(isMotionDetected);
 		}
 	}
 }
@@ -369,14 +369,10 @@ bool TAnalogPir::readInput() {
 		lastOnTime = millis();
 		return true;
 	}
-	else {
-		// motion is not detected, check if less time than the threshold has elapsed
-		if (millis() - lastOnTime > onTime) {
-			return true;
-		}
 
-		return false;
-	}
+	// return true if the last motion was less than
+	// the time threshold ago
+	return millis() - lastOnTime < onTime;
 }
 
 #endif

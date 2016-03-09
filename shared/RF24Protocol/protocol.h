@@ -203,7 +203,7 @@ protected:
 	const int readPin;
 
 private:
-	bool motionDetected;
+	bool isMotionDetected;
 
 	void (*onStateChanged)(const bool&);
 
@@ -214,7 +214,7 @@ public:
 	void init();
 	void update();
 
-	bool isOn() const { return motionDetected; }
+	bool isOn() const { return isMotionDetected; }
 
 	void setCallback(void (*_onStateChanged)(const bool&)) { onStateChanged = _onStateChanged; }
 
