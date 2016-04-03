@@ -55,10 +55,17 @@ var devices = function () {
 			for (var deviceId in deviceH) {
 				var device = deviceH[deviceId].device;
 				
-				if (device != null) {
-					device.readAll();
-				} else {
+				if (device == null) {
 					log.warn('Device %s not initialized!', deviceId);
+					continue;
+				}
+				
+				switch (device.type) {
+				case 'D2-01-xx':
+					device.readStatus();
+					break;
+				default:
+					throw new Error('Unknown device type: ' + device.type);
 				}
 			}
 		},
