@@ -245,7 +245,7 @@ function initGroups(layout) {
 				throw new Error('Sensor ID already present in the layout!');
 			}
 			
-			var sensorConf;
+			var sensorConf = null;
 			if (sensorId in sensors) {
 				sensorConf = sensors[sensorId];
 			} else if (sensorId in radio.sensorH) {
@@ -297,6 +297,9 @@ function initGroups(layout) {
 		var eoSensors = enocean.getSensors();
 		for (var i = 0; i < eoSensors.length; i++) {
 			var sensorId = eoSensors[i];
+			
+			if (sensorId in usedSensorIds) continue;
+			
 			var sensor = enocean.getSensor(sensorId);
 			
 			if (sensor.hidden) continue;
