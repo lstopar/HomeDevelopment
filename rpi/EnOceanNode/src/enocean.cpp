@@ -18,7 +18,7 @@ void TEoGateway::TReadThread::Run() {
 }
 
 void TEoGateway::Init() {
-	Notify->OnNotify(TNotifyType::ntInfo, "Initializing and reading storage manager from \"%s\" ...", StorageFNm.CStr());
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Initializing and reading storage manager from \"%s\" ...", StorageFNm.CStr());
 	// initialize storage and load all the devices
 	StorageManager.addObject("Gateway", &Gateway);
 	StorageManager.Load(StorageFNm.CStr());
