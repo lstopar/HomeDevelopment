@@ -161,7 +161,10 @@ function initHandlers(device) {
 		device.on('status', function (channel, value) {
 			try {
 				var sensorId = devices.getExternalSensorId(device.id, channel);
-				callbacks.onValue(sensorId, value);
+				
+				var transVal = Math.min(val, 1);	// FIXME remove this
+				
+				callbacks.onValue(sensorId, transVal);
 			} catch (e) {
 				log.error(e, 'Exception while processing EnOcean message!');
 			}
