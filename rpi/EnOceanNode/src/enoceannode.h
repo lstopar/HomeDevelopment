@@ -98,7 +98,6 @@ private:	// JS functions
 	JsDeclareFunction(startLearningMode);
 
 	JsDeclareFunction(on);
-	JsDeclareFunction(onDeviceConnected);
 
 public:
 	void OnDeviceConnected(const eoDevice* Device);
