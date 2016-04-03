@@ -411,6 +411,7 @@ void TRf24Radio::Init() {
 	ReadThread.Start();
 }
 
+
 bool TRf24Radio::Ping(const uint16& NodeId) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Pinging node %u ...", NodeId);
 	return Send(NodeId, REQUEST_PING, TMem());
