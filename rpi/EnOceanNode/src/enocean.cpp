@@ -162,36 +162,16 @@ void TEoGateway::Read() {
 			if (DeviceId != TUInt::Mx) {
 				OnDeviceConnected(DeviceId);
 			}
-//
-//
-//			if (Dir == UTE_DIRECTION_BIDIRECTIONAL) {	// check if a response is expected
-//				eoMessage Response(7);
-//				if (Gateway.TeachInModule->CreateUTEResponse(Gateway.telegram, Response, TEACH_IN_ACCEPTED, UTE_DIRECTION_BIDIRECTIONAL) != EO_OK) {
-//					Notify->OnNotify(TNotifyType::ntErr, "Failed to generate response!");
-//					return;
-//				}
-//
-//				Gateway.telegram.sourceID = GATEWAY_ADDR;
-//
-//				if (Gateway.Send(Response) == EO_OK) {
-//					Notify->OnNotify(TNotifyType::ntInfo, "Response sent!");
-//					Notify->OnNotifyFmt(TNotifyType::ntInfo, "Learned device: %u", Device->ID);
-//					OnDeviceConnected(Device);
-//				} else {
-//					Notify->OnNotify(TNotifyType::ntWarn, "Failed to send response!");
-//				}
-//			} else {
-//				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Learned device: %u", Device->ID);
-//			}
 		}
 	}
 	else if (RecV & RECV_TELEGRAM) {
-		Notify->OnNotify(TNotifyType::ntInfo, "Received telegram ...");
 		uint32 DeviceId = TUInt::Mn;
 		eoMessage Msg;
 
 		{
 			TLock Lock(GatewaySection);
+
+			Notify->OnNotify(TNotifyType::ntInfo, "Received telegram ...");
 
 			Msg = Gateway.telegram;
 			eoDebug::Print(Msg);
@@ -199,6 +179,8 @@ void TEoGateway::Read() {
 			if (RecV & RECV_PROFILE) {
 				DeviceId = Gateway.device->ID;
 				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Telegram from device %u", DeviceId);
+			} else {
+				Notify->OnNotifyFmt(ntInfo, "Do not know the device, ID: %d!", Gateway.device->ID);
 			}
 		}
 
