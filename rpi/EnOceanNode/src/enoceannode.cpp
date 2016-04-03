@@ -1,5 +1,11 @@
 #include "enoceannode.h"
 
+TNodeJsEoDevice::TNodeJsEoDevice(const uint32& _DeviceId, TEoGateway* _Gateway,
+		const PNotify& _Notify):
+		DeviceId(_DeviceId),
+		Gateway(_Gateway),
+		Notify(_Notify) {}
+
 eoDevice* TNodeJsEoDevice::GetDevice() const {
 	eoDevice* Device = Gateway->GetDevice(DeviceId);
 	EAssertR(Device != nullptr, "Device missing in gateway!");
@@ -42,11 +48,12 @@ void TNodeJsD201Device::setOutput(const v8::FunctionCallbackInfo<v8::Value>& Arg
 	v8::HandleScope HandleScope(Isolate);
 	// unwrap
 	TNodeJsD201Device* JsDevice = ObjectWrap::Unwrap<TNodeJsD201Device>(Args.Holder());
+	TEoGateway* Gateway = JsDevice->GetGateway();
 
 	const uint8 ChannelN = (uint8) TNodeJsUtil::GetArgInt32(Args, 0);
 	const uint8 Value = (uint8) TNodeJsUtil::GetArgInt32(Args, 1);
 
-	TEoGateway* Gateway = JsDevice->GetGateway();
+	Notify->OnNotifyFmt(ntInfo, "Setting output deviceId: %u, channel: 0x%02x, value: %d ...", DeviceId, Channel, Value);
 
 	eoMessage Msg(eoEEP_D201xx::MX_LEN);
 	eoReturn Code = eoEEP_D201xx::CreateSetOutput(
@@ -71,20 +78,18 @@ void TNodeJsD201Device::readStatus(const v8::FunctionCallbackInfo<v8::Value>& Ar
 	v8::HandleScope HandleScope(Isolate);
 	// unwrap
 	TNodeJsD201Device* JsDevice = ObjectWrap::Unwrap<TNodeJsD201Device>(Args.Holder());
-
-	const int ChannelN = TNodeJsUtil::GetArgInt32(Args, 0, -1);
-
-	const uint8 Channel = ChannelN >= 0 ? (uint8) ChannelN : 0x1E;
-
 	TEoGateway* Gateway = JsDevice->GetGateway();
 
+	const int ChannelN = TNodeJsUtil::GetArgInt32(Args, 0, -1);
+	const uint8 Channel = ChannelN >= 0 ? (uint8) ChannelN : 0x1E;
+
+	const uint32& GatewayId = Gateway->GetId();
+	const uint32& DeviceId = JsDevice->DeviceId;
+
+	Notify->OnNotifyFmt(ntInfo, "Reading status of device %u, sourceId: %u, channel: 0x%02x ...", DeviceId, GatewayId, Channel);
+
 	eoMessage Msg(eoEEP_D201xx::MX_LEN);
-	eoReturn Code = eoEEP_D201xx::CreateStatusQuery(
-			Gateway->GetId(),
-			JsDevice->DeviceId,
-			Channel,
-			Msg
-	);
+	eoReturn Code = eoEEP_D201xx::CreateStatusQuery(GatewayId, DeviceId, Channel, Msg);
 
 	EAssertR(Code == EO_OK, "Failed to generate readStatus message: " + TUInt::GetStr(Code) + "!");
 

@@ -88,7 +88,7 @@ void TEoGateway::StartLearningMode() {
 
 void TEoGateway::Send(const eoMessage& Msg) {
 	TLock Lock(GatewaySection);
-	Notify->OnNotify(ntInfo, "Sending message to EO device ...");
+	Notify->OnNotify(ntInfo, "Sending message of length %d to EO device ...", Msg.dataLength);
 	Gateway.Send(Msg);
 }
 

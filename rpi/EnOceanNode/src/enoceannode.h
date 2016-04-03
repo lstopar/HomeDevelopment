@@ -21,12 +21,11 @@ class TNodeJsEoDevice: public node::ObjectWrap {
 protected:
 	const uint32 DeviceId;
 	TEoGateway* Gateway;
+	PNotify Notify;
 public:
-	TNodeJsEoDevice(const uint32& _DeviceId, TEoGateway* _Gateway):
-		DeviceId(_DeviceId),
-		Gateway(_Gateway) {}
-
+	TNodeJsEoDevice(const uint32& DeviceId, TEoGateway* Gateway, const PNotify& Notify);
 	virtual ~TNodeJsEoDevice() {}
+
 	virtual void OnMsg(const eoMessage& Msg) = 0;
 
 protected:
