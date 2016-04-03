@@ -503,39 +503,32 @@ exports.init = function () {
 	rpi.init();
 	initSensors();
 	
-	if (config.mode != 'debug') {
-		log.info('Initializing devices ...');
-		
-		for (var deviceN = 0; deviceN < devices.length; deviceN++) {
-			devices[deviceN].device.init();
-		}
-		
-		if (radio != null) {
-			log.info('Initializing radio ...');
-			radio.radio.init();
-			setInterval(pingRadios, config.pingInterval);
-		}
-		
-		if (enocean != null) {
-			log.info('Initialzing EnOcean radio ...');
-			enocean.init();
-		}
-		
-		log.info('Starting sampling sensors ...');
-		readAll();
-		setInterval(function () {
-			try {
-				readAll();
-			} catch (e) {
-				log.error(e, 'Exception while reading all devices!');
-			}
-		}, config.samplingInterval);
-	} else {
-		mockReadAll();
-		setInterval(function () {
-			mockReadAll();
-		}, config.samplingInterval);
+	log.info('Initializing devices ...');
+	
+	for (var deviceN = 0; deviceN < devices.length; deviceN++) {
+		devices[deviceN].device.init();
 	}
+	
+	if (radio != null) {
+		log.info('Initializing radio ...');
+		radio.radio.init();
+		setInterval(pingRadios, config.pingInterval);
+	}
+	
+	if (enocean != null) {
+		log.info('Initialzing EnOcean radio ...');
+		enocean.init();
+	}
+	
+	log.info('Starting sampling sensors ...');
+	readAll();
+	setInterval(function () {
+		try {
+			readAll();
+		} catch (e) {
+			log.error(e, 'Exception while reading all devices!');
+		}
+	}, config.samplingInterval);
 	
 	log.info('Sensors initialized!');
 }
