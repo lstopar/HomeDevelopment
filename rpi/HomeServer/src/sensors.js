@@ -522,13 +522,15 @@ exports.init = function () {
 	
 	log.info('Starting sampling sensors ...');
 	readAll();
-	setInterval(function () {
-		try {
-			readAll();
-		} catch (e) {
-			log.error(e, 'Exception while reading all devices!');
-		}
-	}, config.samplingInterval);
+	setTimeout(function () {
+		setInterval(function () {
+			try {
+				readAll();
+			} catch (e) {
+				log.error(e, 'Exception while reading all devices!');
+			}
+		}, config.samplingInterval);
+	}, 10000);
 	
 	log.info('Sensors initialized!');
 }
