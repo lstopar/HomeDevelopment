@@ -61,6 +61,7 @@ private:
 	JsDeclareProperty(id);
 	JsDeclareProperty(type);
 	JsDeclareFunction(setOutput);
+	JsDeclareFunction(readStatus);
 
 	JsDeclareFunction(on);
 

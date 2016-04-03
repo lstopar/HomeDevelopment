@@ -20,6 +20,7 @@ void TNodeJsD201Device::Init(v8::Handle<v8::Object> exports) {
 	tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
 	NODE_SET_PROTOTYPE_METHOD(tpl, "setOutput", _setOutput);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "readStatus", _readStatus);
 
 	exports->SetAccessor(v8::String::NewFromUtf8(Isolate, "id"), _id);
 	exports->SetAccessor(v8::String::NewFromUtf8(Isolate, "type"), _type);
@@ -47,7 +48,8 @@ void TNodeJsD201Device::setOutput(const v8::FunctionCallbackInfo<v8::Value>& Arg
 	TEoGateway* Gateway = JsDevice->GetGateway();
 
 	eoMessage Msg;
-	eoReturn Code = eoEEP_D201xx::CreateSetOutput(Gateway->GetId(),
+	eoReturn Code = eoEEP_D201xx::CreateSetOutput(
+			Gateway->GetId(),
 			JsDevice->DeviceId,
 			0x00,
 			ChannelN,
@@ -59,7 +61,34 @@ void TNodeJsD201Device::setOutput(const v8::FunctionCallbackInfo<v8::Value>& Arg
 
 	Gateway->Send(Msg);
 
-	Args.GetReturnValue().Set(v8::Int32::New(Isolate, JsDevice->DeviceId));
+	Args.GetReturnValue().Set(v8::Undefined(Isolate));
+}
+
+void TNodeJsD201Device::readStatus(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+	// unwrap
+	TNodeJsD201Device* JsDevice = ObjectWrap::Unwrap<TNodeJsD201Device>(Args.Holder());
+
+	const int ChannelN = TNodeJsUtil::GetArgInt32(Args, 0, -1);
+
+	const uint8 Channel = ChannelN >= 0 ? (uint8) ChannelN : 0x1E;
+
+	TEoGateway* Gateway = JsDevice->GetGateway();
+
+	eoMessage Msg;
+	eoReturn Code = eoEEP_D201xx::CreateStatusQuery(
+			Gateway->GetId(),
+			JsDevice->DeviceId,
+			Channel,
+			Msg
+	);
+
+	EAssertR(Code == EO_OK, "Failed to generate message!");
+
+	Gateway->Send(Msg);
+
+	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
 void TNodeJsD201Device::on(const v8::FunctionCallbackInfo<v8::Value>& Args) {

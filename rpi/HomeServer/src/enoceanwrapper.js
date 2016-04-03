@@ -125,7 +125,7 @@ function initDevice(device) {
 		});
 		break;
 	default: {
-		throw 'Unknown EnOcean device type: ' + type;
+		throw new Error('Unknown EnOcean device type: ' + device.type);
 	}
 	}
 }
@@ -168,7 +168,7 @@ module.exports = exports = function (opts) {
 			gateway.startLearningMode();
 		},
 		readAll: function () {
-			devices.readAll();
+			devices.readAllOutputs();
 		},
 		
 		set: function (sensorId, value) {
