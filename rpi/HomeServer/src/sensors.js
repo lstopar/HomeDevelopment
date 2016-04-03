@@ -245,6 +245,17 @@ function initGroups(layout) {
 				throw new Error('Sensor ID already present in the layout!');
 			}
 			
+			var sensorConf;
+			if (sensorId in sensors) {
+				sensorConf = sensors[sensorId];
+			} else if (sensorId in radio.sensorH) {
+				sensorConf = radio.sensorH[sensorId];
+			} else if (enocean != null && enocean.hasSensor(sensorId)) {
+				sensorConf = enocean.getSensor(sensorId);
+			} else {
+				throw new Error('Cannot find sensorId: ' + sensorId);
+			}
+			
 			var sensorConf = sensorId in sensors ? sensors[sensorId] : radio.sensorH[sensorId];
 			
 			if (sensorConf == null) {
@@ -401,10 +412,6 @@ function initSensors() {
 				log.info('Learned new EnOcean device of type %s: %d', type, deviceId);
 				// TODO
 			});
-			
-			var enoceanSensors = enocean.getSensors();
-			
-			// TODO
 		}
 		else if (type == 'virtual') {
 			var deviceSensors = deviceConf.sensors;
