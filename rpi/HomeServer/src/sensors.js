@@ -167,6 +167,9 @@ function readEnocean() {
 	if (enocean == null) return;
 	
 	try {
+		if (log.debug())
+			log.debug('Fetching all values from EnOcean devices ...');
+		
 		enocean.readAll();
 	} catch (e) {
 		log.error(e, 'Failed to read all EnOcean devices!');
