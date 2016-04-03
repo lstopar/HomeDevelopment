@@ -18,7 +18,7 @@ public:
 
 	class TEoGatewayCallback {
 	public:
-		virtual void OnDeviceConnected(const eoDevice* Device) = 0;
+		virtual void OnDeviceConnected(const uint32& DeviceId) = 0;
 		virtual void OnMsg(const uint32& DeviceId, const eoMessage& Msg) = 0;
 	};
 
@@ -66,7 +66,7 @@ public:
 private:
 	void Read();
 
-	void OnDeviceConnected(const eoDevice* Device) const;
+	void OnDeviceConnected(const uint32& DeviceId) const;
 };
 
 

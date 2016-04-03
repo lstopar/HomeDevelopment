@@ -266,8 +266,8 @@ void TNodeJsEoGateway::on(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
-void TNodeJsEoGateway::OnDeviceConnected(const eoDevice* Device) {
-	TNodeJsAsyncUtil::ExecuteOnMain(new TOnDeviceConnectedTask(this, Device), true);
+void TNodeJsEoGateway::OnDeviceConnected(const uint32& DeviceId) {
+	TNodeJsAsyncUtil::ExecuteOnMain(new TOnDeviceConnectedTask(this, DeviceId), true);
 }
 
 void TNodeJsEoGateway::OnMsg(const uint32& DeviceId, const eoMessage& Msg) {
@@ -308,7 +308,6 @@ void TNodeJsEoGateway::TOnDeviceConnectedTask::Run() {
 
 	// add the device to the internal structures
 
-	const uint32& DeviceId = Device->ID;
 	// TODO check which type of device this is
 	v8::Local<v8::Object> JsDevice = TNodeJsUtil::NewInstance(new TNodeJsD201Device(DeviceId, &JsGateway->Gateway));
 

@@ -101,7 +101,7 @@ private:	// JS functions
 	JsDeclareFunction(on);
 
 public:
-	void OnDeviceConnected(const eoDevice* Device);
+	void OnDeviceConnected(const uint32& DeviceId);
 	void OnMsg(const uint32& DeviceId, const eoMessage& Msg);
 
 private:
@@ -113,9 +113,10 @@ private:
 	class TOnDeviceConnectedTask: public TMainThreadTask {
 	private:
 		TNodeJsEoGateway* JsGateway;
-		const eoDevice* Device;
+		const uint32 DeviceId;
 	public:
-		TOnDeviceConnectedTask(TNodeJsEoGateway* _JsGateway, const eoDevice* _Device): JsGateway(_JsGateway), Device(_Device) {}
+		TOnDeviceConnectedTask(TNodeJsEoGateway* _JsGateway, const uint32 _DeviceId):
+			JsGateway(_JsGateway), DeviceId(_DeviceId) {}
 		void Run();
 	};
 

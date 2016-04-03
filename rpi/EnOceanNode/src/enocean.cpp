@@ -64,11 +64,11 @@ void TEoGateway::Init() {
 	const id_device_map& DeviceMap = DeviceManager.GetDeviceList();
 	for (auto It = DeviceMap.begin(); It != DeviceMap.end(); It++) {
 //		const uint32 DeviceId = It->first;
-		eoDevice* Device = It->second;
+		const uint32& DeviceId = It->second->ID;
 
-		Notify->OnNotifyFmt(ntInfo, "Initializing device %u ...", Device->ID);
+		Notify->OnNotifyFmt(ntInfo, "Initializing device %u ...", DeviceId);
 
-		OnDeviceConnected(Device);
+		OnDeviceConnected(DeviceId);
 	}
 
 	// start the read thread
@@ -121,7 +121,7 @@ void TEoGateway::Read() {
 		if (RecV & RECV_TEACHIN) {
 			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received TeachIn ...");
 
-			eoDevice* Device = nullptr;
+			uint32 DeviceId = TUInt::Mx;
 			uint8 Dir;
 
 			{
@@ -149,6 +149,7 @@ void TEoGateway::Read() {
 						Notify->OnNotify(TNotifyType::ntInfo, "Response sent!");
 						Notify->OnNotifyFmt(TNotifyType::ntInfo, "Learned device: %u, saving ...", Device->ID);
 						StorageManager.Save(StorageFNm.CStr());
+						DeviceId = Device->ID;
 					} else {
 						Device = nullptr;
 						Notify->OnNotify(TNotifyType::ntWarn, "Failed to send response!");
@@ -157,7 +158,9 @@ void TEoGateway::Read() {
 			}
 
 			Notify->OnNotify(ntInfo, "Calling device callback ...");
-			OnDeviceConnected(Device);
+			if (DeviceId != TUInt::Mx) {
+				OnDeviceConnected(DeviceId);
+			}
 //
 //
 //			if (Dir == UTE_DIRECTION_BIDIRECTIONAL) {	// check if a response is expected
@@ -226,11 +229,11 @@ void TEoGateway::Read() {
 //	}
 }
 
-void TEoGateway::OnDeviceConnected(const eoDevice* Device) const {
+void TEoGateway::OnDeviceConnected(const uint32& DeviceId) const {
 	Notify->OnNotify(ntInfo, "Received device in EnOceam Gateway ...");
 	if (Callback != nullptr) {
 		Notify->OnNotify(ntInfo, "Calling callback ...");
-		Callback->OnDeviceConnected(Device);
+		Callback->OnDeviceConnected(DeviceId);
 	}
 }
 
