@@ -272,6 +272,22 @@ function initGroups(layout) {
 		}
 	}
 	
+	if (enocean != null) {
+		var eoSensors = enocean.getSensors();
+		for (var i = 0; i < sensors.length; i++) {
+			var sensorId = sensors[i];
+			var sensor = enocean.getSensor(sensorId);
+			
+			if (sensor.hidden) continue;
+			
+			layoutGroups.push({
+				id: 'group-' + sensorId,
+				img: utils.getSensorImg(sensor),
+				sensors: [sensor]
+			});
+		}
+	}
+	
 	log.info('Layout initialized!');
 }
 
@@ -371,6 +387,10 @@ function initSensors() {
 				log.info('Learned new EnOcean device of type %s: %d', type, deviceId);
 				// TODO
 			});
+			
+			var enoceanSensors = enocean.getSensors();
+			
+			// TODO
 		}
 		else if (type == 'virtual') {
 			var deviceSensors = deviceConf.sensors;

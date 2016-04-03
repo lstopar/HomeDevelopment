@@ -118,6 +118,29 @@ var devices = function () {
 			if (!(deviceId in deviceH)) throw new Error('Device ID: ' + deviceId + ' not found!');
 			var dev = deviceH[deviceId];
 			return dev.internalToExternalSensorIdH[internalId];
+		},
+		
+		getAllSensorIds: function () {
+			var result = [];
+			
+			for (var deviceId in deviceH) {
+				var conf = deviceH[deviceId];
+				for (var sensorId in conf.sensors) {
+					result.push(sensorId);
+				}
+			}
+			
+			return result;
+		},
+		
+		getSensor: function (sensorId) {
+			if (!(sensorId in sensorToDeviceIdH)) throw new Error('Unknown device for sensor: ' + sensorId);
+			
+			var deviceId = sensorToDeviceIdH[sensorId];
+			var device = deviceH[deviceId];
+			
+			return device.sensors[sensorId];
+			return devices.getSensor(sensorId);
 		}
 	}
 	
@@ -198,6 +221,14 @@ module.exports = exports = function (opts) {
 			default:
 				throw new Error('Unknown event id: ' + eventId);
 			}
+		},
+		
+		getSensors: function () {
+			return devices.getAllSensorIds();
+		},
+		
+		getSensor: function (sensorId) {
+			return devices.getSensor(sensorId);
 		}
 	}
 };
