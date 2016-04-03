@@ -21,6 +21,7 @@ void TNodeJsD201Device::Init(v8::Handle<v8::Object> exports) {
 
 	NODE_SET_PROTOTYPE_METHOD(tpl, "setOutput", _setOutput);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "readStatus", _readStatus);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "on", _on);
 
 	tpl->InstanceTemplate()->SetAccessor(v8::String::NewFromUtf8(Isolate, "id"), _id);
 	tpl->InstanceTemplate()->SetAccessor(v8::String::NewFromUtf8(Isolate, "type"), _type);
