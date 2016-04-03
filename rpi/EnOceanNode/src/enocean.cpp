@@ -64,7 +64,11 @@ void TEoGateway::Init() {
 	const id_device_map& DeviceMap = DeviceManager.GetDeviceList();
 	for (auto It = DeviceMap.begin(); It != DeviceMap.end(); It++) {
 //		const uint32 DeviceId = It->first;
-		OnDeviceConnected(It->second);
+		eoDevice* Device = It->second;
+
+		Notify->OnNotifyFmt(ntInfo, "Initializing device %u ...", Device->ID);
+
+		OnDeviceConnected(Device);
 	}
 
 	// start the read thread
@@ -223,7 +227,9 @@ void TEoGateway::Read() {
 }
 
 void TEoGateway::OnDeviceConnected(const eoDevice* Device) const {
+	Notify->OnNotify(ntInfo, "Received device in EnOceam Gateway ...");
 	if (Callback != nullptr) {
+		Notify->OnNotify(ntInfo, "Calling callback ...");
 		Callback->OnDeviceConnected(Device);
 	}
 }
