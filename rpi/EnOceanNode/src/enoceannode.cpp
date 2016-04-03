@@ -4,7 +4,9 @@ TNodeJsEoDevice::TNodeJsEoDevice(const uint32& _DeviceId, TEoGateway* _Gateway,
 		const PNotify& _Notify):
 		DeviceId(_DeviceId),
 		Gateway(_Gateway),
-		Notify(_Notify) {}
+		Notify(_Notify) {
+	Notify->OnNotifyFmt(ntInfo, "Device %u created!", DeviceId);
+}
 
 eoDevice* TNodeJsEoDevice::GetDevice() const {
 	eoDevice* Device = Gateway->GetDevice(DeviceId);
@@ -121,7 +123,7 @@ void TNodeJsD201Device::id(v8::Local<v8::String> Name, const v8::PropertyCallbac
 	v8::HandleScope HandleScope(Isolate);
 
 	TNodeJsD201Device* JsDevice = ObjectWrap::Unwrap<TNodeJsD201Device>(Info.Holder());
-	Info.GetReturnValue().Set(v8::Integer::New(Isolate, JsDevice->DeviceId));
+	Info.GetReturnValue().Set(v8::Number::New(Isolate, JsDevice->DeviceId));
 }
 
 void TNodeJsD201Device::type(v8::Local<v8::String> Name, const v8::PropertyCallbackInfo<v8::Value>& Info) {
