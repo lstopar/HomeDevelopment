@@ -50,19 +50,7 @@ private:
 	PNotify Notify;
 
 public:
-	TEoGateway(const TStr& _SerialPort, const TStr& _StorageFNm, const PNotify& _Notify):
-		StorageManager(),
-		Gateway(),
-		SerialPort(_SerialPort),
-		StorageFNm(_StorageFNm),
-		ReadThread(),
-		GatewaySection(),
-		LearnModeStartTm(0),
-		Callback(nullptr),
-		Notify(_Notify) {
-
-		ReadThread = TReadThread(this);
-	}
+	TEoGateway(const TStr& SerialPort, const TStr& StorageFNm, const PNotify& Notify);
 
 	const uint32& GetId() const { return GATEWAY_ADDR; }
 

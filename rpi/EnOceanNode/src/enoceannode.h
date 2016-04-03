@@ -89,7 +89,8 @@ private:
 
 	PNotify Notify;
 
-	TNodeJsEoGateway(const TStr& SerialPort, const TStr& StorageFNm, const PNotify& Notify);
+	TNodeJsEoGateway(const TStr& SerialPort, const TStr& StorageFNm,
+			const PNotify& Notify);
 	~TNodeJsEoGateway();
 
 private:	// JS functions

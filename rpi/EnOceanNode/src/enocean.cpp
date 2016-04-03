@@ -11,7 +11,7 @@ const uint32 TEoGateway::GATEWAY_ADDR = 3333;
 const uint64 TEoGateway::LEARN_MODE_TIME = 30000;
 
 void TEoGateway::TReadThread::Run() {
-	Notify->OnNotify(TNotifyType::ntInfo, "Started EnOcean read thread ...");
+	Gateway->Notify->OnNotify(TNotifyType::ntInfo, "Started EnOcean read thread ...");
 
 	while (true) {
 		Gateway->Read();
