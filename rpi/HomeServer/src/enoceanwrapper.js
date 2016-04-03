@@ -165,6 +165,7 @@ module.exports = exports = function (opts) {
 			gateway.init();
 		},
 		startLearningMode: function () {
+			log.info('Starting learning mode ...');
 			gateway.startLearningMode();
 		},
 		readAll: function () {
