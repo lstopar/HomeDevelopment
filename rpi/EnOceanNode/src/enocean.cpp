@@ -78,6 +78,7 @@ void TEoGateway::StartLearningMode() {
 
 	LearnModeStartTm = TTm::GetCurUniMSecs();
 	Gateway.LearnModeOn();
+	Notify->OnNotify(TNotifyType::ntInfo, "Learning mode is ON!");
 }
 
 void TEoGateway::Send(const eoMessage& Msg) {
@@ -91,61 +92,110 @@ eoDevice* TEoGateway::GetDevice(const uint32& DeviceId) {
 }
 
 void TEoGateway::Read() {
-	TLock Lock(GatewaySection);	// TODO this needs to be smarter
+	bool InLearnMode;
+	uint16 RecV;
 
-	if (Gateway.LearnMode && TTm::GetCurUniMSecs() - LearnModeStartTm > LEARN_MODE_TIME) {
-		Notify->OnNotify(TNotifyType::ntInfo, "Leaving learn mode!");
-		Gateway.LearnModeOff();
+	{
+		TLock Lock(GatewaySection);
+		if (Gateway.LearnMode && TTm::GetCurUniMSecs() - LearnModeStartTm > LEARN_MODE_TIME) {
+			Notify->OnNotify(TNotifyType::ntInfo, "Leaving learn mode!");
+			Gateway.LearnModeOff();
+		}
+
+		InLearnMode = Gateway.LearnMode;
 	}
 
-	const uint16& RecV = Gateway.Receive();
+	{
+		TLock Lock(GatewaySection);
+		RecV = Gateway.Receive();
+	}
 
 	if (RecV == 0) { return; }
 
-	if (Gateway.LearnMode) {
+	if (InLearnMode) {
 		if (RecV & RECV_TEACHIN) {
 			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received TeachIn ...");
 
-			eoDebug::Print(Gateway.telegram);
+			eoDevice* Device = nullptr;
+			uint8 Dir;
 
-			eoDevice* Device = Gateway.device;
-			eoProfile* Profile = Device->GetProfile();
+			{
+				TLock Lock(GatewaySection);
 
-			uint8_t Dir;
-			Profile->GetValue(E_DIRECTION, Dir);
+				eoDebug::Print(Gateway.telegram);
 
-			if (Dir == UTE_DIRECTION_BIDIRECTIONAL) {	// check if a response is expected
-				printf("Response expected ...\n");
+				eoDevice* Device = Gateway.device;
+				eoProfile* Profile = Device->GetProfile();
+
+				Profile->GetValue(E_DIRECTION, Dir);
+			}
+
+			if (Dir == UTE_DIRECTION_BIDIRECTIONAL) {	// TODO need to handle uni-directional devices
+				Notify->OnNotify(TNotifyType::ntInfo, "Resonse expected ...");
+
 				eoMessage Response(7);
 				if (Gateway.TeachInModule->CreateUTEResponse(Gateway.telegram, Response, TEACH_IN_ACCEPTED, UTE_DIRECTION_BIDIRECTIONAL) != EO_OK) {
 					Notify->OnNotify(TNotifyType::ntErr, "Failed to generate response!");
 					return;
 				}
 
-				Gateway.telegram.sourceID = GATEWAY_ADDR;
+				Response.sourceID = GATEWAY_ADDR;
 
-				if (Gateway.Send(Response) == EO_OK) {
-					Notify->OnNotify(TNotifyType::ntInfo, "Response sent!");
-					Notify->OnNotifyFmt(TNotifyType::ntInfo, "Learned device: %u", Device->ID);
-					OnDeviceConnected(Device);
-				} else {
-					Notify->OnNotify(TNotifyType::ntWarn, "Failed to send response!");
+				{
+					TLock Lock(GatewaySection);
+					if (Gateway.Send(Response) == EO_OK) {
+						Notify->OnNotify(TNotifyType::ntInfo, "Response sent!");
+						Notify->OnNotifyFmt(TNotifyType::ntInfo, "Learned device: %u", Device->ID);
+					} else {
+						Device = nullptr;
+						Notify->OnNotify(TNotifyType::ntWarn, "Failed to send response!");
+					}
 				}
-			} else {
-				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Learned device: %u", Device->ID);
+
+				if (Device != nullptr) {
+					OnDeviceConnected(Device);
+				}
+			}
+//
+//
+//			if (Dir == UTE_DIRECTION_BIDIRECTIONAL) {	// check if a response is expected
+//				eoMessage Response(7);
+//				if (Gateway.TeachInModule->CreateUTEResponse(Gateway.telegram, Response, TEACH_IN_ACCEPTED, UTE_DIRECTION_BIDIRECTIONAL) != EO_OK) {
+//					Notify->OnNotify(TNotifyType::ntErr, "Failed to generate response!");
+//					return;
+//				}
+//
+//				Gateway.telegram.sourceID = GATEWAY_ADDR;
+//
+//				if (Gateway.Send(Response) == EO_OK) {
+//					Notify->OnNotify(TNotifyType::ntInfo, "Response sent!");
+//					Notify->OnNotifyFmt(TNotifyType::ntInfo, "Learned device: %u", Device->ID);
+//					OnDeviceConnected(Device);
+//				} else {
+//					Notify->OnNotify(TNotifyType::ntWarn, "Failed to send response!");
+//				}
+//			} else {
+//				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Learned device: %u", Device->ID);
+//			}
+		}
+	}
+	else if (RecV & RECV_TELEGRAM) {
+		eoDevice* Device = nullptr;
+		eoMessage Msg;
+
+		{
+			TLock Lock(GatewaySection);
+
+			Msg = Gateway.telegram;
+			eoDebug::Print(Msg);
+
+			if (RecV & RECV_PROFILE) {
+				Device = Gateway.device;
 			}
 		}
-	} else if (RecV & RECV_TELEGRAM) {
-		const eoMessage& Msg = Gateway.telegram;
 
-		eoDebug::Print(Msg);
-
-		if (RecV & RECV_PROFILE) {
-			eoDevice* Device = Gateway.device;
-
-			if (Callback != nullptr) {
-				Callback->OnMsg(Device->ID, Msg);
-			}
+		if (Device != nullptr && Callback != nullptr) {
+			Callback->OnMsg(Device->ID, Msg);
 		}
 	}
 

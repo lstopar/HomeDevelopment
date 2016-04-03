@@ -237,6 +237,9 @@ void TNodeJsEoGateway::startLearningMode(const v8::FunctionCallbackInfo<v8::Valu
 	v8::HandleScope HandleScope(Isolate);
 
 	TNodeJsEoGateway* JsGateway = ObjectWrap::Unwrap<TNodeJsEoGateway>(Args.Holder());
+
+	JsGateway->Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting learning mode from wrapper ...");
+
 	JsGateway->Gateway.StartLearningMode();
 
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
@@ -266,7 +269,7 @@ void TNodeJsEoGateway::OnDeviceConnected(const eoDevice* Device) {
 }
 
 void TNodeJsEoGateway::OnMsg(const uint32& DeviceId, const eoMessage& Msg) {
-	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, DeviceId, Msg), true);
+	TNodeJsAsyncUtil::ExecuteOnMainAndWait(new TOnMsgTask(this, DeviceId, Msg), true);
 }
 
 void TNodeJsEoGateway::AddDevice(const uint32& DeviceId, v8::Local<v8::Object>& JsDevice) {

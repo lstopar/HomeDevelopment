@@ -398,7 +398,7 @@ TRf24Radio::~TRf24Radio() {
 void TRf24Radio::Init() {
 	Notify->OnNotify(TNotifyType::ntInfo, "Initializing RF24 radio device ...");
 
-	TRadioProtocol::InitRadio(*Radio, *Network, MyAddr, RF24_PA_LOW);
+	TRadioProtocol::InitRadio(*Radio, *Network, MyAddr, RF24_PA_HIGH);
 
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "My address: %d", MyAddr);
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Values per payload: %d", VALS_PER_PAYLOAD);
