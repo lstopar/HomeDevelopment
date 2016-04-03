@@ -95,24 +95,6 @@ void TNodeJsD201Device::type(v8::Local<v8::String> Name, const v8::PropertyCallb
 	Info.GetReturnValue().Set(v8::String::NewFromUtf8(Isolate, "D2-01-xx"));
 }
 
-void TNodeJsEoGateway::Init(v8::Handle<v8::Object> Exports) {
-	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
-	v8::HandleScope HandleScope(Isolate);
-
-	v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(Isolate, TNodeJsUtil::_NewJs<TNodeJsEoGateway>);
-	tpl->SetClassName(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()));
-
-	// ObjectWrap uses the first internal field to store the wrapped pointer.
-	tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-	// Add all methods, getters and setters here.
-	NODE_SET_PROTOTYPE_METHOD(tpl, "init", _init);
-	NODE_SET_PROTOTYPE_METHOD(tpl, "startLearningMode", _startLearningMode);
-	NODE_SET_PROTOTYPE_METHOD(tpl, "onDeviceConnected", _onDeviceConnected);
-
-	Exports->Set(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()), tpl->GetFunction());
-}
-
 void TNodeJsD201Device::OnMsg(const eoMessage& Msg) {
 	d2_01Command Command = eoEEP_D201xx::GetCommand(Msg);
 
@@ -155,8 +137,27 @@ void TNodeJsD201Device::OnStatus(const uint8& Channel, const uint8& Val) {
 	}
 }
 
+
 /////////////////////////////////////////////
 // EnOcean Gateway
+void TNodeJsEoGateway::Init(v8::Handle<v8::Object> Exports) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(Isolate, TNodeJsUtil::_NewJs<TNodeJsEoGateway>);
+	tpl->SetClassName(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()));
+
+	// ObjectWrap uses the first internal field to store the wrapped pointer.
+	tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+	// Add all methods, getters and setters here.
+	NODE_SET_PROTOTYPE_METHOD(tpl, "init", _init);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "startLearningMode", _startLearningMode);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "onDeviceConnected", _onDeviceConnected);
+
+	Exports->Set(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()), tpl->GetFunction());
+}
+
 TNodeJsEoGateway* TNodeJsEoGateway::NewFromArgs(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);

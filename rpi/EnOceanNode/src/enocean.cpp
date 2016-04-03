@@ -7,6 +7,9 @@
 
 #include "enocean.h"
 
+const uint32 TEoGateway::GATEWAY_ADDR = 3333;
+const uint64 TEoGateway::LEARN_MODE_TIME = 30000;
+
 void TEoGateway::TReadThread::Run() {
 	while (true) {
 		Gateway->Read();

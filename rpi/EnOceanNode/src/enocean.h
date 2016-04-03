@@ -14,7 +14,7 @@
 
 class TEoGateway {
 public:
-	static constexpr uint32 GATEWAY_ADDR = 3333;
+	static const uint32 GATEWAY_ADDR;
 
 	class TEoGatewayCallback {
 	public:
@@ -23,7 +23,7 @@ public:
 	};
 
 private:
-	static constexpr uint64 LEARN_MODE_TIME = 30000;
+	static const uint64 LEARN_MODE_TIME;
 
 	class TReadThread: public TThread {
 	private:
