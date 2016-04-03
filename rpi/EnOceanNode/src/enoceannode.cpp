@@ -182,6 +182,7 @@ TNodeJsEoGateway::TNodeJsEoGateway(const TStr& SerialPort, const TStr& StorageFN
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
+	Notify->OnNotify(TNotifyType::ntInfo, "Initializing device map ...");
 	DeviceMap.Reset(Isolate, v8::Object::New(Isolate));
 }
 

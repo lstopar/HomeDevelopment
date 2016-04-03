@@ -11,10 +11,27 @@ const uint32 TEoGateway::GATEWAY_ADDR = 3333;
 const uint64 TEoGateway::LEARN_MODE_TIME = 30000;
 
 void TEoGateway::TReadThread::Run() {
+	Notify->OnNotify(TNotifyType::ntInfo, "Started EnOcean read thread ...");
+
 	while (true) {
 		Gateway->Read();
 		TSysProc::Sleep(1);
 	}
+}
+
+TEoGateway::TEoGateway(const TStr& _SerialPort, const TStr& _StorageFNm, const PNotify& _Notify):
+		StorageManager(),
+		Gateway(),
+		SerialPort(_SerialPort),
+		StorageFNm(_StorageFNm),
+		ReadThread(),
+		GatewaySection(),
+		LearnModeStartTm(0),
+		Callback(nullptr),
+		Notify(_Notify) {
+
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Creating read thread ...");
+	ReadThread = TReadThread(this);
 }
 
 void TEoGateway::Init() {
