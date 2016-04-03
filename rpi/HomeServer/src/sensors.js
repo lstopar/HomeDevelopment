@@ -255,9 +255,7 @@ function initGroups(layout) {
 			} else {
 				throw new Error('Cannot find sensorId: ' + sensorId);
 			}
-			
-			var sensorConf = sensorId in sensors ? sensors[sensorId] : radio.sensorH[sensorId];
-			
+						
 			if (sensorConf == null) {
 				throw new Error('Failed to get configuration of sensor: ' + sensorId);
 			}
