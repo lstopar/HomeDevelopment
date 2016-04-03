@@ -153,7 +153,7 @@ void TNodeJsEoGateway::Init(v8::Handle<v8::Object> Exports) {
 	// Add all methods, getters and setters here.
 	NODE_SET_PROTOTYPE_METHOD(tpl, "init", _init);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "startLearningMode", _startLearningMode);
-	NODE_SET_PROTOTYPE_METHOD(tpl, "onDeviceConnected", _onDeviceConnected);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "on", _onDeviceConnected);
 
 	Exports->Set(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()), tpl->GetFunction());
 }
@@ -167,6 +167,8 @@ TNodeJsEoGateway* TNodeJsEoGateway::NewFromArgs(const v8::FunctionCallbackInfo<v
 	const TStr SerialPort = ParamJson->GetObjStr("serialPort");
 	const TStr StorageFNm = ParamJson->GetObjStr("storageFile");
 	const PNotify Notify = ParamJson->GetObjBool("verbose", false) ? TNotify::StdNotify : TNotify::NullNotify;
+
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "EnOcean gateway created!");
 
 	return new TNodeJsEoGateway(SerialPort, StorageFNm, Notify);
 }
