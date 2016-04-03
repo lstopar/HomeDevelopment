@@ -118,9 +118,12 @@ var devices = function () {
 			return sensor.internalId;
 		},
 		
-		getExternalSensorId: function (deviceId, internalId) {
-			if (!(deviceId in deviceH)) throw new Error('Device ID: ' + deviceId + ' not found!');
+		getExternalSensorId: function (internalDeviceId, internalId) {
+			if (!(internalDeviceId in internalToExternalIdH)) throw new Error('Device ID: ' + deviceId + ' not found!');
+			
+			var deviceId = internalToExternalIdH[internalDeviceId];
 			var dev = deviceH[deviceId];
+			
 			return dev.internalToExternalSensorIdH[internalId];
 		},
 		
