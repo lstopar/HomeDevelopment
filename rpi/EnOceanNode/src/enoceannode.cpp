@@ -48,7 +48,7 @@ void TNodeJsD201Device::setOutput(const v8::FunctionCallbackInfo<v8::Value>& Arg
 
 	TEoGateway* Gateway = JsDevice->GetGateway();
 
-	eoMessage Msg;
+	eoMessage Msg(eoEEP_D201xx::MX_LEN);
 	eoReturn Code = eoEEP_D201xx::CreateSetOutput(
 			Gateway->GetId(),
 			JsDevice->DeviceId,
@@ -58,7 +58,7 @@ void TNodeJsD201Device::setOutput(const v8::FunctionCallbackInfo<v8::Value>& Arg
 			Msg
 	);
 
-	EAssertR(Code == EO_OK, "Failed to generate message!");
+	EAssertR(Code == EO_OK, "Failed to generate setOutput message: " + TUInt::GetStr(Code) + "!");
 
 	Gateway->Send(Msg);
 
@@ -77,7 +77,7 @@ void TNodeJsD201Device::readStatus(const v8::FunctionCallbackInfo<v8::Value>& Ar
 
 	TEoGateway* Gateway = JsDevice->GetGateway();
 
-	eoMessage Msg;
+	eoMessage Msg(eoEEP_D201xx::MX_LEN);
 	eoReturn Code = eoEEP_D201xx::CreateStatusQuery(
 			Gateway->GetId(),
 			JsDevice->DeviceId,
@@ -85,7 +85,7 @@ void TNodeJsD201Device::readStatus(const v8::FunctionCallbackInfo<v8::Value>& Ar
 			Msg
 	);
 
-	EAssertR(Code == EO_OK, "Failed to generate message: " + TUInt::GetStr(Code) + "!");
+	EAssertR(Code == EO_OK, "Failed to generate readStatus message: " + TUInt::GetStr(Code) + "!");
 
 	Gateway->Send(Msg);
 
