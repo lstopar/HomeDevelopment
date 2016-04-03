@@ -303,6 +303,11 @@ TNodeJsEoDevice* TNodeJsEoGateway::GetDevice(const uint32& DeviceId) const {
 	return ObjectWrap::Unwrap<TNodeJsEoDevice>(JsDevice);
 }
 
+TNodeJsEoGateway::TOnDeviceConnectedTask::TOnDeviceConnectedTask(TNodeJsEoGateway* _JsGateway,
+		const uint32& _DeviceId):
+			JsGateway(_JsGateway),
+			DeviceId(_DeviceId) {}
+
 void TNodeJsEoGateway::TOnDeviceConnectedTask::Run() {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
@@ -312,7 +317,7 @@ void TNodeJsEoGateway::TOnDeviceConnectedTask::Run() {
 	JsGateway->Notify->OnNotifyFmt(ntInfo, "Creating new JS device with ID %u ...", DeviceId);
 
 	// TODO check which type of device this is
-	v8::Local<v8::Object> JsDevice = TNodeJsUtil::NewInstance(new TNodeJsD201Device(DeviceId, &JsGateway->Gateway));
+	v8::Local<v8::Object> JsDevice = TNodeJsUtil::NewInstance(TNodeJsD201Device::New(DeviceId, &JsGateway->Gateway));
 
 	JsGateway->AddDevice(DeviceId, JsDevice);
 

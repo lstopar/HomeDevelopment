@@ -49,7 +49,7 @@ private:
 	v8::Persistent<v8::Function> StatusCb;
 
 public:
-	TNodeJsD201Device(const uint32_t& _DeviceId, TEoGateway* _EoGateway):
+	TNodeJsD201Device(const uint32_t& DeviceId, TEoGateway* Gateway):
 		TNodeJsEoDevice(DeviceId, Gateway),
 		StatusCb() {}
 	~TNodeJsD201Device();
@@ -115,8 +115,7 @@ private:
 		TNodeJsEoGateway* JsGateway;
 		const uint32 DeviceId;
 	public:
-		TOnDeviceConnectedTask(TNodeJsEoGateway* _JsGateway, const uint32& _DeviceId):
-			JsGateway(_JsGateway), DeviceId(_DeviceId) {}
+		TOnDeviceConnectedTask(TNodeJsEoGateway* JsGateway, const uint32& DeviceId);
 		void Run();
 	};
 
