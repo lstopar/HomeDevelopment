@@ -159,8 +159,12 @@ function initHandlers(device) {
 	switch (device.type) {
 	case 'D2-01-xx':
 		device.on('status', function (channel, value) {
-			var sensorId = devices.getExternalSensorId(device.id, channel);
-			callbacks.onValue(sensorId, value);
+			try {
+				var sensorId = devices.getExternalSensorId(device.id, channel);
+				callbacks.onValue(sensorId, value);
+			} catch (e) {
+				log.error(e, 'Exception while processing EnOcean message!');
+			}
 		});
 		break;
 	default: {
