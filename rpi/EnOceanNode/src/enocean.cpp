@@ -18,10 +18,12 @@ void TEoGateway::TReadThread::Run() {
 }
 
 void TEoGateway::Init() {
+	Notify->OnNotify(TNotifyType::ntInfo, "Initializing and reading storage manager ...");
 	// initialize storage and load all the devices
 	StorageManager.addObject("Gateway", &Gateway);
 	StorageManager.Load(StorageFNm.CStr());
 
+	Notify->OnNotify(TNotifyType::ntInfo, "Setting functions ...");
 	// init teachin module
 	eoTeachInModule* TeachInModule = Gateway.TeachInModule;
 	TeachInModule->SetRPS(0x02, 0x01);	// profile F6-02-xx Rocker switch, 2 rocker
@@ -40,6 +42,7 @@ void TEoGateway::Init() {
 	}
 
 	// execute callback for all the devices
+	Notify->OnNotify(TNotifyType::ntInfo, "Initializing loaded devices ...");
 	eoDeviceManager& DeviceManager = *Gateway.deviceManager;
 	const id_device_map& DeviceMap = DeviceManager.GetDeviceList();
 	for (auto It = DeviceMap.begin(); It != DeviceMap.end(); It++) {
