@@ -544,7 +544,6 @@ exports.init = function () {
 	}
 	
 	log.info('Starting sampling sensors ...');
-	readAll();
 	setTimeout(function () {
 		setInterval(function () {
 			try {
@@ -553,7 +552,7 @@ exports.init = function () {
 				log.error(e, 'Exception while reading all devices!');
 			}
 		}, config.samplingInterval);
-	}, 10000);
+	}, 5000);
 	
 	log.info('Sensors initialized!');
 }

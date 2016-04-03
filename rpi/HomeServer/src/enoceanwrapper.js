@@ -77,7 +77,7 @@ var devices = function () {
 		set: function (sensorId, value) {
 			if (!(sensorId in sensorToDeviceIdH)) throw new Error('Tried to set a value for an invalid sensorId: ' + sensorId);
 			
-			var deviceId = sensorToDeviceId(sensorId);
+			var deviceId = sensorToDeviceIdH[sensorId];
 			var conf = deviceH[deviceId];
 			var device = conf.device;
 			
