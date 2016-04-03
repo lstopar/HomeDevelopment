@@ -75,6 +75,7 @@ void TEoGateway::StartLearningMode() {
 	TLock Lock(GatewaySection);
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Starting learning mode ...");
+	EAssertR(!Gateway.LearnMode, "Already in learning mode!");
 
 	LearnModeStartTm = TTm::GetCurUniMSecs();
 	Gateway.LearnModeOn();
