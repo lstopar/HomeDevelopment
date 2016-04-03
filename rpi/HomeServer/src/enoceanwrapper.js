@@ -138,6 +138,7 @@ module.exports = exports = function (opts) {
 		devices.add(device);
 	}
 	
+	log.info('Creating Gateway ...');
 	gateway = new enocean.Gateway(config);
 	gateway.on('device', function (e, device) {
 		var internalId = device.id;

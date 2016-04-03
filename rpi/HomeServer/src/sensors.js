@@ -355,6 +355,8 @@ function initSensors() {
 			log.info('Initializing EnOcean gateway ...');
 			
 			enocean = require('./enoceanwrapper.js')(deviceConf);
+			
+			log.info('Adding value listener ...');
 			enocean.on('value', function (sensorId, value) {
 				if (log.debug())
 					log.debug('Received %s: %d', sensorId, value);
@@ -363,6 +365,8 @@ function initSensors() {
 				
 				updateValue(sensorId, value);
 			});
+			
+			log.info('Adding device listener ...');
 			enocean.on('deviceLearned', function (deviceId, type) {
 				log.info('Learned new EnOcean device of type %s: %d', type, deviceId);
 				// TODO
