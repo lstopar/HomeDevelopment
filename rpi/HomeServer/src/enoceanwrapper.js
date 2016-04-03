@@ -118,7 +118,7 @@ var devices = function () {
 }();
 
 
-function initDevice(device) {
+function initHandlers(device) {
 	switch (device.type) {
 	case 'D2-01-xx':
 		device.on('status', function (channel, value) {
@@ -149,11 +149,10 @@ module.exports = exports = function (opts) {
 		
 		try {
 			if (devices.hasDevice(internalId)) {
-				var externalId = getExternalDeviceId(internalId);
+				var externalId = devices.getExternalDeviceId(internalId);
 				log.info('initializing EnOcean device with ID: %s ...', externalId);
 				
-				initDevice(device);
-				
+				initHandlers(device);
 				devices.initDevice(device);
 			} else {
 				log.info('New EnOcean device of type %s: %d', device.type, device.id);
