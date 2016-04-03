@@ -85,7 +85,7 @@ void TNodeJsD201Device::readStatus(const v8::FunctionCallbackInfo<v8::Value>& Ar
 			Msg
 	);
 
-	EAssertR(Code == EO_OK, "Failed to generate message!");
+	EAssertR(Code == EO_OK, "Failed to generate message: " + TUInt::GetStr(Code) + "!");
 
 	Gateway->Send(Msg);
 
