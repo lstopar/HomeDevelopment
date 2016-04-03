@@ -153,7 +153,7 @@ void TNodeJsEoGateway::Init(v8::Handle<v8::Object> Exports) {
 	// Add all methods, getters and setters here.
 	NODE_SET_PROTOTYPE_METHOD(tpl, "init", _init);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "startLearningMode", _startLearningMode);
-	NODE_SET_PROTOTYPE_METHOD(tpl, "on", _onDeviceConnected);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "on", _on);
 
 	Exports->Set(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()), tpl->GetFunction());
 }
