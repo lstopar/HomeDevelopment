@@ -516,6 +516,11 @@ exports.init = function () {
 			setInterval(pingRadios, config.pingInterval);
 		}
 		
+		if (enocean != null) {
+			log.info('Initialzing EnOcean radio ...');
+			enocean.init();
+		}
+		
 		log.info('Starting sampling sensors ...');
 		readAll();
 		setInterval(function () {
