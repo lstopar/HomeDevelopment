@@ -274,8 +274,8 @@ function initGroups(layout) {
 	
 	if (enocean != null) {
 		var eoSensors = enocean.getSensors();
-		for (var i = 0; i < sensors.length; i++) {
-			var sensorId = sensors[i];
+		for (var i = 0; i < eoSensors.length; i++) {
+			var sensorId = eoSensors[i];
 			var sensor = enocean.getSensor(sensorId);
 			
 			if (sensor.hidden) continue;
