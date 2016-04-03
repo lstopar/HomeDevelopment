@@ -362,30 +362,30 @@ module.exports = exports = function (_getValue, _setValue) {
 			{
 				type: 'EnOcean',
 				nodes: [
-				    {
-				    	id: 'nodon-module',
-				    	internalId: 3, // TODO
-				    	name: 'NodOn Relay',
-				    	type: 'D2-01-xx',
-				    	sensors: [
-							{
-								id: MAIN_LIGHT_ID,
-								internalId: 0,
-								type: 'actuator',
-								unit: '',
-								name: 'Main Light',
-								description: ''
-							},
-							{
-								id: AMBIENT_LIGHT_ID,
-								internalId: 1,
-								type: 'actuator',
-								unit: '',
-								name: 'Ambient Light',
-								description: ''
-							}
-				    	]
-				    }
+//				    {
+//				    	id: 'nodon-module',
+//				    	internalId: 3, // TODO
+//				    	name: 'NodOn Relay',
+//				    	type: 'D2-01-xx',
+//				    	sensors: [
+//							{
+//								id: MAIN_LIGHT_ID,
+//								internalId: 0,
+//								type: 'actuator',
+//								unit: '',
+//								name: 'Main Light',
+//								description: ''
+//							},
+//							{
+//								id: AMBIENT_LIGHT_ID,
+//								internalId: 1,
+//								type: 'actuator',
+//								unit: '',
+//								name: 'Ambient Light',
+//								description: ''
+//							}
+//				    	]
+//				    }
 				],
 				configuration: {
 					storageFile: 'config/enocean.txt',
