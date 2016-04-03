@@ -66,6 +66,17 @@ function updateValue(sensorId, value) {
 		if (value != previousVal) {
 			values[sensorId] = value;
 			
+			var type;
+			if (sensorId in sensors) {
+				type = sensors[sensorId];
+			} else if (sensorId in radio.sensorH) {
+				type = radio.sensorH[sensorId].type;
+			} else if (enocean != null && enocean.hasSensor(sensorId)) {
+				type = enocean.getSensor(sensorId).type;
+			} else {
+				throw new Error('Could not find the type for sensor: ' + sensorId);
+			}
+			
 			// web sockets callback
 			callbacks.onValueReceived({
 				id: sensorId,
