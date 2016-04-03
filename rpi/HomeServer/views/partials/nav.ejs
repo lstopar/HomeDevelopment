@@ -23,7 +23,13 @@
 		                	<script type="text/javascript">
 		                		$(document).ready(function () {
 		                			$('#btn-eo-learn').click(function () {
-		                				
+		                				$.ajax('api/eolearnmode', {
+											method: 'POST',
+											success: function (data) {
+												alert('Learn mode started!');
+											},
+											error: handleAjaxError()
+										});
 		                			});
 		                		});
 		                	</script>
