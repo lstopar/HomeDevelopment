@@ -129,21 +129,18 @@ void TEoGateway::Read() {
 				eoProfile* Profile = Device->GetProfile();
 
 				Profile->GetValue(E_DIRECTION, Dir);
-			}
 
-			if (Dir == UTE_DIRECTION_BIDIRECTIONAL) {	// TODO need to handle uni-directional devices
-				Notify->OnNotify(TNotifyType::ntInfo, "Resonse expected ...");
+				if (Dir == UTE_DIRECTION_BIDIRECTIONAL) {	// TODO need to handle uni-directional devices
+					Notify->OnNotify(TNotifyType::ntInfo, "Resonse expected ...");
 
-				eoMessage Response(7);
-				if (Gateway.TeachInModule->CreateUTEResponse(Gateway.telegram, Response, TEACH_IN_ACCEPTED, UTE_DIRECTION_BIDIRECTIONAL) != EO_OK) {
-					Notify->OnNotify(TNotifyType::ntErr, "Failed to generate response!");
-					return;
-				}
+					eoMessage Response(7);
+					if (Gateway.TeachInModule->CreateUTEResponse(Gateway.telegram, Response, TEACH_IN_ACCEPTED, UTE_DIRECTION_BIDIRECTIONAL) != EO_OK) {
+						Notify->OnNotify(TNotifyType::ntErr, "Failed to generate response!");
+						return;
+					}
 
-				Response.sourceID = GATEWAY_ADDR;
+					Response.sourceID = GATEWAY_ADDR;
 
-				{
-					TLock Lock(GatewaySection);
 					if (Gateway.Send(Response) == EO_OK) {
 						Notify->OnNotify(TNotifyType::ntInfo, "Response sent!");
 						Notify->OnNotifyFmt(TNotifyType::ntInfo, "Learned device: %u", Device->ID);
@@ -152,11 +149,10 @@ void TEoGateway::Read() {
 						Notify->OnNotify(TNotifyType::ntWarn, "Failed to send response!");
 					}
 				}
-
-				if (Device != nullptr) {
-					OnDeviceConnected(Device);
-				}
 			}
+
+			Notify->OnNotify(ntInfo, "Calling device callback ...");
+			OnDeviceConnected(Device);
 //
 //
 //			if (Dir == UTE_DIRECTION_BIDIRECTIONAL) {	// check if a response is expected
@@ -181,7 +177,8 @@ void TEoGateway::Read() {
 		}
 	}
 	else if (RecV & RECV_TELEGRAM) {
-		eoDevice* Device = nullptr;
+		Notify->OnNotify(TNotifyType::ntInfo, "Received telegram ...");
+		uint32 DeviceId = TUInt::Mn;
 		eoMessage Msg;
 
 		{
@@ -191,35 +188,37 @@ void TEoGateway::Read() {
 			eoDebug::Print(Msg);
 
 			if (RecV & RECV_PROFILE) {
-				Device = Gateway.device;
+				DeviceId = Gateway.device->ID;
+				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Telegram from device %u", DeviceId);
 			}
 		}
 
-		if (Device != nullptr && Callback != nullptr) {
-			Callback->OnMsg(Device->ID, Msg);
+		if (DeviceId != TUInt::Mn && Callback != nullptr) {
+			Notify->OnNotify(ntInfo, "Calling callback ...");
+			Callback->OnMsg(DeviceId, Msg);
 		}
 	}
-
-	if ((RecV & RECV_TELEGRAM_SEC) > 0) {
-		printf("Received secure telegram!\n");
-		// TODO
-	}
-	if ((RecV & RECV_ERROR) > 0) {
-		printf("Received error telegram!\n");
-		// TODO
-	}
-	if ((RecV & RECV_DEVICE_ADDED) > 0) {
-		printf("Device added!\n");
-		// TODO
-	}
-	if ((RecV & RECV_SECTEACHIN) > 0) {
-		printf("Received second teachIN!\n");
-		// TODO
-	}
-	if ((RecV & RECV_REMAN) > 0) {
-		printf("Received remote management message!\n");
-		// TODO
-	}
+//
+//	if ((RecV & RECV_TELEGRAM_SEC) > 0) {
+//		printf("Received secure telegram!\n");
+//		// TODO
+//	}
+//	if ((RecV & RECV_ERROR) > 0) {
+//		printf("Received error telegram!\n");
+//		// TODO
+//	}
+//	if ((RecV & RECV_DEVICE_ADDED) > 0) {
+//		printf("Device added!\n");
+//		// TODO
+//	}
+//	if ((RecV & RECV_SECTEACHIN) > 0) {
+//		printf("Received second teachIN!\n");
+//		// TODO
+//	}
+//	if ((RecV & RECV_REMAN) > 0) {
+//		printf("Received remote management message!\n");
+//		// TODO
+//	}
 }
 
 void TEoGateway::OnDeviceConnected(const eoDevice* Device) const {
