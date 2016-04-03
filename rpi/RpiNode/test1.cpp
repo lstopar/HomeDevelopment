@@ -9,12 +9,7 @@
  * Listens for messages from the transmitter and prints them out.
  */
 
-#include <RF24/RF24.h>
-#include <RF24Network/RF24Network.h>
-#include <iostream>
-#include <ctime>
-#include <stdio.h>
-#include <time.h>
+#include "eoLink.h"
 
 
 /**
