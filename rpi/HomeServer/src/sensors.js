@@ -151,7 +151,7 @@ function pingRadios() {
 function readRadioDevices() {
 	if (radio != null) {
 		if (log.debug())
-			log.debug('Fetching all values from radio dvices ...');
+			log.debug('Fetching all values from radio devices ...');
 		
 		var nodes = radio.nodes;
 		for (var nodeId in nodes) {

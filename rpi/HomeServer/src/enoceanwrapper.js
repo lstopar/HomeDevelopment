@@ -142,7 +142,7 @@ module.exports = exports = function (opts) {
 	
 	log.info('Creating Gateway ...');
 	gateway = new enocean.Gateway(config);
-	gateway.on('device', function (e, device) {
+	gateway.on('device', function (device) {
 		log.info('New EnOcean device of type %s', device.type);
 		
 		var internalId = device.id;
