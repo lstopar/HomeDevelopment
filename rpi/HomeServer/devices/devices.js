@@ -225,14 +225,14 @@ module.exports = exports = function (_getValue, _setValue) {
 	return {
 		onValue: onValue,
 		layout: [
-			{
-				id: 'group-lights',
-				img: 'img/bulb.svg',
-				sensorIds: [
-				    MAIN_LIGHT_ID,
-				    AMBIENT_LIGHT_ID
-				]
-			},
+//			{
+//				id: 'group-lights',
+//				img: 'img/bulb.svg',
+//				sensorIds: [
+//				    MAIN_LIGHT_ID,
+//				    AMBIENT_LIGHT_ID
+//				]
+//			},
 		    {
 		    	id: 'group-leds',
 		    	img: 'img/bulb.svg',

@@ -501,6 +501,7 @@ exports.getSensors = function () {
 	for (var sensorId in sensors) {
 		result.push(sensors[sensorId]);
 	}
+	// TODO
 	return result;
 };
 
