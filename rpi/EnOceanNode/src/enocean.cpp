@@ -38,6 +38,7 @@ void TEoGateway::Init() {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Initializing and reading storage manager from \"%s\" ...", StorageFNm.CStr());
 	// initialize storage and load all the devices
 	StorageManager.addObject("Gateway", &Gateway);
+	Notify->OnNotify(TNotifyType::ntInfo, "Loading ...");
 	StorageManager.Load(StorageFNm.CStr());
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Setting functions ...");
@@ -109,6 +110,7 @@ void TEoGateway::Read() {
 		if (Gateway.LearnMode && TTm::GetCurUniMSecs() - LearnModeStartTm > LEARN_MODE_TIME) {
 			Notify->OnNotify(TNotifyType::ntInfo, "Leaving learn mode!");
 			Gateway.LearnModeOff();
+			StorageManager.Save(StorageFNm.CStr());
 		}
 
 		InLearnMode = Gateway.LearnMode;
@@ -152,7 +154,6 @@ void TEoGateway::Read() {
 					if (Gateway.Send(Response) == EO_OK) {
 						Notify->OnNotify(TNotifyType::ntInfo, "Response sent!");
 						Notify->OnNotifyFmt(TNotifyType::ntInfo, "Learned device: %u, saving ...", Device->ID);
-						StorageManager.Save(StorageFNm.CStr());
 						DeviceId = Device->ID;
 					} else {
 						Device = nullptr;
@@ -183,7 +184,7 @@ void TEoGateway::Read() {
 				DeviceId = Gateway.device->ID;
 				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Telegram from device %u", DeviceId);
 			} else {
-				Notify->OnNotifyFmt(ntInfo, "Do not know the device, ID: %d!", Gateway.device->ID);
+				Notify->OnNotify(ntInfo, "Do not know the device!");
 			}
 		}
 
