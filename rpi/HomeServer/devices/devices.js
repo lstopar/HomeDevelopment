@@ -15,6 +15,7 @@ var LED_BLUE_ID = 'led-blue';
 var LED_RED_ID = 'led-red';
 var LED_GREEN_ID = 'led-green';
 var AMBIENT_LIGHT_ID = 'light-ambient';
+var MAIN_LIGHT_ID = 'light-main';
 var BLINK_RGB_ID = 'rgb-blink';
 var CYCLE_HSL_ID = 'hsl-cycle';
 
@@ -339,7 +340,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	    	unit: '',
 				    	    	name: 'Motion sofa',
 				    	    	description: ''
-				    	    },
+				    	    }/*,
 				    	    {
 				    	    	id: AMBIENT_LIGHT_ID,
 				    	    	internalId: 6,
@@ -347,7 +348,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	    	unit: '',
 				    	    	name: 'Ambient light',
 				    	    	description: ''
-				    	    }
+				    	    }*/
 				    	]
 				    }
 				],
@@ -355,6 +356,40 @@ module.exports = exports = function (_getValue, _setValue) {
 					pinCE: 25,		// RPI_V2_GPIO_P1_22	// TODO the pins are hardcoded in C++
 					pinCSN: 8,		// RPI_V2_GPIO_P1_24
 					id: 00,
+					verbose: true
+				}
+			},
+			{
+				type: 'EnOcean',
+				nodes: [
+				    {
+				    	id: 'nodon-module',
+				    	internalId: 3, // TODO
+				    	name: 'NodOn Relay',
+				    	type: 'D2-01-xx',
+				    	sensors: [
+							{
+								id: MAIN_LIGHT_ID,
+								internalId: 0,
+								type: 'actuator',
+								unit: '',
+								name: 'Main Light',
+								description: ''
+							},
+							{
+								id: AMBIENT_LIGHT_ID,
+								internalId: 1,
+								type: 'actuator',
+								unit: '',
+								name: 'Ambient Light',
+								description: ''
+							}
+				    	]
+				    }
+				],
+				configuration: {
+					storageFile: 'config/enocean.txt',
+					serialPort: '/dev/ttyUSB0',
 					verbose: true
 				}
 			},

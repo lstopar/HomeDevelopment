@@ -1,0 +1,33 @@
+_EOLINK_SAVE
+HEADER
+{
+ name:_HUMAN_ARCHIVE
+ major:0x0
+ minor:0x4
+}
+Gateway
+{
+ myDeviceManager
+ {
+  Counter:0x1
+  Device_0000
+  {
+   profile
+   {
+    rorg:0xf6
+    func:0x2
+    type:0x1
+    manufacturer:0x7ff
+   }
+   dBm:0x0
+   ID:0xfefbe1df
+  }
+ }
+ myFilter
+ {
+ }
+ myLearnFilter
+ {
+ }
+ LearnMode:TRUE
+}

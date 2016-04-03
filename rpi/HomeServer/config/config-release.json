@@ -1,5 +1,6 @@
 {
 	"rpilib": "../RpiNode/build/Release/rpinode.node",
+	"enoceanLib": "./../../../EnOceanNode/build/Debug/enoceannode.node",
 	"server": {
 		"port": 80
 	},

@@ -451,7 +451,7 @@ void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueI
 
 void TNodeJsRf24Radio::OnValue(const uint16& NodeId, const char& ValId, const int& Val) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Executing callback for value id: %d", ValId);
-	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, NodeId, (int) ValId, Val), true);
+	TNodeJsAsyncUtil::ExecuteOnMainAndWait(new TOnMsgTask(this, NodeId, (int) ValId, Val), true);
 }
 
 void TNodeJsRf24Radio::TOnMsgTask::Run() {

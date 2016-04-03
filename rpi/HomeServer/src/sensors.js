@@ -12,6 +12,7 @@ var rpi = require('../' + config.rpilib);
 var devices = [];
 var sensors = {};
 var radio = null;
+var enocean = null;
 var values = {};
 var layoutGroups = [];
 
@@ -41,10 +42,15 @@ function setValue(vals) {
 		if (sensorId in sensors) {
 			var device = sensors[sensorId].device;
 			device.set({ id: sensorId, value: value });
-		} else if (sensorId in radio.sensorH) {
+		}
+		else if (sensorId in radio.sensorH) {
 			var success = radio.radio.set({ id: sensorId, value: value });
 			onNodeConnected(radio.sensorH[sensorId].nodeId, success);
-		} else {
+		}
+		else if (enocean.hasId(sensorId)) {
+			enocean.set(sensorId, value);
+		} 
+		else {
 			throw new Error('Could not find sensor: ' + sensorId);
 		}
 	}
@@ -157,12 +163,23 @@ function readRadioDevices() {
 	}
 }
 
+function readEnocean() {
+	if (enocean == null) return;
+	
+	try {
+		enocean.readAll();
+	} catch (e) {
+		log.error(e, 'Failed to read all EnOcean devices!');
+	}
+}
+
 function readAll() {
 	if (log.debug())
 		log.debug('Reading all devices ...');
 	
 	readDevices();
 	readRadioDevices();
+	readEnocean();
 }
 
 function mockReadAll() {
@@ -333,7 +350,25 @@ function initSensors() {
 				
 				updateValue(val.id, trans);
 			});
-		} else if (type == 'virtual') {
+		}
+		else if (type == 'EnOcean') {
+			log.info('Initializing EnOcean gateway ...');
+			
+			enocean = require('./enoceanwrapper.js')(deviceConf);
+			enocean.on('value', function (sensorId, value) {
+				if (log.debug())
+					log.debug('Received %s: %d', sensorId, value);
+				
+				// TODO transform
+				
+				updateValue(sensorId, value);
+			});
+			enocean.on('deviceLearned', function (deviceId, type) {
+				log.info('Learned new EnOcean device of type %s: %d', type, deviceId);
+				// TODO
+			});
+		}
+		else if (type == 'virtual') {
 			var deviceSensors = deviceConf.sensors;
 			
 			for (var sensorN = 0; sensorN < deviceSensors.length; sensorN++) {
@@ -429,12 +464,12 @@ exports.getLayout = function () {
 	if (log.trace())
 		log.trace('Returning layout: %s', JSON.stringify(layoutGroups));
 	return layoutGroups;
-}
+};
 
 exports.isOnline = function (nodeId) {
 	if (radio == null) return false;
 	return radio.nodes[nodeId].connected;
-}
+};
 
 exports.getNodes = function () {
 	if (radio == null) return [];
@@ -445,6 +480,10 @@ exports.getNodes = function () {
 	}
 	
 	return result;
+};
+
+exports.hasEnOcean = function () {
+	return enocean != null;
 };
 
 exports.init = function () {

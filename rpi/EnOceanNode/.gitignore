@@ -1,0 +1,9 @@
+/build
+
+# eclipse
+.settings/
+.project
+.cproject
+
+# link to the libraries
+/lib
