@@ -106,6 +106,16 @@ function initApi() {
 			handleServerError(e, req, res);
 		}
 	});
+	
+	app.post(API_PATH + '/eolearnmode', function (req, res) {
+		try {
+			sensors.enterEoLearnMode();
+			res.status(204);	// no content
+			res.end();
+		} catch (e) {
+			handleServerError(e, req, res);
+		}
+	});
 }
 
 //=====================================================

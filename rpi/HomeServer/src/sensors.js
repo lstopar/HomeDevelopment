@@ -490,6 +490,12 @@ exports.hasEnOcean = function () {
 	return enocean != null;
 };
 
+exports.enterEoLearnMode = function () {
+	if (!exports.hasEnOcean()) throw new Error('Tried to enter learn mode with no EnOcean device!');
+	
+	enocean.startLearningMode();
+}
+
 exports.init = function () {
 	if (config.samplingInterval == null) throw new Error("The sampling interval is not set!");
 	

@@ -168,7 +168,7 @@ module.exports = exports = function (opts) {
 			gateway.startLearningMode();
 		},
 		readAll: function () {
-			devices.readAllOutputs();
+			devices.readAll();
 		},
 		
 		set: function (sensorId, value) {
