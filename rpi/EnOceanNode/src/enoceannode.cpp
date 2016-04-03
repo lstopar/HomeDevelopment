@@ -303,7 +303,7 @@ TNodeJsEoDevice* TNodeJsEoGateway::GetDevice(const uint32& DeviceId) const {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
-	v8::Local<v8::Integer> Key = v8::Number::New(Isolate, DeviceId);
+	v8::Local<v8::Number> Key = v8::Number::New(Isolate, DeviceId);
 	v8::Local<v8::Object> Map = v8::Local<v8::Object>::New(Isolate, DeviceMap);
 
 	Notify->OnNotifyFmt(ntInfo, "Fetching device %d\n", DeviceId);
