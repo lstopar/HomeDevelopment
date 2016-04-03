@@ -194,7 +194,7 @@ void TNodeJsEoGateway::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	// unwrap
 	TNodeJsEoGateway* JsGateway = ObjectWrap::Unwrap<TNodeJsEoGateway>(Args.Holder());
 
-	Notify->OnNotify(TNotifyType::ntInfo, "Calling init from wrapper ...");
+	JsGateway->Notify->OnNotify(TNotifyType::ntInfo, "Calling init from wrapper ...");
 	JsGateway->Gateway.Init();
 
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
