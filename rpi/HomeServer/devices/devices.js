@@ -54,17 +54,18 @@ function getMotion() {
 	return getMotionTv() || getMotionSofa()	;
 }
 
-function isAmbientOn() {
-	return getValue(AMBIENT_LIGHT_ID) == 1;
-}
-
-function ambientOn() {
-	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 1 });
-}
-
-function ambientOff() {
-	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 0 });
-}
+// TODO uncomment
+//function isAmbientOn() {
+//	return getValue(AMBIENT_LIGHT_ID) == 1;
+//}
+//
+//function ambientOn() {
+//	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 1 });
+//}
+//
+//function ambientOff() {
+//	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 0 });
+//}
 
 function ledStripOff() {
 	// TODO
@@ -225,7 +226,7 @@ module.exports = exports = function (_getValue, _setValue) {
 		    	id: 'group-lights',
 		    	img: 'img/bulb.svg',
 		    	sensorIds: [
-		    	    AMBIENT_LIGHT_ID,
+//		    	    AMBIENT_LIGHT_ID,	TODO
 		    	    LED_BLUE_ID,
 		    	    LED_RED_ID,
 		    	    LED_GREEN_ID,
