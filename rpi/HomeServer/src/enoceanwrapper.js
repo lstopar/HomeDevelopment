@@ -42,6 +42,10 @@ var devices = function () {
 			return internalId in internalToExternalIdH;
 		},
 		
+		hasSensor: function (sensorId) {
+			return sensorId in sensorToDeviceIdH;
+		},
+		
 		initDevice: function (device) {
 			var internalId = device.id;
 			
@@ -134,7 +138,7 @@ var devices = function () {
 		},
 		
 		getSensor: function (sensorId) {
-			if (!(sensorId in sensorToDeviceIdH)) throw new Error('Unknown device for sensor: ' + sensorId);
+			if (!that.hasSensor(sensorId)) throw new Error('Unknown device for sensor: ' + sensorId);
 			
 			var deviceId = sensorToDeviceIdH[sensorId];
 			var device = deviceH[deviceId];
@@ -229,6 +233,10 @@ module.exports = exports = function (opts) {
 		
 		getSensor: function (sensorId) {
 			return devices.getSensor(sensorId);
+		},
+		
+		hasSensor: function (sensorId) {
+			return devices.hasSensor(sensorId);
 		}
 	}
 };

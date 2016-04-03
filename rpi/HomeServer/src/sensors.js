@@ -47,7 +47,7 @@ function setValue(vals) {
 			var success = radio.radio.set({ id: sensorId, value: value });
 			onNodeConnected(radio.sensorH[sensorId].nodeId, success);
 		}
-		else if (enocean.hasId(sensorId)) {
+		else if (enocean.hasSensor(sensorId)) {
 			enocean.set(sensorId, value);
 		} 
 		else {
