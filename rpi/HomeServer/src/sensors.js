@@ -252,8 +252,6 @@ function initGroups(layout) {
 				sensorConf = radio.sensorH[sensorId];
 			} else if (enocean != null && enocean.hasSensor(sensorId)) {
 				sensorConf = enocean.getSensor(sensorId);
-			} else {
-				throw new Error('Cannot find sensorId: ' + sensorId);
 			}
 						
 			if (sensorConf == null) {
