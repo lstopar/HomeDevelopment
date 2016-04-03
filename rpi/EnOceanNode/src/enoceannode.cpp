@@ -53,7 +53,7 @@ void TNodeJsD201Device::setOutput(const v8::FunctionCallbackInfo<v8::Value>& Arg
 	const uint8 ChannelN = (uint8) TNodeJsUtil::GetArgInt32(Args, 0);
 	const uint8 Value = (uint8) TNodeJsUtil::GetArgInt32(Args, 1);
 
-	Notify->OnNotifyFmt(ntInfo, "Setting output deviceId: %u, channel: 0x%02x, value: %d ...", DeviceId, Channel, Value);
+	JsDevice->Notify->OnNotifyFmt(ntInfo, "Setting output deviceId: %u, channel: 0x%02x, value: %d ...", JsDevice->DeviceId, ChannelN, Value);
 
 	eoMessage Msg(eoEEP_D201xx::MX_LEN);
 	eoReturn Code = eoEEP_D201xx::CreateSetOutput(
@@ -86,7 +86,7 @@ void TNodeJsD201Device::readStatus(const v8::FunctionCallbackInfo<v8::Value>& Ar
 	const uint32& GatewayId = Gateway->GetId();
 	const uint32& DeviceId = JsDevice->DeviceId;
 
-	Notify->OnNotifyFmt(ntInfo, "Reading status of device %u, sourceId: %u, channel: 0x%02x ...", DeviceId, GatewayId, Channel);
+	JsDevice->Notify->OnNotifyFmt(ntInfo, "Reading status of device %u, sourceId: %u, channel: 0x%02x ...", DeviceId, GatewayId, Channel);
 
 	eoMessage Msg(eoEEP_D201xx::MX_LEN);
 	eoReturn Code = eoEEP_D201xx::CreateStatusQuery(GatewayId, DeviceId, Channel, Msg);
@@ -324,7 +324,7 @@ void TNodeJsEoGateway::TOnDeviceConnectedTask::Run() {
 	JsGateway->Notify->OnNotifyFmt(ntInfo, "Creating new JS device with ID %u ...", DeviceId);
 
 	// TODO check which type of device this is
-	v8::Local<v8::Object> JsDevice = TNodeJsUtil::NewInstance(TNodeJsD201Device::New(DeviceId, &JsGateway->Gateway));
+	v8::Local<v8::Object> JsDevice = TNodeJsUtil::NewInstance(TNodeJsD201Device::New(DeviceId, &JsGateway->Gateway, JsGateway->Notify));
 
 	JsGateway->AddDevice(DeviceId, JsDevice);
 
