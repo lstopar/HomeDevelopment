@@ -143,7 +143,8 @@ void TEoGateway::Read() {
 
 					if (Gateway.Send(Response) == EO_OK) {
 						Notify->OnNotify(TNotifyType::ntInfo, "Response sent!");
-						Notify->OnNotifyFmt(TNotifyType::ntInfo, "Learned device: %u", Device->ID);
+						Notify->OnNotifyFmt(TNotifyType::ntInfo, "Learned device: %u, saving ...", Device->ID);
+						StorageManager.Save(StorageFNm.CStr());
 					} else {
 						Device = nullptr;
 						Notify->OnNotify(TNotifyType::ntWarn, "Failed to send response!");
