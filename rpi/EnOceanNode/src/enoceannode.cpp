@@ -65,6 +65,7 @@ void TNodeJsD201Device::setOutput(const v8::FunctionCallbackInfo<v8::Value>& Arg
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
+
 void TNodeJsD201Device::readStatus(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
