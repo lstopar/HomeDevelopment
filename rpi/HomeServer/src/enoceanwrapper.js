@@ -54,9 +54,11 @@ var devices = function () {
 		readAll: function () {
 			for (var deviceId in deviceH) {
 				var device = deviceH[deviceId].device;
-				if (device == null) {
+				
+				if (device != null) {
+					device.readAll();
+				} else {
 					log.warn('Device %s not initialized!', deviceId);
-					device.readAll();	// TODO implement
 				}
 			}
 		},
@@ -141,6 +143,8 @@ module.exports = exports = function (opts) {
 	log.info('Creating Gateway ...');
 	gateway = new enocean.Gateway(config);
 	gateway.on('device', function (e, device) {
+		log.info('New EnOcean device of type %s', device.type);
+		
 		var internalId = device.id;
 		
 		try {
