@@ -55,17 +55,20 @@ function getMotion() {
 }
 
 // TODO uncomment
-//function isAmbientOn() {
+function isAmbientOn() {
+	return false;
 //	return getValue(AMBIENT_LIGHT_ID) == 1;
-//}
+}
 //
-//function ambientOn() {
+function ambientOn() {
+	return;
 //	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 1 });
-//}
+}
 //
-//function ambientOff() {
+function ambientOff() {
+	return;
 //	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 0 });
-//}
+}
 
 function ledStripOff() {
 	// TODO

@@ -162,6 +162,7 @@ module.exports = exports = function (opts) {
 	
 	return {
 		init: function () {
+			log.info('Inializing EnOcean ...');
 			gateway.init();
 		},
 		startLearningMode: function () {
