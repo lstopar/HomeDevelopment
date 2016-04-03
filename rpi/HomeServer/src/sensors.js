@@ -81,7 +81,7 @@ function updateValue(sensorId, value) {
 			callbacks.onValueReceived({
 				id: sensorId,
 				value: value,
-				type: sensorId in sensors ? sensors[sensorId] : radio.sensorH[sensorId].type
+				type: type
 			});
 			// devices callback
 			onValueCallback(sensorId, value);
