@@ -50,7 +50,8 @@ private:
 	PNotify Notify;
 
 public:
-	TEoGateway(const TStr& SerialPort, const TStr& StorageFNm, const PNotify& Notify);
+	TEoGateway(const TStr& SerialPort, const TStr& StorageFNm,
+			const PNotify& Notify);
 
 	const uint32& GetId() const { return GATEWAY_ADDR; }
 

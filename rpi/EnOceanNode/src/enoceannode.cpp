@@ -168,14 +168,14 @@ TNodeJsEoGateway* TNodeJsEoGateway::NewFromArgs(const v8::FunctionCallbackInfo<v
 	const TStr StorageFNm = ParamJson->GetObjStr("storageFile");
 	const PNotify Notify = ParamJson->GetObjBool("verbose", false) ? TNotify::StdNotify : TNotify::NullNotify;
 
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "EnOcean gateway created!");
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Parsed arguments, creating EnOcean gateway: %s, %s ...", StorageFNm.CStr(), SerialPort.CStr());
 
 	return new TNodeJsEoGateway(SerialPort, StorageFNm, Notify);
 }
 
 TNodeJsEoGateway::TNodeJsEoGateway(const TStr& SerialPort, const TStr& StorageFNm,
 		const PNotify& _Notify):
-		Gateway(SerialPort, StorageFNm, Notify),
+		Gateway(SerialPort, StorageFNm, _Notify),
 		DeviceMap(),
 		OnDeviceCallback(),
 		Notify(_Notify) {
