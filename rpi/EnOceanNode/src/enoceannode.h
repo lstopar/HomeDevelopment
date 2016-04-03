@@ -48,12 +48,12 @@ private:
 	v8::Persistent<v8::Function> StatusCb;
 
 public:
-	TNodeJsD201Device(const uint32_t& DeviceId, TEoGateway* Gateway, const PNotify& Notify):
+	TNodeJsD201Device(const uint32& DeviceId, TEoGateway* Gateway, const PNotify& Notify):
 		TNodeJsEoDevice(DeviceId, Gateway, Notify),
 		StatusCb() {}
 	~TNodeJsD201Device();
 
-	static TNodeJsD201Device* New(const uint16& DeviceId, TEoGateway* Gateway, const PNotify& Notify)
+	static TNodeJsD201Device* New(const uint32& DeviceId, TEoGateway* Gateway, const PNotify& Notify)
 		{ return new TNodeJsD201Device(DeviceId, Gateway, Notify); }
 
 private:
