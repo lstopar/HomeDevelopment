@@ -213,6 +213,8 @@ TNodeJsEoGateway::TNodeJsEoGateway(const TStr& SerialPort, const TStr& StorageFN
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Initializing device map ...");
 	DeviceMap.Reset(Isolate, v8::Object::New(Isolate));
+
+	Gateway.SetCallback(this);
 }
 
 TNodeJsEoGateway::~TNodeJsEoGateway() {
