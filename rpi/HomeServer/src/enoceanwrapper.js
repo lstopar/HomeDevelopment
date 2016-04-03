@@ -162,7 +162,7 @@ function initHandlers(device) {
 			try {
 				var sensorId = devices.getExternalSensorId(device.id, channel);
 				
-				var transVal = Math.min(val, 1);	// FIXME remove this
+				var transVal = Math.min(value, 1);	// FIXME remove this
 				
 				callbacks.onValue(sensorId, transVal);
 			} catch (e) {
