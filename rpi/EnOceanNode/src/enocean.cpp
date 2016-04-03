@@ -88,6 +88,7 @@ void TEoGateway::StartLearningMode() {
 
 void TEoGateway::Send(const eoMessage& Msg) {
 	TLock Lock(GatewaySection);
+	Notify->OnNotify(ntInfo, "Sending message to EO device ...");
 	Gateway.Send(Msg);
 }
 
@@ -232,7 +233,7 @@ void TEoGateway::Read() {
 void TEoGateway::OnDeviceConnected(const uint32& DeviceId) const {
 	Notify->OnNotify(ntInfo, "Received device in EnOceam Gateway ...");
 	if (Callback != nullptr) {
-		Notify->OnNotify(ntInfo, "Calling callback ...");
+		Notify->OnNotifyFmt(ntInfo, "Calling callback for device ID %u ...", DeviceId);
 		Callback->OnDeviceConnected(DeviceId);
 	}
 }

@@ -267,6 +267,7 @@ void TNodeJsEoGateway::on(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 }
 
 void TNodeJsEoGateway::OnDeviceConnected(const uint32& DeviceId) {
+	Notify->OnNotifyFmt(ntInfo, "Device connected in wrapper, ID %u ...", DeviceId);
 	TNodeJsAsyncUtil::ExecuteOnMain(new TOnDeviceConnectedTask(this, DeviceId), true);
 }
 
@@ -307,6 +308,8 @@ void TNodeJsEoGateway::TOnDeviceConnectedTask::Run() {
 	v8::HandleScope HandleScope(Isolate);
 
 	// add the device to the internal structures
+
+	JsGateway->Notify->OnNotifyFmt(ntInfo, "Creating new JS device with ID %u ...", DeviceId);
 
 	// TODO check which type of device this is
 	v8::Local<v8::Object> JsDevice = TNodeJsUtil::NewInstance(new TNodeJsD201Device(DeviceId, &JsGateway->Gateway));

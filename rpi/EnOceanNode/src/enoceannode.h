@@ -115,7 +115,7 @@ private:
 		TNodeJsEoGateway* JsGateway;
 		const uint32 DeviceId;
 	public:
-		TOnDeviceConnectedTask(TNodeJsEoGateway* _JsGateway, const uint32 _DeviceId):
+		TOnDeviceConnectedTask(TNodeJsEoGateway* _JsGateway, const uint32& _DeviceId):
 			JsGateway(_JsGateway), DeviceId(_DeviceId) {}
 		void Run();
 	};
