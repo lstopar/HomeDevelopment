@@ -368,7 +368,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				nodes: [
 				    {
 				    	id: 'nodon-module',
-				    	internalId: 26243606,
+				    	internalId: 39423744,
 				    	name: 'NodOn Relay',
 				    	type: 'D2-01-xx',
 				    	sensors: [
