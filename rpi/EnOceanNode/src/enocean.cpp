@@ -73,6 +73,9 @@ void TEoGateway::Init() {
 
 void TEoGateway::StartLearningMode() {
 	TLock Lock(GatewaySection);
+
+	Notify->OnNotify(TNotifyType::ntInfo, "Starting learning mode ...");
+
 	LearnModeStartTm = TTm::GetCurUniMSecs();
 	Gateway.LearnModeOn();
 }
@@ -91,7 +94,7 @@ void TEoGateway::Read() {
 	TLock Lock(GatewaySection);	// TODO this needs to be smarter
 
 	if (Gateway.LearnMode && TTm::GetCurUniMSecs() - LearnModeStartTm > LEARN_MODE_TIME) {
-		printf("Leaving learn mode!\n");
+		Notify->OnNotify(TNotifyType::ntInfo, "Leaving learn mode!");
 		Gateway.LearnModeOff();
 	}
 
