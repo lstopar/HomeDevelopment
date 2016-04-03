@@ -63,10 +63,13 @@ void TEoGateway::Init() {
 	eoDeviceManager& DeviceManager = *Gateway.deviceManager;
 	const id_device_map& DeviceMap = DeviceManager.GetDeviceList();
 	for (auto It = DeviceMap.begin(); It != DeviceMap.end(); It++) {
-//		const uint32 DeviceId = It->first;
+		eoDevice* Device = It->second;
 		const uint32& DeviceId = It->second->ID;
 
 		Notify->OnNotifyFmt(ntInfo, "Initializing device %u ...", DeviceId);
+		if (Device->GetProfile() == nullptr) {
+			Notify->OnNotify(ntWarn, "Device does not have a profile!");
+		}
 
 		OnDeviceConnected(DeviceId);
 	}
@@ -173,7 +176,7 @@ void TEoGateway::Read() {
 
 			Notify->OnNotify(TNotifyType::ntInfo, "Received telegram ...");
 
-			Msg = Gateway.telegram;
+			Msg = eoMessage(Gateway.telegram);
 			eoDebug::Print(Msg);
 
 			if (RecV & RECV_PROFILE) {
