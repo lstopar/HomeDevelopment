@@ -124,8 +124,6 @@ private:
 	TRf24Radio Radio;
 
 	// structures to convert from JS to cpp IDs
-//	TStrIntH ValueNmIdH;
-//	TStrIntH ValueNmNodeIdH;
 	THash<TStr, TIntPr> ValNmNodeIdValIdPrH;
 	THash<TIntPr, TStr> NodeIdValIdPrValNmH;
 

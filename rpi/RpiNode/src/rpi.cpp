@@ -429,6 +429,34 @@ bool TRf24Radio::Set(const uint16& NodeId, const int& ValId, const int& Val) {
 	return Send(NodeId, REQUEST_SET, Payload);
 }
 
+bool TRf24Radio::Set(const uint16& NodeId, const TIntPrV& ValIdValPrV) {
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Calling multiple SET for node %d ...", NodeId);
+
+	bool Success = true;
+
+	const int NMsgs = ceil(double(ValIdValPrV.Len()) / double(VALS_PER_PAYLOAD));
+	int RemainN = ValIdValPrV.Len();
+	for (int MsgN = 0; MsgN < NMsgs; MsgN++) {
+		const int PayloadSize = TMath::Mn(RemainN, VALS_PER_PAYLOAD);
+
+		TVec<TRadioValue> ValV(PayloadSize);
+		for (int ValN = 0; ValN < PayloadSize; ValN++) {
+			const TIntPr& ValIdValPr = ValIdValPrV[MsgN*VALS_PER_PAYLOAD + ValN];
+
+			TRadioValue& RadioVal = ValV[ValN];
+			ValV[0].SetValId((char) ValIdValPr.Val1);
+			ValV[0].SetVal(ValIdValPr.Val2);
+		}
+
+		TMem Payload;	TRadioProtocol::GenSetPayload(ValV, Payload);
+		Success &= Send(NodeId, REQUEST_SET, Payload);
+
+		RemainN -= VALS_PER_PAYLOAD;
+	}
+
+	return Success;
+}
+
 bool TRf24Radio::Get(const uint16& NodeId, const int& ValId) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Calling GET for node %d, valId: %d ...", NodeId, ValId);
 

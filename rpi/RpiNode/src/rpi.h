@@ -172,6 +172,7 @@ public:
 	void Init();
 	bool Ping(const uint16& NodeId);
 	bool Set(const uint16& NodeId, const int& ValId, const int& Val);
+	bool Set(const uint16& NodeId, const TIntPrV& ValIdValPrV);
 	bool Get(const uint16& NodeId, const int& ValId);
 	bool GetAll(const uint16& NodeId);
 

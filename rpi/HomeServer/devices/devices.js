@@ -54,24 +54,29 @@ function getMotion() {
 	return getMotionTv() || getMotionSofa()	;
 }
 
-// TODO uncomment
 function isAmbientOn() {
-	return false;
-//	return getValue(AMBIENT_LIGHT_ID) == 1;
+	return getValue(AMBIENT_LIGHT_ID) == 1;
 }
+
+function isLedStripOff() {
+	return getValue(LED_RED_ID) == 0 && getValue(LED_GREEN_ID) && getValue(LED_BLUE_ID);
+}
+
 //
 function ambientOn() {
-	return;
-//	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 1 });
+	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 1 });
 }
 //
 function ambientOff() {
-	return;
-//	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 0 });
+	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 0 });
 }
 
 function ledStripOff() {
-	// TODO
+	setValue([
+	    { sensorId: LED_RED_ID, value: 0 },
+	    { sensorId: LED_GREEN_ID, value: 0 },
+	    { sensorId: LED_BLUE_ID, value: 0 }
+	]);
 }
 
 function lightsOff() {
@@ -98,6 +103,16 @@ function periodicCheck() {
 //=======================================================
 // CONTROLLERS
 //=======================================================
+
+function onAmbientLight(value) {
+	if (isLedStripOff()) {
+		setValue([
+	  	    { sensorId: LED_RED_ID, value: 100 },
+	  	    { sensorId: LED_GREEN_ID, value: 100 },
+	  	    { sensorId: LED_BLUE_ID, value: 100 }
+	  	]);
+	}
+}
 
 var MotionDetector = function () {
 	var EMPTY_ROOM_THRESHOLD = 1000*60*30;	// 15 mins
@@ -219,6 +234,9 @@ module.exports = exports = function (_getValue, _setValue) {
 		}
 		else if (sensorId == TV_ID) {
 			tv.onValue(value == 1);
+		}
+		else if (sensorId == AMBIENT_LIGHT_ID) {
+			onAmbientLight(value);
 		}
 	}
 	

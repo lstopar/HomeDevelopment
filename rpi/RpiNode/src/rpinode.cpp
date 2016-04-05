@@ -389,15 +389,54 @@ void TNodeJsRf24Radio::set(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 
 	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
 
+	if (Args.Length() == 0) { return; }
+
 	const PJsonVal ArgVal = TNodeJsUtil::GetArgJson(Args, 0);
-	const TStr ValueNm = ArgVal->GetObjStr("id");
-	const int Val = ArgVal->GetObjInt("value");
+	bool Success = true;
 
-	const TIntPr& NodeIdValIdPr = JsRadio->ValNmNodeIdValIdPrH.GetDat(ValueNm);
-	const uint16 NodeId = (uint16) NodeIdValIdPr.Val1;
-	const int ValId = NodeIdValIdPr.Val2;
+	if (ArgVal->IsArr()) {
+		THash<TInt, TIntPrV> NodeIdValIdValPrVH;
 
-	bool Success = JsRadio->Radio.Set(NodeId, ValId, Val);
+		for (int ArgN = 0; ArgN < ArgVal->GetArrVals(); ArgN++) {
+			const PJsonVal& ValJson = ArgVal->GetArrVal(ArgN);
+
+			const TStr& ValNm = ValJson->GetObjStr("sensorId");
+			const int& Val = ValJson->GetObjInt("value");
+
+			const TIntPr& NodeIdValIdPr = ValNmNodeIdValIdPrH.GetDat(ValNm);
+			const uint16 NodeId = NodeIdValIdPr.Val1;
+			const int ValId = NodeIdValIdPr.Val2;
+
+			if (!NodeIdValIdValPrVH.IsKey(NodeId)) { NodeIdValIdValPrVH.AddDat(NodeId); }
+
+			TIntPrV& ValIdValPrV = NodeIdValIdValPrVH.GetDat(NodeId);
+			ValIdValPrV.Add(TIntPr(ValId, Val));
+		}
+
+		int KeyId = NodeIdValIdValPrVH.FFirstKeyId();
+		while (NodeIdValIdValPrVH.FNextKeyId(KeyId)) {
+			const uint16 NodeId = NodeIdValIdValPrVH.GetKey(KeyId);
+			const TIntPrV& ValIdValPrV = NodeIdValIdValPrVH[KeyId];
+			Success &= Radio.Set(NodeId, ValIdValPrV);
+		}
+	} else {
+		const TStr& ValueNm = ArgVal->GetObjStr("sensorId");
+		const int Val = ArgVal->GetObjInt("value");
+
+		const TIntPr& NodeIdValIdPr = JsRadio->ValNmNodeIdValIdPrH.GetDat(ValueNm);
+		const uint16 NodeId = (uint16) NodeIdValIdPr.Val1;
+		const int ValId = NodeIdValIdPr.Val2;
+
+		Success = JsRadio->Radio.Set(NodeId, ValId, Val);
+	}
+
+	if (Args[0]->IsArray()) {
+		v8::Local<v8::Array> ArgsArr = TNodeJsUtil::GetArg
+		for (int ArgN = 0; ArgN < )
+	} else {
+		const PJsonVal ArgVal = TNodeJsUtil::GetArgJson(Args, 0);
+
+	}
 
 	Args.GetReturnValue().Set(v8::Boolean::New(Isolate, Success));
 }

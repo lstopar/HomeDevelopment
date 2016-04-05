@@ -46,7 +46,31 @@ function getValue(sensorId) {
 
 function setValue(vals) {
 	if (vals.constructor === Array) {
-		log.warn('Setting multiple values not supported yet!!');
+		var rpiDevices = [];
+		var radioDevices = [];
+		var enoceanDevices = [];
+		
+		for (var i = 0; i < vals.length; i++) {
+			var sensorId = vals[i].sensorId;
+			
+			if (sensorId in sensors)
+				rpiDevices.push(vals[i]);
+			if (sensorId in radio.sensorH)
+				radioDevices.push(vals[i]);
+			if (enocean != null && enocean.hasSensor(sensorId))
+				enoceanDevices.push(vals[i]);
+		}
+		
+		// set RPi devices
+		for (var i = 0; i < rpiDevices.length; i++) {
+			setValue(rpiDevices[i]);
+		}
+		// set radio devices
+		radio.radio.set(vals);	// TODO implement
+		// set EnOcean devices
+		for (var i = 0; i < enoceanDevices.length; i++) {
+			setValue(enoceanDevices[i]);
+		}
 	} else {
 		var sensorId = vals.sensorId;
 		var value = vals.value;
@@ -56,7 +80,7 @@ function setValue(vals) {
 			device.set({ id: sensorId, value: value });
 		}
 		else if (sensorId in radio.sensorH) {
-			var success = radio.radio.set({ id: sensorId, value: value });
+			var success = radio.radio.set({ sensorId: sensorId, value: value });
 			onNodeConnected(radio.sensorH[sensorId].nodeId, success);
 		}
 		else if (enocean.hasSensor(sensorId)) {
