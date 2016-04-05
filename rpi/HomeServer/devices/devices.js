@@ -105,12 +105,18 @@ function periodicCheck() {
 //=======================================================
 
 function onAmbientLight(value) {
-	if (isLedStripOff()) {
-		setValue([
-	  	    { sensorId: LED_RED_ID, value: 100 },
-	  	    { sensorId: LED_GREEN_ID, value: 100 },
-	  	    { sensorId: LED_BLUE_ID, value: 100 }
-	  	]);
+	if (value == 1) {
+		if (isLedStripOff()) {
+			setValue([
+		  	    { sensorId: LED_RED_ID, value: 100 },
+		  	    { sensorId: LED_GREEN_ID, value: 100 },
+		  	    { sensorId: LED_BLUE_ID, value: 100 }
+		  	]);
+		}
+	} else {
+		if (!isLedStripOff()) {	// TODO check for modes
+			ledStripOff();
+		}
 	}
 }
 
