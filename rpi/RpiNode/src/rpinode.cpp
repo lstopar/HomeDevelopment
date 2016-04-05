@@ -403,7 +403,7 @@ void TNodeJsRf24Radio::set(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 			const TStr& ValNm = ValJson->GetObjStr("sensorId");
 			const int& Val = ValJson->GetObjInt("value");
 
-			const TIntPr& NodeIdValIdPr = ValNmNodeIdValIdPrH.GetDat(ValNm);
+			const TIntPr& NodeIdValIdPr = JsRadio->ValNmNodeIdValIdPrH.GetDat(ValNm);
 			const uint16 NodeId = NodeIdValIdPr.Val1;
 			const int ValId = NodeIdValIdPr.Val2;
 
