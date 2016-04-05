@@ -348,6 +348,8 @@ function initSensors() {
 		log.info('Initializing device %d ...', deviceN);
 		var deviceConf = devicesConf[deviceN];
 		
+		var transformH = {};
+		
 		var type = deviceConf.type;
 		if (type == 'Rf24') {
 			log.info('Initializing radio ...');
@@ -357,7 +359,6 @@ function initSensors() {
 			var radioSensorH = {};
 			var radioConf = [];
 			var nodeIdH = {};
-			var transformH = {};
 			
 			for (var nodeN = 0; nodeN < nodes.length; nodeN++) {
 				var node = nodes[nodeN];
@@ -401,11 +402,11 @@ function initSensors() {
 			
 			log.info('Setting callback ...');
 			radio.radio.onValue(function (val) {	// TODO move this somewhere, make a common interface
-				if (log.trace()) 
-					log.trace('Received value from the radio: %s', JSON.stringify(val));
-				
 				var transFun = transformH[val.id];
 				var trans = transFun(val.value);
+				
+				if (log.debug())
+					log.debug('Received %s: %d', val.id, trans);
 				
 				updateValue(val.id, trans);
 			});
