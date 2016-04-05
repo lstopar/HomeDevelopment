@@ -134,7 +134,7 @@ void TNodeJsD201Device::type(v8::Local<v8::String> Name, const v8::PropertyCallb
 }
 
 void TNodeJsD201Device::OnMsg(const eoMessage& Msg) {
-	Notify->OnNotify("Got message in JsDevice ...");
+	Notify->OnNotify(ntInfo, "Got message in JsDevice ...");
 	d2_01Command Command = eoEEP_D201xx::GetCommand(Msg);
 
 	switch (Command) {
@@ -170,7 +170,7 @@ void TNodeJsD201Device::OnStatus(const uint8& Channel, const uint8& Val) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
-	Notify->OnNotify("Got message in OnStatus ...");
+	Notify->OnNotify(ntInfo, "Got message in OnStatus ...");
 
 	if (!StatusCb.IsEmpty()) {
 		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, StatusCb);
