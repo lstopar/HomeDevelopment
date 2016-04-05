@@ -32,9 +32,9 @@ function getSensorConfig(sensorId) {
 	if (sensorId in sensors) {
 		return sensors[sensorId];
 	} else if (sensorId in radio.sensorH) {
-		return radio.sensorH[sensorId].type;
+		return radio.sensorH[sensorId];
 	} else if (enocean != null && enocean.hasSensor(sensorId)) {
-		return enocean.getSensor(sensorId).type;
+		return enocean.getSensor(sensorId);
 	} else {
 		throw new Error('Could not find the type for sensor: ' + sensorId);
 	}
