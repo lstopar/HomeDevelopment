@@ -417,7 +417,7 @@ void TNodeJsRf24Radio::set(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 		while (NodeIdValIdValPrVH.FNextKeyId(KeyId)) {
 			const uint16 NodeId = NodeIdValIdValPrVH.GetKey(KeyId);
 			const TIntPrV& ValIdValPrV = NodeIdValIdValPrVH[KeyId];
-			Success &= Radio.Set(NodeId, ValIdValPrV);
+			Success &= JsRadio->Radio.Set(NodeId, ValIdValPrV);
 		}
 	} else {
 		const TStr& ValueNm = ArgVal->GetObjStr("sensorId");
@@ -428,14 +428,6 @@ void TNodeJsRf24Radio::set(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 		const int ValId = NodeIdValIdPr.Val2;
 
 		Success = JsRadio->Radio.Set(NodeId, ValId, Val);
-	}
-
-	if (Args[0]->IsArray()) {
-		v8::Local<v8::Array> ArgsArr = TNodeJsUtil::GetArg
-		for (int ArgN = 0; ArgN < )
-	} else {
-		const PJsonVal ArgVal = TNodeJsUtil::GetArgJson(Args, 0);
-
 	}
 
 	Args.GetReturnValue().Set(v8::Boolean::New(Isolate, Success));

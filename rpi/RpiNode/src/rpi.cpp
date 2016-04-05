@@ -444,8 +444,8 @@ bool TRf24Radio::Set(const uint16& NodeId, const TIntPrV& ValIdValPrV) {
 			const TIntPr& ValIdValPr = ValIdValPrV[MsgN*VALS_PER_PAYLOAD + ValN];
 
 			TRadioValue& RadioVal = ValV[ValN];
-			ValV[0].SetValId((char) ValIdValPr.Val1);
-			ValV[0].SetVal(ValIdValPr.Val2);
+			RadioVal.SetValId((char) ValIdValPr.Val1);
+			RadioVal.SetVal(ValIdValPr.Val2);
 		}
 
 		TMem Payload;	TRadioProtocol::GenSetPayload(ValV, Payload);
