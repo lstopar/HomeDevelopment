@@ -70,6 +70,10 @@ function mainLightOn() {
 	setValue({ sensorId: MAIN_LIGHT_ID, value: 1 });
 }
 
+function mainLightOff() {
+	setValue({ sensorId: MAIN_LIGHT_ID, value: 0 });
+}
+
 function ambientOn() {
 	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 1 });
 }
