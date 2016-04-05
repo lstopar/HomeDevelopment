@@ -28,6 +28,18 @@ var callbacks = {
 // SENSOR FUNCTIONS
 //=======================================================
 
+function getSensorConfig(sensorId) {
+	if (sensorId in sensors) {
+		return sensors[sensorId];
+	} else if (sensorId in radio.sensorH) {
+		return radio.sensorH[sensorId].type;
+	} else if (enocean != null && enocean.hasSensor(sensorId)) {
+		return enocean.getSensor(sensorId).type;
+	} else {
+		throw new Error('Could not find the type for sensor: ' + sensorId);
+	}
+}
+
 function getValue(sensorId) {
 	return sensorId in values ? values[sensorId] : 0;
 }
@@ -66,16 +78,7 @@ function updateValue(sensorId, value) {
 		if (value != previousVal) {
 			values[sensorId] = value;
 			
-			var type;
-			if (sensorId in sensors) {
-				type = sensors[sensorId];
-			} else if (sensorId in radio.sensorH) {
-				type = radio.sensorH[sensorId].type;
-			} else if (enocean != null && enocean.hasSensor(sensorId)) {
-				type = enocean.getSensor(sensorId).type;
-			} else {
-				throw new Error('Could not find the type for sensor: ' + sensorId);
-			}
+			var type = getSensorConfig(sensorId).type;
 			
 			// web sockets callback
 			callbacks.onValueReceived({
@@ -245,15 +248,7 @@ function initGroups(layout) {
 				throw new Error('Sensor ID already present in the layout!');
 			}
 			
-			var sensorConf = null;
-			if (sensorId in sensors) {
-				sensorConf = sensors[sensorId];
-			} else if (sensorId in radio.sensorH) {
-				sensorConf = radio.sensorH[sensorId];
-			} else if (enocean != null && enocean.hasSensor(sensorId)) {
-				sensorConf = enocean.getSensor(sensorId);
-			}
-						
+			var sensorConf = getSensorConfig(sensorId);
 			if (sensorConf == null) {
 				throw new Error('Failed to get configuration of sensor: ' + sensorId);
 			}
@@ -396,14 +391,22 @@ function initSensors() {
 			
 			enocean = require('./enoceanwrapper.js')(deviceConf);
 			
+			var enoceanSensors = enocean.getSensors();
+			for (var i = 0; i < enoceanSensors.length; i++) {
+				var sensorId = enoceanSensors[i];
+				var sensorConf = enocean.getSensor(sensorId);
+				transformH[sensorId] = sensorConf.transform != null ? sensorConf.transform : function (val) { return val; };
+			}
+			
 			log.info('Adding value listener ...');
 			enocean.on('value', function (sensorId, value) {
 				if (log.debug())
 					log.debug('Received %s: %d', sensorId, value);
 				
-				// TODO transform
+				var transFun = transformH[sensorId];
+				var trans = transfun(value);
 				
-				updateValue(sensorId, value);
+				updateValue(sensorId, trans);
 			});
 			
 			log.info('Adding device listener ...');
@@ -495,13 +498,18 @@ exports.getSensors = function () {
 	var result = [];
 	if (radio != null) {
 		for (var sensorId in radio.sensorH) {
-			result.push(radio.sensorH[sensorId]);
+			result.push(getSensorConfig(sensorId));
 		}
 	}
 	for (var sensorId in sensors) {
-		result.push(sensors[sensorId]);
+		result.push(getSensorConfig(sensorId));
 	}
-	// TODO
+	if (enocean != null) {
+		var enoceanSensors = enocean.getSensors();
+		for (var i = 0; i < enoceanSensors.length; i++) {
+			result.push(getSensorConfig(enoceanSensors[i]));
+		}
+	}
 	return result;
 };
 
