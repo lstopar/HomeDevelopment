@@ -62,11 +62,18 @@ function isLedStripOff() {
 	return getValue(LED_RED_ID) == 0 && getValue(LED_GREEN_ID) == 0 && getValue(LED_BLUE_ID) == 0;
 }
 
-//
+function isMainLightOn() {
+	return getValue(MAIN_LIGHT_ID) == 1;
+}
+
+function mainLightOn() {
+	setValue({ sensorId: MAIN_LIGHT_ID, value: 1 });
+}
+
 function ambientOn() {
 	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 1 });
 }
-//
+
 function ambientOff() {
 	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 0 });
 }
@@ -198,6 +205,9 @@ var TvController = function () {
 				if (_isOn) {
 					if (isAmbientOn()) {
 						ambientOff();
+					}
+					if (isMainLightOn()) {
+						mainLightOff();
 					}
 				} else {
 					if (getLuminosity() < LUMINOSITY_THRESHOLD && !isAmbientOn()) {
