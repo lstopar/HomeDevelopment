@@ -123,7 +123,7 @@ function onAmbientLight(value) {
 				setValue([
 			  	    { sensorId: LED_RED_ID, value: 100 },
 			  	    { sensorId: LED_GREEN_ID, value: 49 },
-			  	    { sensorId: LED_BLUE_ID, value: 11 }
+			  	    { sensorId: LED_BLUE_ID, value: 7 }
 			  	]);
 			}
 		} else {
