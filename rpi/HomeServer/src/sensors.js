@@ -340,6 +340,7 @@ function initSensors() {
 	var devicesConf = devs.devices;
 	
 	onValueCallback = devs.onValue != null ? devs.onValue : function () {};
+	var transformH = {};
 	
 	if (log.info())
 		log.info('Using device configuration:\n%s', JSON.stringify(devicesConf, null, '\t'));
@@ -347,8 +348,6 @@ function initSensors() {
 	for (var deviceN = 0; deviceN < devicesConf.length; deviceN++) {
 		log.info('Initializing device %d ...', deviceN);
 		var deviceConf = devicesConf[deviceN];
-		
-		var transformH = {};
 		
 		var type = deviceConf.type;
 		if (type == 'Rf24') {
