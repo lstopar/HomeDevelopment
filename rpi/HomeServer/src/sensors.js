@@ -424,11 +424,11 @@ function initSensors() {
 			
 			log.info('Adding value listener ...');
 			enocean.on('value', function (sensorId, value) {
-				if (log.debug())
-					log.debug('Received %s: %d', sensorId, value);
-				
 				var transFun = transformH[sensorId];
 				var trans = transFun(value);
+				
+				if (log.debug())
+					log.debug('Received %s: %d', sensorId, trans);
 				
 				updateValue(sensorId, trans);
 			});
