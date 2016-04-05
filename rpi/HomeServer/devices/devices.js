@@ -109,8 +109,8 @@ function onAmbientLight(value) {
 		if (isLedStripOff()) {
 			setValue([
 		  	    { sensorId: LED_RED_ID, value: 100 },
-		  	    { sensorId: LED_GREEN_ID, value: 100 },
-		  	    { sensorId: LED_BLUE_ID, value: 100 }
+		  	    { sensorId: LED_GREEN_ID, value: 49 },
+		  	    { sensorId: LED_BLUE_ID, value: 11 }
 		  	]);
 		}
 	} else {
