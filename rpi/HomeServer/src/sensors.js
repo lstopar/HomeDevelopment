@@ -404,7 +404,7 @@ function initSensors() {
 					log.debug('Received %s: %d', sensorId, value);
 				
 				var transFun = transformH[sensorId];
-				var trans = transfun(value);
+				var trans = transFun(value);
 				
 				updateValue(sensorId, trans);
 			});
