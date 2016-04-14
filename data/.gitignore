@@ -1,0 +1,7 @@
+/node_modules
+
+# eclipse
+.project
+/.settings
+/.sublime-project
+/.tern-project
