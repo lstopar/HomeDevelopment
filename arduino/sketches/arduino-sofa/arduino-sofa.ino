@@ -14,22 +14,16 @@ const int PIR_PIN = 4;
 const int LUM_PIN = 3;
 const int VOUT_PIN = 5;
 
-const int LIGHT_SWITCH_PIN = 6;
-const int LIGHT_VOUT_PIN = 9;
-const int LIGHT_READ_PIN = 2;
-
-const int N_VAL_IDS = 3;
+const int N_VAL_IDS = 2;
 const int VAL_IDS[N_VAL_IDS] = {
   PIR_PIN,
-  LUM_PIN,
-  LIGHT_SWITCH_PIN
+  LUM_PIN
 };
 
 RF24 radio(7,8);
 RF24Network network(radio);
 
 TAnalogPir pir(PIR_PIN, 1000, 500);
-TManualSwitch lightSwitch(LIGHT_VOUT_PIN, LIGHT_READ_PIN, LIGHT_SWITCH_PIN);
 
 void writeRadio(const uint16_t& recipient, const unsigned char& type, const char* buff, const int& len);
 void onPirEvent(const bool& motion);
@@ -53,7 +47,6 @@ void setup() {
   digitalWrite(VOUT_PIN, HIGH);
 
   pir.init();
-  lightSwitch.init();
  
   SPI.begin();
 
@@ -70,7 +63,6 @@ void setup() {
 
   // set callbacks
   pir.setCallback(onPirEvent);
-  lightSwitch.setCallback(onSwitchEvent);
 }
 
 //====================================================
@@ -104,9 +96,6 @@ bool getRadioVal(const char& valId, TRadioValue& rval) {
   }
   else if (valId == LUM_PIN) {
     rval.SetVal(analogRead(LUM_PIN) >> 2);
-  }
-  else if (valId == LIGHT_SWITCH_PIN) {
-    rval.SetVal(lightSwitch.isOn());
   }
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId, HEX);
@@ -144,17 +133,7 @@ void processGet(const uint16_t& callerAddr, const char& valId) {
 
 void processSet(const uint16_t& callerAddr, const TRadioValue& rval) {
   const char valId = rval.GetValId();
-  
-  if (valId == LIGHT_SWITCH_PIN) {
-    if (rval.GetValBool()) {
-      lightSwitch.on();
-    } else {
-      lightSwitch.off();
-    }
-    processGet(callerAddr, valId);
-  } else {
-    Serial.print("Unknown valId for SET: ");  Serial.println(valId);
-  }
+  Serial.print("Unknown valId for SET: ");  Serial.println(valId);
 }
 
 //====================================================
@@ -163,10 +142,6 @@ void processSet(const uint16_t& callerAddr, const TRadioValue& rval) {
 
 void onPirEvent(const bool& motion) {
   processGet(ADDRESS_RPI, PIR_PIN);
-}
-
-void onSwitchEvent(const bool& isOn) {
-  processGet(ADDRESS_RPI, LIGHT_SWITCH_PIN);
 }
 
 void loop(void) {
@@ -220,6 +195,5 @@ void loop(void) {
   }
 
   pir.update();
-  lightSwitch.update();
 }
 

@@ -1,0 +1,22 @@
+{
+  "name": "LegoberryCollector",
+  "version": "0.1.0",
+  "description": "Data collection server",
+  "author": "Luka Stopar <luka@lstopar.si>",
+  "contributors": [],
+  "repository": {},
+  "main": "./main.js",
+  "engines": {
+    "node": "0.12.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.14.2",
+    "bunyan": "^1.5.1",
+    "bunyan-format": "^0.2.1",
+    "express": "^4.12.2",
+    "mysql": "^2.9.0"
+  },
+  "devDependencies": {},
+  "scripts": {},
+  "keywords": []
+}
