@@ -74,10 +74,10 @@ $(document).ready(function () {
 		
 		if (connected) {
 			span.addClass('label-success');
-			span.html('Connected');
+			span.html('Connected (0s)');
 		} else {
 			span.addClass('label-danger');
-			span.html('Disconnected');
+			span.html('Disconnected (0s)');
 		}
 	}
 	

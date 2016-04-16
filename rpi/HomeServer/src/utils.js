@@ -16,7 +16,28 @@ module.exports = exports = {
 	
 	formatConnTime: function (timestamp) {
 		var diff = new Date().getTime() - timestamp;
-		return (diff / 1000).toFixed() + 's';
+		
+		var seconds = Math.floor(diff / 1000);
+		var minutes = Math.floor(seconds / 60);
+		var hours = Math.floor(minutes / 60);
+		var days = Math.floor(hours / 24);
+		var months = Math.floor(days / 30);
+		
+		if (months != 0) {
+			return months + 'M' + (days != 0 ? days + 'd' : '');
+		}
+		else if (days != 0) {
+			return days + 'd' + (hours != 0 ? hours + 'h' : '');
+		}
+		else if (hours != 0) {
+			return hours + 'h';
+		}
+		else if (minutes != 0) {
+			return minutes + 'm';
+		}
+		else {
+			return seconds + 's';
+		}
 	},
 	
 	ping: function (host, callback) {
