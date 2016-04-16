@@ -14,7 +14,7 @@ module.exports = exports = {
 		return val.toFixed();
 	},
 	
-	getConnChangedTime: function (timestamp) {
+	formatConnTime: function (timestamp) {
 		var diff = new Date().getTime() - timestamp;
 		return (diff / 1000).toFixed() + 's';
 	},
