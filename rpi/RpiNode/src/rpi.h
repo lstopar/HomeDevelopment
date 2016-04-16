@@ -131,6 +131,7 @@ class TRf24Radio {
 public:
 	class TRf24RadioCallback {
 	public:
+		virtual void OnPong(const uint16& NodeId) = 0;
 		virtual void OnValue(const uint16& NodeId, const char& ValId, const int& Val) = 0;
 	};
 
@@ -171,6 +172,7 @@ public:
 
 	void Init();
 	bool Ping(const uint16& NodeId);
+	bool Pong(const uint16& NodeId);
 	bool Set(const uint16& NodeId, const int& ValId, const int& Val);
 	bool Set(const uint16& NodeId, const TIntPrV& ValIdValPrV);
 	bool Get(const uint16& NodeId, const int& ValId);

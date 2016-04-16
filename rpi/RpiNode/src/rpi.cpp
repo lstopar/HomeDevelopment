@@ -332,9 +332,16 @@ void TRf24Radio::TReadThread::Run() {
 				try {
 					switch (Type) {
 					case REQUEST_PING: {
-						Notify->OnNotify(TNotifyType::ntInfo, "Received ping, ignoring ...");
+						Notify->OnNotify(TNotifyType::ntInfo, "Received ping, replying ...");
+						Radio->Pong(FromNode);
 						break;
-					} case REQUEST_PUSH: {
+					}
+					case REQUEST_PONG: {
+						Notify->OnNotify(TNotifyType::ntInfo, "Received pong, ignoring ...");
+						Radio->Callback->OnPong(FromNode);
+						break;
+					}
+					case REQUEST_PUSH: {
 						Notify->OnNotify(TNotifyType::ntInfo, "Received PUSH ...");
 						TVec<TRadioValue> ValV;
 						TRadioProtocol::ParsePushPayload(Payload, ValV);
@@ -344,16 +351,20 @@ void TRf24Radio::TReadThread::Run() {
 						}
 
 						break;
-					} case REQUEST_GET: {
+					}
+					case REQUEST_GET: {
 						Notify->OnNotify(TNotifyType::ntWarn, "GET not supported!");
 						break;
-					} case REQUEST_SET: {
+					}
+					case REQUEST_SET: {
 						Notify->OnNotify(TNotifyType::ntWarn, "SET not supported!");
 						break;
-					} case REQUEST_CHILD_CONFIG: {
+					}
+					case REQUEST_CHILD_CONFIG: {
 						Notify->OnNotify(TNotifyType::ntWarn, "Child woke up and sent configuration request, ignoring ...");
 						break;
-					} default: {
+					}
+					default: {
 						Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type: %d", Type);
 					}
 					}
@@ -415,6 +426,11 @@ void TRf24Radio::Init() {
 bool TRf24Radio::Ping(const uint16& NodeId) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Pinging node %u ...", NodeId);
 	return Send(NodeId, REQUEST_PING, TMem());
+}
+
+bool TRf24Radio::Pong(const uint16& NodeId) {
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Ponging node %u ...", NodeId);
+	return Send(NodeId, REQUEST_PONG, TMem());
 }
 
 bool TRf24Radio::Set(const uint16& NodeId, const int& ValId, const int& Val) {

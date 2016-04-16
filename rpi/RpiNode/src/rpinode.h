@@ -128,6 +128,7 @@ private:
 	THash<TIntPr, TStr> NodeIdValIdPrValNmH;
 
 	v8::Persistent<v8::Function> OnValueCallback;
+	v8::Persistent<v8::Function> OnPongCallback;
 
 	PNotify Notify;
 
@@ -140,11 +141,14 @@ private:
 
 	// callbacks
 	JsDeclareFunction(onValue);
+	JsDeclareFunction(onPong);
 
 	void OnMsgMainThread(const uint16& NodeId, const uint8& ValueId,
 			const int& Val);
+	void OnPongMainThread(const uint16& NodeId);
 
 public:
+	void OnPong(const uint16& NodeId);
 	void OnValue(const uint16& NodeId, const char& ValId, const int& Val);
 
 	class TOnMsgTask: public TMainThreadTask {
@@ -161,7 +165,17 @@ public:
 			Val(_Val) {}
 
 		void Run();
-		static void Run(TOnMsgTask& Task);
+	};
+
+	class TOnPongTask: public TMainThreadTask {
+	private:
+		TNodeJsRf24Radio* JsRadio;
+		const uint16 NodeId;
+	public:
+		TOnPongTask(TNodeJsRf24Radio* _JsRadio, const uint16& _NodeId):
+			JsRadio(_JsRadio),
+			NodeId(_NodeId) {}
+		void Run();
 	};
 };
 

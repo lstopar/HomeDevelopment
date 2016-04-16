@@ -52,6 +52,7 @@ const int VALS_PER_PAYLOAD = (PAYLOAD_LEN - 1) / TRadioValue::BYTES;
 const unsigned char REQUEST_GET = 65;
 const unsigned char REQUEST_SET = 66;
 const unsigned char REQUEST_PUSH = 67;
+const unsigned char REQUEST_PONG = 68;
 const unsigned char REQUEST_PING = 't';				// 116
 const unsigned char REQUEST_CHILD_CONFIG = 'k';		//107
 

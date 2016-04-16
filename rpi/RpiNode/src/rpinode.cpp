@@ -283,6 +283,7 @@ void TNodeJsRf24Radio::Init(v8::Handle<v8::Object> Exports) {
 	NODE_SET_PROTOTYPE_METHOD(tpl, "set", _set);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "ping", _ping);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "onValue", _onValue);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "onPong", _onPong);
 
 	Exports->Set(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()), tpl->GetFunction());
 }
@@ -345,6 +346,7 @@ TNodeJsRf24Radio::TNodeJsRf24Radio(const uint16& NodeId, const int& PinCE, const
 
 TNodeJsRf24Radio::~TNodeJsRf24Radio() {
 	OnValueCallback.Reset();
+	OnPongCallback.Reset();
 }
 
 void TNodeJsRf24Radio::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {
@@ -457,6 +459,17 @@ void TNodeJsRf24Radio::onValue(const v8::FunctionCallbackInfo<v8::Value>& Args) 
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
+void TNodeJsRf24Radio::onPong(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
+	v8::Local<v8::Function> Cb = TNodeJsUtil::GetArgFun(Args, 0);
+
+	JsRadio->OnPongCallback.Reset(Isolate, Cb);
+	Args.GetReturnValue().Set(v8::Undefined(Isolate));
+}
+
 
 void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueId,
 		const int& Val) {
@@ -481,6 +494,25 @@ void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueI
 	}
 }
 
+void TNodeJsRf24Radio::OnPongMainThread(const uint16& NodeId) {
+	if (!OnValueCallback.IsEmpty()) {
+		v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+		v8::HandleScope HandleScope(Isolate);
+
+		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got pong from node %u", NodeId);
+
+		// TODO check if this is a valid node ID!!
+
+		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnValueCallback);
+		TNodeJsUtil::ExecuteVoid(Callback, v8::Integer::New(Isolate, (int) NodeId));
+	}
+}
+
+void TNodeJsRf24Radio::OnPong(const uint16& NodeId) {
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Executing pong callback for value id: %d", ValId);
+	TNodeJsAsyncUtil::ExecuteOnMainAndWait(new TOnPongTask(this, NodeId), true);
+}
+
 void TNodeJsRf24Radio::OnValue(const uint16& NodeId, const char& ValId, const int& Val) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Executing callback for value id: %d", ValId);
 	TNodeJsAsyncUtil::ExecuteOnMainAndWait(new TOnMsgTask(this, NodeId, (int) ValId, Val), true);
@@ -491,6 +523,14 @@ void TNodeJsRf24Radio::TOnMsgTask::Run() {
 		JsRadio->OnMsgMainThread(NodeId, ValueId, Val);
 	} catch (const PExcept& Except) {
 		JsRadio->Notify->OnNotifyFmt(TNotifyType::ntErr, "Failed to execute value callback: %s!", Except->GetMsgStr().CStr());
+	}
+}
+
+void TNodeJsRf24Radio::TOnPongTask::Run() {
+	try {
+		JsRadio->OnPongMainThread(NodeId);
+	} catch (const PExcept& Except) {
+		JsRadio->Notify->OnNotifyFmt(TNotifyType::ntErr, "Failed to execute pong callback: %s!", Except->GetMsgStr().CStr());
 	}
 }
 
