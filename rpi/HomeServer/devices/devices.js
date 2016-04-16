@@ -121,9 +121,9 @@ function onAmbientLight(value) {
 		if (value == 1) {
 			if (isLedStripOff()) {
 				setValue([
-			  	    { sensorId: LED_RED_ID, value: 100 },
-			  	    { sensorId: LED_GREEN_ID, value: 49 },
-			  	    { sensorId: LED_BLUE_ID, value: 8 }		// XXX should be 7, but it's set to 8 because then it rounds to 7
+			  	    { sensorId: LED_RED_ID, value: 255 },
+			  	    { sensorId: LED_GREEN_ID, value: 66 },
+			  	    { sensorId: LED_BLUE_ID, value: 5 }
 			  	]);
 			}
 		} else {

@@ -95,7 +95,11 @@ void setup() {
 
 void writeRadio(const uint16_t& recipient, const unsigned char& type, const char* buff, const int& len) {
   RF24NetworkHeader header(recipient, type);
-  network.write(header, buff, len);
+  const bool success = network.write(header, buff, len);
+
+  if (!success) {
+    Serial.println("Failed to send message!");
+  }
 }
 
 void push(const uint16_t& to, const TRadioValue* valV, const int& len) {  
@@ -135,7 +139,7 @@ bool getRadioVal(const char& valId, TRadioValue& rval) {
       Serial.println(valId);  
     }
 
-    rval.SetVal((int) (val / 2.55));
+    rval.SetVal(val);
   } else if (valId == MODE_BLINK_RGB) {
     rval.SetVal(rgb.isBlinking());
   }
@@ -189,15 +193,15 @@ void processSet(const uint16_t& callerAddr, const TRadioValue& rval) {
     processGet(callerAddr, valId);
   }
   else if (valId == PIN_BLUE) {
-    rgb.setBlue((int) (double(rval.GetValInt())*2.55));
+    rgb.setBlue(rval.GetValInt());
     processGet(callerAddr, valId);
   }
   else if (valId == PIN_RED) {
-    rgb.setRed((int) (double(rval.GetValInt())*2.55));
+    rgb.setRed(rval.GetValInt());
     processGet(callerAddr, valId);
   }
   else if (valId == PIN_GREEN) {
-    rgb.setGreen((int) (double(rval.GetValInt())*2.55));
+    rgb.setGreen(rval.GetValInt());
     processGet(callerAddr, valId);
   }
   else if (valId == MODE_BLINK_RGB) {
