@@ -125,6 +125,7 @@ function onNodeConnected(nodeId, connected) {
 		
 		if (connected != prevStatus) {
 			nodeIdH[nodeId].connected = connected;
+			nodeIdH[nodeId].connectionChangedTime = new Date().getTime();
 			
 			if (connected) {
 				log.info('Node %d has connected!', nodeId);
@@ -168,23 +169,40 @@ function readDevices() {
 	}
 }
 
-function pingRadios() {
-	if (log.debug())
-		log.debug('Pinging radio devices ...');
+var rf24Pinger = (function () {
+	var nodePongH = {};
 	
-	try {
-		var nodeIdH = radio.nodes;
-		
-		for (var nodeId in nodeIdH) {			
-			if (log.debug())
-				log.debug('Pinging node %d', nodeId)
-			
-			onNodeConnected(nodeId, radio.radio.ping(parseInt(nodeId)));
-		}
-	} catch (e) {
-		log.error(e, 'Exception while pinging radio nodes!');
+	for (var nodeId in radio.nodes) {
+		nodePongH[nodeId] = true;
 	}
-}
+	
+	return {
+		onPong: function (nodeId) {
+			log.info('Node %d ponged!', nodeId);
+			nodePongH[nodeId] = true;
+		},
+		ping: function () {
+			if (log.debug())
+				log.debug('Pinging radio devices ...');
+			
+			try {
+				var nodeIdH = radio.nodes;
+				
+				for (var nodeId in nodeIdH) {
+					onNodeConnected(nodeId, nodePongH[nodeId]);
+					nodePongH[nodeId] = false;
+					
+					if (log.debug())
+						log.debug('Pinging node %d', nodeId)
+					
+					radio.radio.ping(parseInt(nodeId));
+				}
+			} catch (e) {
+				log.error(e, 'Exception while pinging radio nodes!');
+			}
+		}
+	}
+})();
 
 function readRadioDevices() {
 	if (radio != null) {
@@ -385,7 +403,8 @@ function initSensors() {
 				nodeIdH[nodeId] = {
 					id: nodeId,
 					name: node.name,
-					connected: false
+					connected: false,
+					connectionChangedTime: new Date().getTime()
 				};
 			}
 			
@@ -411,6 +430,7 @@ function initSensors() {
 			});
 			radio.radio.onPong(function (nodeId) {
 				log.info('Received pong from node %d', nodeId);
+				rf24Pinger.onPong(nodeId + '');
 			});
 		}
 		else if (type == 'EnOcean') {
@@ -588,7 +608,7 @@ exports.init = function () {
 	if (radio != null) {
 		log.info('Initializing radio ...');
 		radio.radio.init();
-		setInterval(pingRadios, config.pingInterval);
+		setInterval(rf24Pinger.ping, config.pingInterval);
 	}
 	
 	if (enocean != null) {
