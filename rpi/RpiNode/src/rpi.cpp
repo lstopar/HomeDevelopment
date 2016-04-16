@@ -376,7 +376,7 @@ TRf24Radio::TRf24Radio(const uint16& NodeAddr, const uint8& PinCe,
 		Radio(nullptr),
 		Network(nullptr),
 		ReadThread(),
-		RetryCount(3),
+		RetryCount(1),
 		Callback(nullptr),
 		Notify(_Notify) {
 
