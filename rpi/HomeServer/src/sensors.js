@@ -409,6 +409,9 @@ function initSensors() {
 				
 				updateValue(val.id, trans);
 			});
+			radio.radio.onPong(function (nodeId) {
+				log.info('Received pong from node %d', nodeId);
+			});
 		}
 		else if (type == 'EnOcean') {
 			log.info('Initializing EnOcean gateway ...');

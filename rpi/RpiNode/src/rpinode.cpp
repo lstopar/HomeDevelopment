@@ -509,7 +509,7 @@ void TNodeJsRf24Radio::OnPongMainThread(const uint16& NodeId) {
 }
 
 void TNodeJsRf24Radio::OnPong(const uint16& NodeId) {
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Executing pong callback for value id: %d", ValId);
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Executing pong callback from node: %u", NodeId);
 	TNodeJsAsyncUtil::ExecuteOnMainAndWait(new TOnPongTask(this, NodeId), true);
 }
 
