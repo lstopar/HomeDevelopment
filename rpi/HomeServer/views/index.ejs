@@ -93,7 +93,11 @@
 										</div>
 										<script type="text/javascript">
 										$(document).ready(function () {
-											createSlider('<%= sensor.id %>', 0, 100, <%= val %>);
+											<%
+											var min = sensor.min != null ? sensor.min : 0;
+											var max = sensor.max != null ? sensor.max : 100;
+											%>
+											createSlider('<%= sensor.id %>', <%= min %>, <%= max %>, <%= val %>);
 										});
 										</script>
 									<% } %>

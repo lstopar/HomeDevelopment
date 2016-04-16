@@ -332,6 +332,8 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	    	id: LED_BLUE_ID,
 				    	    	internalId: 5,
 				    	    	type: 'dimmer',
+				    	    	min: 0,
+				    	    	max: 255,
 				    	    	unit: '%',
 				    	    	name: 'LED blue',
 				    	    	description: 'Dimmer 1'
@@ -340,6 +342,8 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	    	id: LED_RED_ID,
 				    	    	internalId: 6,
 				    	    	type: 'dimmer',
+				    	    	min: 0,
+				    	    	max: 255,
 				    	    	unit: '%',
 				    	    	name: 'LED red',
 				    	    	description: 'Dimmer 1'
@@ -348,6 +352,8 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	    	id: LED_GREEN_ID,
 				    	    	internalId: 9,
 				    	    	type: 'dimmer',
+				    	    	min: 0,
+				    	    	max: 255,
 				    	    	unit: '%',
 				    	    	name: 'LED green',
 				    	    	description: 'Dimmer 1'
@@ -392,15 +398,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	    	unit: '',
 				    	    	name: 'Motion sofa',
 				    	    	description: ''
-				    	    }/*,
-				    	    {
-				    	    	id: AMBIENT_LIGHT_ID,
-				    	    	internalId: 6,
-				    	    	type: 'actuator',
-				    	    	unit: '',
-				    	    	name: 'Ambient light',
-				    	    	description: ''
-				    	    }*/
+				    	    }
 				    	]
 				    }
 				],
