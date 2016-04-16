@@ -162,7 +162,8 @@ void loop(void) {
     } 
     else if (header.type == REQUEST_PING) {
       network.read(header, NULL, 0);
-      Serial.println("Received ping, ignoring ...");
+      Serial.println("Received ping, ponging ...");
+      writeRadio(fromAddr, REQUEST_PONG, NULL, 0);
     } 
     else if (header.type == REQUEST_GET) {
       Serial.println("Received GET request ...");

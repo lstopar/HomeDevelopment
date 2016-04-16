@@ -503,7 +503,7 @@ void TNodeJsRf24Radio::OnPongMainThread(const uint16& NodeId) {
 
 		// TODO check if this is a valid node ID!!
 
-		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnValueCallback);
+		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnPongCallback);
 		TNodeJsUtil::ExecuteVoid(Callback, v8::Integer::New(Isolate, (int) NodeId));
 	}
 }
