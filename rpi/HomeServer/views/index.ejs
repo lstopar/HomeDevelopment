@@ -42,7 +42,7 @@
             			<% if (connected) { %>
             				<span id="span-status-node-<%= node.id %>" class="label label-success pull-right" style="margin-top: 2px;">Connected (<%= utils.formatConnTime(sensors.getConnChangedTime(node.id)) %>)</span>
             			<% } else { %>
-            				<span id="span-status-node-<%= node.id %>" class="label label-danger pull-right" style="margin-top: 2px;">Disconnected</span>
+            				<span id="span-status-node-<%= node.id %>" class="label label-danger pull-right" style="margin-top: 2px;">Disconnected (<%= utils.formatConnTime(sensors.getConnChangedTime(node.id)) %>)</span>
             			<% } %>
             		</li>
             	<% } %>
