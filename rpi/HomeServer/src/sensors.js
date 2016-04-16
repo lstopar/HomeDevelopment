@@ -172,11 +172,12 @@ function readDevices() {
 var rf24Pinger = (function () {
 	var nodePongH = {};
 	
-	for (var nodeId in radio.nodes) {
-		nodePongH[nodeId] = true;
-	}
-	
 	return {
+		init: function () {
+			for (var nodeId in radio.nodes) {
+				nodePongH[nodeId] = true;
+			}
+		},
 		onPong: function (nodeId) {
 			log.info('Node %d ponged!', nodeId);
 			nodePongH[nodeId] = true;
@@ -608,6 +609,7 @@ exports.init = function () {
 	if (radio != null) {
 		log.info('Initializing radio ...');
 		radio.radio.init();
+		rf24Pinger.init();
 		setInterval(rf24Pinger.ping, config.pingInterval);
 	}
 	
