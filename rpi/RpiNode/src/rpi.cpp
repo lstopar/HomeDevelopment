@@ -500,23 +500,9 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message to node %d ...", NodeAddr);
 
 		RF24NetworkHeader Header(NodeAddr, Command);
+		Network->write(Header, Buff(), Buff.Len());
 
-		int RetryN = 0;
-		bool Success = false;
-		do {
-			Success = Network->write(Header, Buff(), Buff.Len());
-
-			if (Success) { break; }
-
-			RetryN++;
-			TSysProc::Sleep(RETRY_DELAY);
-		} while (RetryN < RetryCount);
-
-		if (!Success) {
-			Notify->OnNotify(TNotifyType::ntWarn, "Failed to send message!");
-		}
-
-		return Success;
+		return true;
 	} catch (const PExcept& Except) {
 		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception when sending!");
 		return false;
