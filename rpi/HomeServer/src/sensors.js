@@ -572,6 +572,11 @@ exports.isOnline = function (nodeId) {
 	return radio.nodes[nodeId].connected;
 };
 
+exports.getConnChangedTime = function (nodeId) {
+	if (radio == null || !(nodeId in radio.nodes)) return Number.MAX_VALUE;
+	return radio.nodes[nodeId].connectionChangedTime;
+}
+
 exports.getNodes = function () {
 	if (radio == null) return [];
 	

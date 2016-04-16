@@ -14,8 +14,13 @@ module.exports = exports = {
 		return val.toFixed();
 	},
 	
+	getConnChangedTime: function (timestamp) {
+		var diff = new Date().getTime() - timestamp;
+		return (diff / 1000).toFixed() + 's';
+	},
+	
 	ping: function (host, callback) {
-		exec('ping -c 3 -q ' + host, function (e, stdout, stderr) {
+		exec('ping -c 2 -q ' + host, function (e, stdout, stderr) {
 			callback(e == null);
 		});
 	}
