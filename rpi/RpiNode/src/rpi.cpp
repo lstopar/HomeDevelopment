@@ -358,9 +358,11 @@ void TRf24Radio::TReadThread::AddUnprocessedMsgV(const TVec<TMsgInfo>& MsgV) {
 }
 
 void TRf24Radio::TReadThread::ProcessMsg(const uint16& FromNode, const uchar& Type, const TMem& Payload) const {
-	if (Radio->Callback == nullptr) { return; }
-
 	try {
+		Notify->OnNotifyFmt(ntInfo, "Processing message of type %u from node %u", FromNode, Type);
+
+		if (Radio->Callback == nullptr) { return; }
+
 		switch (Type) {
 		case REQUEST_PING: {
 			Notify->OnNotify(ntInfo, "Received ping, replying ...");
