@@ -544,7 +544,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 			// wait for an ACK
 			uint16 From;
 			uchar Type;
-			TMem Payload;
+			TMem Payload(PAYLOAD_LEN);
 
 			const uint64 StartTm = TTm::GetCurUniMSecs();
 			while (!ReceivedAck && TTm::GetCurUniMSecs() - StartTm < ACK_TIMEOUT) {
