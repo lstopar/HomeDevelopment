@@ -322,6 +322,20 @@ void TRf24Radio::TReadThread::Run() {
 
 	while (true) {
 		try {
+			// process queued messages
+			TVec<TMsgInfo> QueuedMsgV;
+			{
+				TLock Lock(Radio->CriticalSection);
+				QueuedMsgV = MsgQ;
+				MsgQ.Clr();
+			}
+
+			for (int MsgN = 0; MsgN < QueuedMsgV.Len(); MsgN++) {
+				const TMsgInfo& MsgInfo = QueuedMsgV[MsgN];
+				ProcessMsg(MsgInfo.Val1, MsgInfo.Val2, MsgInfo.Val3);
+			}
+
+			// process new messages
 			Radio->UpdateNetwork();
 
 			while (Radio->Read(FromNode, Type, Payload)) {
