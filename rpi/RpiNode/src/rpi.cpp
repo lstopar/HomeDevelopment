@@ -310,7 +310,7 @@ void TYL40Adc::CleanUp() {
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
 const uint64 TRf24Radio::RETRY_DELAY = 30;
-const uint64 TRf24Radio::ACK_TIMEOUT = 80;
+const uint64 TRf24Radio::ACK_TIMEOUT = 100;
 
 void TRf24Radio::TReadThread::Run() {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");

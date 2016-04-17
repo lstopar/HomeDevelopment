@@ -251,15 +251,20 @@ void loop(void) {
     if (header.type != REQUEST_ACK) {
       writeRadio(fromAddr, REQUEST_ACK, NULL, 0);
     }
-    
-    if (header.type == REQUEST_CHILD_CONFIG) {
+
+    if (header.type == REQUEST_ACK || header.type == REQUEST_PONG) {
+      // TODO currently not supported
+    }
+    else if (header.type == REQUEST_CHILD_CONFIG) {
       network.read(header, NULL, 0);
       Serial.println("Received configuration message, ignoring ...");
-    } else if (header.type == REQUEST_PING) {
+    }
+    else if (header.type == REQUEST_PING) {
       network.read(header, NULL, 0);
       Serial.println("Received ping, ponging ...");
       writeRadio(fromAddr, REQUEST_PONG, NULL, 0);
-    } else if (header.type == REQUEST_GET) {
+    }
+    else if (header.type == REQUEST_GET) {
       network.read(header, recPayload, PAYLOAD_LEN);
 
       Serial.println("Received GET request ...");
@@ -269,7 +274,8 @@ void loop(void) {
         const char& valId = getBuff[valN];
         processGet(fromAddr, valId);
       }
-    } else if (header.type == REQUEST_SET) {
+    }
+    else if (header.type == REQUEST_SET) {
       network.read(header, recPayload, PAYLOAD_LEN);
 
       Serial.println("Received SET ...");
@@ -279,7 +285,8 @@ void loop(void) {
         const TRadioValue& val = setValV[valN];
         processSet(fromAddr, val);
       }
-    } else {
+    } 
+    else {
       Serial.print("Unknown header type: ");
       Serial.println(header.type);
       network.read(header, NULL, 0);
