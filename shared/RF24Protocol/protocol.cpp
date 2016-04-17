@@ -115,8 +115,8 @@ void TRadioProtocol::InitRadio(RF24& Radio, RF24Network& Network, const uint16_t
 		const rf24_pa_dbm_e& Power) {
 
 	Radio.begin();
-//	Radio.setAutoAck(true);
-//	Radio.setRetries(20, 30);
+	Radio.setAutoAck(true);
+	Radio.setRetries(20, 30);
 	Radio.setDataRate(RF24_2MBPS);
 	Radio.setPALevel(Power);	// set power to high for better range
 	Radio.setCRCLength(rf24_crclength_e::RF24_CRC_16);
