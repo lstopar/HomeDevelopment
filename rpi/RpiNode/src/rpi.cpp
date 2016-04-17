@@ -351,6 +351,8 @@ void TRf24Radio::TReadThread::Run() {
 }
 
 void TRf24Radio::TReadThread::AddUnprocessedMsgV(const TVec<TMsgInfo>& MsgV) {
+	if (MsgV.Empty()) { return; }
+
 	TLock Lock(Radio->CriticalSection);
 	MsgQ.AddV(MsgV);
 }
@@ -548,18 +550,17 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 
 			const uint64 StartTm = TTm::GetCurUniMSecs();
 			while (!ReceivedAck && TTm::GetCurUniMSecs() - StartTm < ACK_TIMEOUT) {
-				const bool Received = Read(From, Type, Payload);
-
-				if (!Received) { continue; }
-
-				if (Type == REQUEST_ACK) {
-					if (From != NodeAddr) {
-						Notify->OnNotifyFmt(ntWarn, "WTF!? received ACK from incorrect node, expected: %u, got: %u", NodeAddr, From);
+				UpdateNetwork();
+				while (Read(From, Type, Payload)) {
+					if (Type == REQUEST_ACK) {
+						if (From != NodeAddr) {
+							Notify->OnNotifyFmt(ntWarn, "WTF!? received ACK from incorrect node, expected: %u, got: %u", NodeAddr, From);
+						} else {
+							ReceivedAck = true;
+						}
 					} else {
-						ReceivedAck = true;
+						ReceivedMsgV.Add(TMsgInfo(From, Type, Payload));
 					}
-				} else {
-					ReceivedMsgV.Add(TMsgInfo(From, Type, Payload));
 				}
 			}
 
