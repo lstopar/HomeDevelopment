@@ -160,6 +160,7 @@ private:
 	};
 
 	static const uint64 RETRY_DELAY;
+	static const uint64 ACK_TIMEOUT;
 
 	const uint16 MyAddr;
 	RF24* Radio;

@@ -310,6 +310,7 @@ void TYL40Adc::CleanUp() {
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
 const uint64 TRf24Radio::RETRY_DELAY = 30;
+const uint64 TRf24Radio::ACK_TIMEOUT = 150;
 
 void TRf24Radio::TReadThread::Run() {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
@@ -359,7 +360,8 @@ void TRf24Radio::TReadThread::AddUnprocessedMsgV(const TVec<TMsgInfo>& MsgV) {
 	MsgQ.AddV(MsgV);
 }
 
-void TRf24Radio::TReadThread::ProcessMsg(const uint16& FromNode, const uchar& Type, const TMem& Payload) const {
+void TRf24Radio::TReadThread::ProcessMsg(const uint16& FromNode, const uchar& Type,
+		const TMem& Payload) const {
 	try {
 		Notify->OnNotifyFmt(ntInfo, "Processing message of type %u from node %u", Type, FromNode);
 
@@ -535,11 +537,12 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 		TVec<TMsgInfo> ReceivedMsgV;
 
 		TRpiUtil::SetMaxPriority();
-		const uint64 ACK_TIMEOUT = 150;
 
 		uint16 From;
 		uchar Type;
-		TMem Payload(PAYLOAD_LEN);
+		TMem Payload;
+
+		Payload.Gen(PAYLOAD_LEN);
 
 		bool ReceivedAck = false;
 		int RetryN = 0;
@@ -555,6 +558,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 			const uint64 StartTm = TTm::GetCurUniMSecs();
 			while (!ReceivedAck && TTm::GetCurUniMSecs() - StartTm < ACK_TIMEOUT) {
 				UpdateNetwork();
+
 				while (Read(From, Type, Payload)) {
 					if (Type == REQUEST_ACK) {
 						if (From != NodeAddr) {
