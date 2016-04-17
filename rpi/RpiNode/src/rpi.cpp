@@ -529,7 +529,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 		TVec<TMsgInfo> ReceivedMsgV;
 
 		TRpiUtil::SetMaxPriority();
-		const uint64 ACK_TIMEOUT = 50;
+		const uint64 ACK_TIMEOUT = 200;
 
 		bool ReceivedAck = false;
 		int RetryN = 0;
