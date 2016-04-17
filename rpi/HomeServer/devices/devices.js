@@ -274,15 +274,14 @@ module.exports = exports = function (_getValue, _setValue) {
 				    AMBIENT_LIGHT_ID
 				]
 			},
-		    {
-		    	id: 'group-leds',
-		    	img: 'img/bulb.svg',
+			{
+		    	id: 'group-ambient',
+		    	img: 'img/ambient.svg',
 		    	sensorIds: [
-		    	    LED_BLUE_ID,
-		    	    LED_RED_ID,
-		    	    LED_GREEN_ID,
-		    	    BLINK_RGB_ID,
-		    	    CYCLE_HSL_ID
+		    	    LUMINOSITY_ID,
+		    	    TEMPERATURE_ID,
+		    	    HUMIDITY_ID,
+		    	    TV_ID
 		    	]
 		    },
 		    {
@@ -294,14 +293,16 @@ module.exports = exports = function (_getValue, _setValue) {
 		    	]
 		    },
 		    {
-		    	id: 'group-ambient',
-		    	img: 'img/ambient.svg',
+		    	id: 'group-leds',
+		    	img: 'img/bulb.svg',
 		    	sensorIds: [
-		    	    LUMINOSITY_ID,
-		    	    TEMPERATURE_ID,
-		    	    HUMIDITY_ID
+		    	    LED_BLUE_ID,
+		    	    LED_RED_ID,
+		    	    LED_GREEN_ID,
+		    	    BLINK_RGB_ID,
+		    	    CYCLE_HSL_ID
 		    	]
-		    }
+		    },
 		],
 		devices: [
 			{
