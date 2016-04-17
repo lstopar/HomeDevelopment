@@ -596,9 +596,9 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 		if (Network->available()) {
 			Network->peek(Header);
 
-			Notify->OnNotify(TNotifyType::ntInfo, "Received message, reading ...");
-
 			const uchar MsgType = Header.type;
+
+			Notify->OnNotify(TNotifyType::ntInfo, "Received message of type %u from node %u, reading ...", MsgType, Header.from_node);
 
 			if (!TRadioProtocol::IsValidType(MsgType)) {
 				Network->read(Header, nullptr, 0);
