@@ -526,7 +526,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 		Notify->OnNotifyFmt(ntInfo, "Sending message to node %d ...", NodeAddr);
 
 		RF24NetworkHeader Header(NodeAddr, Command);
-		TVec<TTriple<TUInt16, TUCh, TMem>> ReceivedMsgV;
+		TVec<TMsgInfo> ReceivedMsgV;
 
 		TRpiUtil::SetMaxPriority();
 		const uint64 ACK_TIMEOUT = 50;
@@ -559,7 +559,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 						ReceivedAck = true;
 					}
 				} else {
-					ReceivedMsgV.Add(TTriple<TUInt16, TUCh, TMem>(From, Type, Payload));
+					ReceivedMsgV.Add(TMsgInfo(From, Type, Payload));
 				}
 			}
 
