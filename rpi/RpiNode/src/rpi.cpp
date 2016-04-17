@@ -327,8 +327,10 @@ void TRf24Radio::TReadThread::Run() {
 			TVec<TMsgInfo> QueuedMsgV;
 			{
 				TLock Lock(Radio->CriticalSection);
-				QueuedMsgV = MsgQ;
-				MsgQ.Clr();
+				if (!MsgQ.Empty()) {
+					QueuedMsgV = MsgQ;
+					MsgQ.Clr();
+				}
 			}
 
 			if (!QueuedMsgV.Empty()) {
