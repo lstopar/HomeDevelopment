@@ -326,57 +326,69 @@ void TRf24Radio::TReadThread::Run() {
 
 			while (Radio->Read(FromNode, Type, Payload)) {
 				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message!");
-
-				if (Radio->Callback == nullptr) { continue; }
-
-				try {
-					switch (Type) {
-					case REQUEST_PING: {
-						Notify->OnNotify(TNotifyType::ntInfo, "Received ping, replying ...");
-						Radio->Pong(FromNode);
-						break;
-					}
-					case REQUEST_PONG: {
-						Notify->OnNotify(TNotifyType::ntInfo, "Received pong, ignoring ...");
-						Radio->Callback->OnPong(FromNode);
-						break;
-					}
-					case REQUEST_PUSH: {
-						Notify->OnNotify(TNotifyType::ntInfo, "Received PUSH ...");
-						TVec<TRadioValue> ValV;
-						TRadioProtocol::ParsePushPayload(Payload, ValV);
-
-						for (int ValN = 0; ValN < ValV.Len(); ValN++) {
-							Radio->Callback->OnValue(FromNode, ValV[ValN].GetValId(), ValV[ValN].GetValInt());
-						}
-
-						break;
-					}
-					case REQUEST_GET: {
-						Notify->OnNotify(TNotifyType::ntWarn, "GET not supported!");
-						break;
-					}
-					case REQUEST_SET: {
-						Notify->OnNotify(TNotifyType::ntWarn, "SET not supported!");
-						break;
-					}
-					case REQUEST_CHILD_CONFIG: {
-						Notify->OnNotify(TNotifyType::ntWarn, "Child woke up and sent configuration request, ignoring ...");
-						break;
-					}
-					default: {
-						Notify->OnNotifyFmt(TNotifyType::ntWarn, "Unknown header type: %d", Type);
-					}
-					}
-				} catch (const PExcept& Except) {
-					Notify->OnNotifyFmt(TNotifyType::ntErr, "Error when calling read callback: %s", Except->GetMsgStr().CStr());
-				}
+				ProcessMsg(FromNode, Type, Payload);
 			}
 
 			delayMicroseconds(500);
 		} catch (const PExcept& Except) {
 			Notify->OnNotifyFmt(TNotifyType::ntErr, "Error on the read thread: %s", Except->GetMsgStr().CStr());
 		}
+	}
+}
+
+void TRf24Radio::TReadThread::AddUnprocessedMsgV(const TVec<TMsgInfo>& MsgV) {
+	TLock Lock(Radio->CriticalSection);
+	MsgQ.AddV(MsgV);
+}
+
+void TRf24Radio::TReadThread::ProcessMsg(const uint16& FromNode, const uchar& Type, const TMem& Payload) const {
+	if (Radio->Callback == nullptr) { return; }
+
+	try {
+		switch (Type) {
+		case REQUEST_PING: {
+			Notify->OnNotify(ntInfo, "Received ping, replying ...");
+			Radio->Pong(FromNode);
+			break;
+		}
+		case REQUEST_ACK: {
+			Notify->OnNotify(ntWarn, "Received ACK in read thread, this should not happen!");
+			break;
+		}
+		case REQUEST_PONG: {
+			Notify->OnNotify(ntInfo, "Received pong, ignoring ...");
+			Radio->Callback->OnPong(FromNode);
+			break;
+		}
+		case REQUEST_PUSH: {
+			Notify->OnNotify(TNotifyType::ntInfo, "Received PUSH ...");
+			TVec<TRadioValue> ValV;
+			TRadioProtocol::ParsePushPayload(Payload, ValV);
+
+			for (int ValN = 0; ValN < ValV.Len(); ValN++) {
+				Radio->Callback->OnValue(FromNode, ValV[ValN].GetValId(), ValV[ValN].GetValInt());
+			}
+
+			break;
+		}
+		case REQUEST_GET: {
+			Notify->OnNotify(ntWarn, "GET not supported!");
+			break;
+		}
+		case REQUEST_SET: {
+			Notify->OnNotify(ntWarn, "SET not supported!");
+			break;
+		}
+		case REQUEST_CHILD_CONFIG: {
+			Notify->OnNotify(ntWarn, "Child woke up and sent configuration request, ignoring ...");
+			break;
+		}
+		default: {
+			Notify->OnNotifyFmt(ntWarn, "Unknown header type: %d", Type);
+		}
+		}
+	} catch (const PExcept& Except) {
+		Notify->OnNotifyFmt(TNotifyType::ntErr, "Error when calling read callback: %s", Except->GetMsgStr().CStr());
 	}
 }
 
@@ -474,7 +486,7 @@ bool TRf24Radio::Set(const uint16& NodeId, const TIntPrV& ValIdValPrV) {
 }
 
 bool TRf24Radio::Get(const uint16& NodeId, const int& ValId) {
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Calling GET for node %d, valId: %d ...", NodeId, ValId);
+	Notify->OnNotifyFmt(ntInfo, "Calling GET for node %d, valId: %d ...", NodeId, ValId);
 
 	TChV ValIdV(1,1);
 	ValIdV[0] = (char) ValId;
@@ -484,7 +496,7 @@ bool TRf24Radio::Get(const uint16& NodeId, const int& ValId) {
 }
 
 bool TRf24Radio::GetAll(const uint16& NodeId) {
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Calling GET all values for node %d ...", NodeId);
+	Notify->OnNotifyFmt(ntInfo, "Calling GET all values for node %d ...", NodeId);
 
 	TChV ValIdV(1,1);
 	ValIdV[0] = VAL_ID_ALL;
@@ -497,18 +509,63 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 	TLock Lock(CriticalSection);
 
 	try {
-		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Sending message to node %d ...", NodeAddr);
+		Notify->OnNotifyFmt(ntInfo, "Sending message to node %d ...", NodeAddr);
 
 		RF24NetworkHeader Header(NodeAddr, Command);
-		const bool Success = Network->write(Header, Buff(), Buff.Len());
+		TVec<TTriple<TUInt16, TUCh, TMem>> ReceivedMsgV;
 
-		if (!Success) {
+		TRpiUtil::SetMaxPriority();
+		const uint64 ACK_TIMEOUT = 50;
+
+		bool ReceivedAck = false;
+		int RetryN = 0;
+		while (!ReceivedAck && RetryN < RetryCount) {
+			if (RetryN > 0) {
+				Notify->OnNotifyFmt(ntInfo, "Resending message, count %d", RetryN);
+			}
+
+			// write the message
+			Network->write(Header, Buff(), Buff.Len());
+
+			// wait for an ACK
+			uint16 From;
+			uchar Type;
+			TMem Payload;
+
+			const uint64 StartTm = TTm::GetCurUniMSecs();
+			while (!ReceivedAck && TTm::GetCurUniMSecs() - StartTm < ACK_TIMEOUT) {
+				const bool Received = Read(From, Type, Payload);
+
+				if (!Received) { continue; }
+
+				if (Type == REQUEST_ACK) {
+					if (From != NodeAddr) {
+						Notify->OnNotifyFmt(ntWarn, "WTF!? received ACK from incorrect node, expected: %u, got: %u", NodeAddr, From);
+					} else {
+						ReceivedAck = true;
+					}
+				} else {
+					ReceivedMsgV.Add(TTriple<TUInt16, TUCh, TMem>(From, Type, Payload));
+				}
+			}
+
+			RetryN++;
+		}
+
+		TRpiUtil::SetDefaultPriority();
+
+		if (!ReceivedMsgV.Empty()) {
+			ReadThread.AddUnprocessedMsgV(ReceivedMsgV);
+		}
+
+		if (!ReceivedAck) {
 			Notify->OnNotifyFmt(ntInfo, "Failed to send message!");
 		}
 
-		return Success;
+		return ReceivedAck;
 	} catch (const PExcept& Except) {
 		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception when sending!");
+		TRpiUtil::SetDefaultPriority();
 		return false;
 	}
 }

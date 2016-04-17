@@ -245,8 +245,13 @@ void loop(void) {
 
   while (network.available()) {
     network.peek(header);
-
+    
     const uint16_t& fromAddr = header.from_node;
+    // acknowledge
+    if (header.type != REQUEST_ACK) {
+      writeRadio(fromAddr, REQUEST_ACK, NULL, 0);
+    }
+    
     if (header.type == REQUEST_CHILD_CONFIG) {
       network.read(header, NULL, 0);
       Serial.println("Received configuration message, ignoring ...");

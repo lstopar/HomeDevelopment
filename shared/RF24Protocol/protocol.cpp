@@ -22,6 +22,8 @@ void TRadioValue::ReadFromBuff(const char* Buff) {
 
 bool TRadioProtocol::IsValidType(const unsigned char& Type) {
 	return Type == REQUEST_PING ||
+			Type == REQUEST_PONG ||
+			Type == REQUEST_ACK ||
 			Type == REQUEST_CHILD_CONFIG ||
 			Type == REQUEST_GET ||
 			Type == REQUEST_PUSH ||
@@ -29,7 +31,10 @@ bool TRadioProtocol::IsValidType(const unsigned char& Type) {
 }
 
 bool TRadioProtocol::HasPayload(const unsigned char& Type) {
-	return Type != REQUEST_PING && Type != REQUEST_CHILD_CONFIG;
+	return Type != REQUEST_PING &&
+			Type != REQUEST_CHILD_CONFIG &&
+			Type != REQUEST_PONG &&
+			Type != REQUEST_ACK;
 }
 
 #ifndef ARDUINO

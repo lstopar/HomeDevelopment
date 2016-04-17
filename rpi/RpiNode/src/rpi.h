@@ -128,6 +128,7 @@ private:
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
 class TRf24Radio {
+	typedef TTriple<TUInt16, TUCh, TMem> TMsgInfo;
 public:
 	class TRf24RadioCallback {
 	public:
@@ -139,16 +140,23 @@ private:
 	class TReadThread: public TThread {
 	private:
 		TRf24Radio* Radio;
+		TVec<TMsgInfo> MsgQ;
 		PNotify Notify;
 	public:
 		TReadThread():
 			Radio(),
+			MsgQ(),
 			Notify() {}
 		TReadThread(TRf24Radio* _Radio):
 			Radio(_Radio),
+			MsgQ(),
 			Notify(_Radio->Notify) {}
 
 		void Run();
+		void AddUnprocessedMsgV(const TVec<TTriple<TUInt16, TUCh, TMem>>& MsgV);
+
+	private:
+		void ProcessMsg(const uint16& FromNode, const uchar& Type, const TMem& Payload) const;
 	};
 
 	static const uint64 RETRY_DELAY;
