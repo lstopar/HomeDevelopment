@@ -540,9 +540,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 
 		uint16 From;
 		uchar Type;
-		TMem Payload;
-
-		Payload.Gen(PAYLOAD_LEN);
+		TMem Payload;	Payload.Gen(PAYLOAD_LEN);
 
 		bool ReceivedAck = false;
 		int RetryN = 0;
@@ -578,6 +576,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 
 		TRpiUtil::SetDefaultPriority();
 
+		// process the messages that were queued
 		if (!ReceivedMsgV.Empty()) {
 			ReadThread.AddUnprocessedMsgV(ReceivedMsgV);
 		}
