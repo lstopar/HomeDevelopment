@@ -533,7 +533,11 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 		TVec<TMsgInfo> ReceivedMsgV;
 
 		TRpiUtil::SetMaxPriority();
-		const uint64 ACK_TIMEOUT = 100;
+		const uint64 ACK_TIMEOUT = 150;
+
+		uint16 From;
+		uchar Type;
+		TMem Payload(PAYLOAD_LEN);
 
 		bool ReceivedAck = false;
 		int RetryN = 0;
@@ -546,10 +550,6 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 			Network->write(Header, Buff(), Buff.Len());
 
 			// wait for an ACK
-			uint16 From;
-			uchar Type;
-			TMem Payload(PAYLOAD_LEN);
-
 			const uint64 StartTm = TTm::GetCurUniMSecs();
 			while (!ReceivedAck && TTm::GetCurUniMSecs() - StartTm < ACK_TIMEOUT) {
 				UpdateNetwork();
@@ -558,6 +558,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 						if (From != NodeAddr) {
 							Notify->OnNotifyFmt(ntWarn, "WTF!? received ACK from incorrect node, expected: %u, got: %u", NodeAddr, From);
 						} else {
+							Notify->OnNotifyFmt(ntInfo, "Received ack from node %u", NodeAddr);
 							ReceivedAck = true;
 						}
 					} else {
