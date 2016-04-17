@@ -330,9 +330,12 @@ void TRf24Radio::TReadThread::Run() {
 				MsgQ.Clr();
 			}
 
-			for (int MsgN = 0; MsgN < QueuedMsgV.Len(); MsgN++) {
-				const TMsgInfo& MsgInfo = QueuedMsgV[MsgN];
-				ProcessMsg(MsgInfo.Val1, MsgInfo.Val2, MsgInfo.Val3);
+			if (!QueuedMsgV.Empty()) {
+				Notify->OnNotifyFmt(ntInfo, "Processing %d queued messages ...", QueuedMsgV.Len());
+				for (int MsgN = 0; MsgN < QueuedMsgV.Len(); MsgN++) {
+					const TMsgInfo& MsgInfo = QueuedMsgV[MsgN];
+					ProcessMsg(MsgInfo.Val1, MsgInfo.Val2, MsgInfo.Val3);
+				}
 			}
 
 			// process new messages
