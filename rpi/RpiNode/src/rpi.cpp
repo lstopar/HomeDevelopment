@@ -531,7 +531,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 		TVec<TMsgInfo> ReceivedMsgV;
 
 		TRpiUtil::SetMaxPriority();
-		const uint64 ACK_TIMEOUT = 200;
+		const uint64 ACK_TIMEOUT = 100;
 
 		bool ReceivedAck = false;
 		int RetryN = 0;
@@ -608,8 +608,6 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 			} else {
 				Network->read(Header, Payload(), PAYLOAD_LEN);
 			}
-
-			Notify->OnNotify(TNotifyType::ntInfo, "Message processed!");
 
 			From = Header.from_node;
 			Type = MsgType;

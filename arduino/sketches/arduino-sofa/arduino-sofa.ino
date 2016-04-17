@@ -153,9 +153,12 @@ void loop(void) {
     RF24NetworkHeader header;
     network.peek(header);
 
-    Serial.println("Received message ...");
-
     const uint16_t& fromAddr = header.from_node;
+    // acknowledge
+    if (header.type != REQUEST_ACK) {
+      writeRadio(fromAddr, REQUEST_ACK, NULL, 0);
+    }
+
     if (header.type == REQUEST_CHILD_CONFIG) {
       network.read(header, NULL, 0);
       Serial.println("Received configuration message, ignoring ...");

@@ -249,7 +249,6 @@ void loop(void) {
     const uint16_t& fromAddr = header.from_node;
     // acknowledge
     if (header.type != REQUEST_ACK) {
-      Serial.println("Sending ACK");
       writeRadio(fromAddr, REQUEST_ACK, NULL, 0);
     }
     
