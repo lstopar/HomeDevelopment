@@ -339,7 +339,6 @@ void TRf24Radio::TReadThread::Run() {
 			Radio->UpdateNetwork();
 
 			while (Radio->Read(FromNode, Type, Payload)) {
-				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received message!");
 				ProcessMsg(FromNode, Type, Payload);
 			}
 
