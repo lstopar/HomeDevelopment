@@ -361,7 +361,7 @@ void TRf24Radio::TReadThread::AddUnprocessedMsgV(const TVec<TMsgInfo>& MsgV) {
 
 void TRf24Radio::TReadThread::ProcessMsg(const uint16& FromNode, const uchar& Type, const TMem& Payload) const {
 	try {
-		Notify->OnNotifyFmt(ntInfo, "Processing message of type %u from node %u", FromNode, Type);
+		Notify->OnNotifyFmt(ntInfo, "Processing message of type %u from node %u", Type, FromNode);
 
 		if (Radio->Callback == nullptr) { return; }
 
