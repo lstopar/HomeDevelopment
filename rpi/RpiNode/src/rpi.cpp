@@ -321,31 +321,36 @@ void TRf24Radio::TReadThread::Run() {
 
 	Payload.Gen(PAYLOAD_LEN);
 
+	TMsgInfoV QueuedMsgV;
+
 	while (true) {
 		try {
 			// process queued messages
-			TVec<TMsgInfo> QueuedMsgV;
 			{
 				TLock Lock(Radio->CriticalSection);
+				// process new messages
+				Radio->UpdateNetwork();
+
+				while (Radio->Read(FromNode, Type, Payload)) {
+					Notify->OnNotifyFmt(ntInfo, "Read message, adding to queue ...");
+					AddToQueue(TMsgInfo(FromNode, Type, Payload));
+				}
+
 				if (!MsgQ.Empty()) {
-					QueuedMsgV = MsgQ;
+					Notify->OnNotifyFmt(ntInfo, "Adding %d messages to queue ...", MsgQ.Len());
+					QueuedMsgV.AddV(MsgQ);
 					MsgQ.Clr();
 				}
 			}
 
 			if (!QueuedMsgV.Empty()) {
-				Notify->OnNotifyFmt(ntInfo, "Processing %d queued messages ...", QueuedMsgV.Len());
+				Notify->OnNotifyFmt(ntInfo, "Processing %d messages ...", QueuedMsgV.Len());
 				for (int MsgN = 0; MsgN < QueuedMsgV.Len(); MsgN++) {
-					const TMsgInfo& MsgInfo = QueuedMsgV[MsgN];
-					ProcessMsg(MsgInfo.Val1, MsgInfo.Val2, MsgInfo.Val3);
+					const TMsgInfo& Msg = QueuedMsgV[MsgN];
+					ProcessMsg(Msg.Val1, Msg.Val2, Msg.Val3);
 				}
-			}
-
-			// process new messages
-			Radio->UpdateNetwork();
-
-			while (Radio->Read(FromNode, Type, Payload)) {
-				ProcessMsg(FromNode, Type, Payload);
+				Notify->OnNotify(ntInfo, "Queued messages processed!");
+				QueuedMsgV.Clr();
 			}
 
 			delayMicroseconds(500);
@@ -355,7 +360,12 @@ void TRf24Radio::TReadThread::Run() {
 	}
 }
 
-void TRf24Radio::TReadThread::AddUnprocessedMsgV(const TVec<TMsgInfo>& MsgV) {
+void TRf24Radio::TReadThread::AddToQueue(const TMsgInfo& Msg) {
+	TLock Lock(Radio->CriticalSection);
+	MsgQ.Add(Msg);
+}
+
+void TRf24Radio::TReadThread::AddToQueue(const TMsgInfoV& MsgV) {
 	if (MsgV.Empty()) { return; }
 
 	TLock Lock(Radio->CriticalSection);
@@ -380,7 +390,7 @@ void TRf24Radio::TReadThread::ProcessMsg(const uint16& FromNode, const uchar& Ty
 			break;
 		}
 		case REQUEST_PONG: {
-			Notify->OnNotify(ntInfo, "Received pong, ignoring ...");
+			Notify->OnNotifyFmt(ntInfo, "Received pong from node %u ...", FromNode);
 			Radio->Callback->OnPong(FromNode);
 			break;
 		}
@@ -536,7 +546,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 		Notify->OnNotifyFmt(ntInfo, "Sending message to node %d ...", NodeAddr);
 
 		RF24NetworkHeader Header(NodeAddr, Command);
-		TVec<TMsgInfo> ReceivedMsgV;
+		TMsgInfoV ReceivedMsgV;
 
 		TRpiUtil::SetMaxPriority();
 
@@ -548,7 +558,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 		int RetryN = 0;
 		while (!ReceivedAck && RetryN < RetryCount) {
 			if (RetryN > 0) {
-				Notify->OnNotifyFmt(ntInfo, "Resending message, count %d", RetryN);
+				Notify->OnNotifyFmt(ntInfo, "Re-sending message, count %d", RetryN);
 			}
 
 			// write the message
@@ -580,7 +590,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 
 		// process the messages that were queued
 		if (!ReceivedMsgV.Empty()) {
-			ReadThread.AddUnprocessedMsgV(ReceivedMsgV);
+			ReadThread.AddToQueue(ReceivedMsgV);
 		}
 
 		if (!ReceivedAck) {

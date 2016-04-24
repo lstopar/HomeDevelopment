@@ -447,7 +447,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				configuration: {
 					storageFile: 'config/enocean.txt',
 					serialPort: '/dev/ttyUSB0',
-					verbose: true
+					verbose: false
 				}
 			},
 	  		{
@@ -473,7 +473,7 @@ module.exports = exports = function (_getValue, _setValue) {
 					temperatureId: TEMPERATURE_ID,
 					humidityId: HUMIDITY_ID,
 					timeout: 10000,
-					verbose: true
+					verbose: false
 				}
 			},
 			{

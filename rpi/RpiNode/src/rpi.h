@@ -129,6 +129,7 @@ private:
 //// RF24 Radio transmitter
 class TRf24Radio {
 	typedef TTriple<TUInt16, TUCh, TMem> TMsgInfo;
+	typedef TVec<TMsgInfo> TMsgInfoV;
 public:
 	class TRf24RadioCallback {
 	public:
@@ -153,7 +154,8 @@ private:
 			Notify(_Radio->Notify) {}
 
 		void Run();
-		void AddUnprocessedMsgV(const TVec<TTriple<TUInt16, TUCh, TMem>>& MsgV);
+		void AddToQueue(const TMsgInfo& Msg);
+		void AddToQueue(const TMsgInfoV& MsgV);
 
 	private:
 		void ProcessMsg(const uint16& FromNode, const uchar& Type, const TMem& Payload) const;
