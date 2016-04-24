@@ -49,7 +49,7 @@ public:
 const char VAL_ID_ALL = 0xFF;
 
 const int RETRY_COUNT = 3;
-const uint64_t ACK_TIMEOUT = 80;
+const uint64_t ACK_TIMEOUT = 100;
 
 const unsigned char COMM_CHANNEL = 0x4C;
 const int PAYLOAD_LEN = MAX_FRAME_SIZE - sizeof(RF24NetworkHeader);
