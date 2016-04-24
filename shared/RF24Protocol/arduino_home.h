@@ -216,9 +216,11 @@ public:
 	void setProcessSet(void (*_processSet)(const uint16_t&, const std::vector<TRadioValue>&)) { processSet = _processSet; }
 
 private:
-	bool _send(const uint16_t& to, const unsigned char& type, const char* payload=NULL,
+	bool send(const uint16_t& to, const unsigned char& type, const char* payload=NULL,
 			const int& payloadLen=0);
-	void processMsg(const TRadioMsg& msg) const;
+	void _send(RF24NetworkHeader& header, const char* payload=NULL,
+			const int& payloadLen=0);
+	void processMsg(const TRadioMsg& msg);
 };
 
 #endif

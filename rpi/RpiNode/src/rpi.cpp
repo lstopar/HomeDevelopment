@@ -309,8 +309,6 @@ void TYL40Adc::CleanUp() {
 
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
-const uint64 TRf24Radio::ACK_TIMEOUT = 80;
-
 void TRf24Radio::TReadThread::Run() {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
 
@@ -432,7 +430,6 @@ TRf24Radio::TRf24Radio(const uint16& NodeAddr, const uint8& PinCe,
 		Radio(nullptr),
 		Network(nullptr),
 		ReadThread(),
-		RetryCount(3),
 		Callback(nullptr),
 		Notify(_Notify) {
 
@@ -555,7 +552,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 		TLock Lock(CriticalSection);
 
 		int RetryN = 0;
-		while (!ReceivedAck && RetryN < RetryCount) {
+		while (!ReceivedAck && RetryN < RETRY_COUNT) {
 			if (RetryN > 0) {
 				Notify->OnNotifyFmt(ntInfo, "Re-sending message, count %d", RetryN);
 			}
@@ -613,6 +610,7 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 	try {
 		RF24NetworkHeader Header;
 		if (Network->available()) {
+			// read the message
 			Network->peek(Header);
 
 			const uchar MsgType = Header.type;
@@ -632,7 +630,7 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 
 			// acknowledge
 			if (Type != REQUEST_ACK) {
-				RF24NetworkHeader Header(Header.from_node, REQUEST_ACK);
+				RF24NetworkHeader Header(From, REQUEST_ACK);
 				_Send(Header);
 			}
 

@@ -340,19 +340,15 @@ void TRf24Wrapper::update() {
 
 		// acknowledge
 		if (type != REQUEST_ACK) {
-			_send(from, REQUEST_ACK);
+			RF24NetworkHeader ackHeader(from, REQUEST_ACK);
+			_send(ackHeader);
 		}
 
-		if (type == REQUEST_GET || type == REQUEST_SET) {
+		if (TRadioProtocol::HasPayload(type)) {
 			receiveQ.push(TRadioMsg(from, type, receivePayload, PAYLOAD_LEN));
 		}
-		else if (type == REQUEST_PING) {
-			Serial.println("Received ping, ponging ...");
-			_send(from, REQUEST_PONG);
-		}
 		else {
-			Serial.print("Received unsupported message type: ");
-			Serial.println(type);
+			receiveQ.push(TRadioMsg(from, type));
 		}
 	}
 
@@ -386,7 +382,7 @@ bool TRf24Wrapper::push(const uint16_t& to, const std::vector<TRadioValue>& valu
 	else {
 		char payload[VALS_PER_PAYLOAD];
 		TRadioProtocol::genPushPayload(values, payload);
-		return _send(to, REQUEST_PUSH, payload, PAYLOAD_LEN);
+		return send(to, REQUEST_PUSH, payload, PAYLOAD_LEN);
 	}
 }
 
@@ -396,21 +392,69 @@ bool TRf24Wrapper::push(const uint16_t& to, const TRadioValue& value) {
 	return push(to, valueV);
 }
 
-bool TRf24Wrapper::_send(const uint16_t& to, const unsigned char& type, const char* payload,
+bool TRf24Wrapper::send(const uint16_t& to, const unsigned char& type, const char* payload,
 			const int& payloadLen) {
 	Serial.println("Sending message ...");
 
-	RF24NetworkHeader header(to, type);
-	const bool success = network.write(header, payload, payloadLen);
+	bool receivedAck = false;
 
-	if (!success) {
-		Serial.println("Failed to send message!");
+	RF24NetworkHeader header(to, type);
+	RF24NetworkHeader receiveHeader;
+
+	int retryN = 0;
+	while (!receivedAck && retryN < RETRY_COUNT) {
+		if (retryN > 0) {
+			Serial.print("Re-sending message, count: ");
+			Serial.println(retryN);
+		}
+
+		_send(header, payload, payloadLen);
+
+		const uint64_t startTm = millis();
+		while (!receivedAck && millis() - startTm < ACK_TIMEOUT) {
+			network.update();
+
+			while (network.available()) {
+				network.peek(header);
+
+				if (TRadioProtocol::HasPayload(header.type)) {
+					network.read(header, receivePayload, PAYLOAD_LEN);
+					receiveQ.push(TRadioMsg(header.from_node, header.type, receivePayload, PAYLOAD_LEN));
+				}
+				else {
+					network.read(header, NULL, 0);
+					if (header.type == REQUEST_ACK) {
+						if (header.from_node == to) {
+							receivedAck = true;
+						} else {
+							Serial.print("Received ACK from unexpected node: ");
+							Serial.println(header.from_node);
+						}
+					}
+					else {
+						receiveQ.push(TRadioMsg(header.from_node, header.type));
+					}
+				}
+			}
+		}
+
+		retryN++;
 	}
 
-	return success;
+	if (!receivedAck) {
+		Serial.print("Failed to send message to node: ");
+		Serial.println(to);
+	}
+
+	return receivedAck;
 }
 
-void TRf24Wrapper::processMsg(const TRadioMsg& msg) const {
+void TRf24Wrapper::_send(RF24NetworkHeader& header, const char* payload,
+			const int& payloadLen) {
+	network.write(header, payload, payloadLen);
+}
+
+void TRf24Wrapper::processMsg(const TRadioMsg& msg) {
 	const uint16_t& node = msg.getAddr();
 	const unsigned char& type = msg.getType();
 
@@ -435,6 +479,11 @@ void TRf24Wrapper::processMsg(const TRadioMsg& msg) const {
 		if (processSet != NULL) {
 			processSet(node, valueV);
 		}
+		break;
+	}
+	case REQUEST_PING: {
+		Serial.println("Received ping, ponging ...");
+		send(node, REQUEST_PONG);
 		break;
 	}
 	default: {

@@ -161,14 +161,10 @@ private:
 		void ProcessMsg(const uint16& FromNode, const uchar& Type, const TMem& Payload) const;
 	};
 
-	static const uint64 ACK_TIMEOUT;
-
 	const uint16 MyAddr;
 	RF24* Radio;
 	RF24Network* Network;
 	TReadThread ReadThread;
-
-	const int RetryCount;
 
 	TRf24RadioCallback* Callback;
 

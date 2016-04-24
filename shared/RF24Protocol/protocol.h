@@ -48,6 +48,9 @@ public:
 
 const char VAL_ID_ALL = 0xFF;
 
+const int RETRY_COUNT = 3;
+const uint64_t ACK_TIMEOUT = 80;
+
 const unsigned char COMM_CHANNEL = 0x4C;
 const int PAYLOAD_LEN = MAX_FRAME_SIZE - sizeof(RF24NetworkHeader);
 const int VALS_PER_PAYLOAD = (PAYLOAD_LEN - 1) / TRadioValue::BYTES;
