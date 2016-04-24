@@ -192,7 +192,7 @@ public:
 
 private:
 	bool Send(const uint16& To, const uchar& Command, const TMem& Buff);
-	void _Send(const RF24NetworkHeader& Header, const TMem& Buff=TMem());
+	void _Send(RF24NetworkHeader& Header, const TMem& Buff=TMem());
 
 	void UpdateNetwork();
 	bool Read(uint16& From, uchar& Type, TMem& Payload);

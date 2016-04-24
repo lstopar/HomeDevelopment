@@ -599,7 +599,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 	return ReceivedAck;
 }
 
-void TRf24Radio::_Send(const RF24NetworkHeader& Header, const TMem& Buff) {
+void TRf24Radio::_Send(RF24NetworkHeader& Header, const TMem& Buff) {
 	Network->write(Header, Buff(), Buff.Len());
 }
 
