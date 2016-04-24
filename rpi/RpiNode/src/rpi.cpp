@@ -561,7 +561,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 			}
 
 			// write the message
-			_Send(Header, Buff(), Buff.Len());
+			_Send(Header, Buff);
 
 			// wait for an ACK
 			const uint64 StartTm = TTm::GetCurUniMSecs();
@@ -597,6 +597,10 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 	}
 
 	return ReceivedAck;
+}
+
+void TRf24Radio::_Send(const RF24NetworkHeader& Header, const TMem& Buff) {
+	Network->write(Header, Buff(), Buff.Len());
 }
 
 void TRf24Radio::UpdateNetwork() {
@@ -638,8 +642,4 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception while reading!");
 	}
 	return false;
-}
-
-void TRf24Radio::_Send(const RF24NetworkHeader& Header, const TMem& Buff) {
-	Network->write(Header, Buff(), Buff.Len());
 }
