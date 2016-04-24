@@ -632,7 +632,7 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 
 			// acknowledge
 			if (Type != REQUEST_ACK) {
-				RF24NetworkHeader Header(To, REQUEST_ACK);
+				RF24NetworkHeader Header(Header.from_node, REQUEST_ACK);
 				_Send(Header);
 			}
 
