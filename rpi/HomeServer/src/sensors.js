@@ -197,7 +197,7 @@ var rf24Pinger = (function () {
 						log.debug('Pinging node %d', nodeId)
 					
 					var success = radio.radio.ping(parseInt(nodeId));
-					onNodeConnected(success);
+					onNodeConnected(nodeId, success);
 				}
 			} catch (e) {
 				log.error(e, 'Exception while pinging radio nodes!');
