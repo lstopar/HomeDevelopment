@@ -38,12 +38,13 @@ bool TRadioProtocol::HasPayload(const unsigned char& Type) {
 }
 
 #ifndef ARDUINO
-void TRadioProtocol::ParseGetPayload(const TMem& Payload, TChV& ValIdV) {
+void TRadioProtocol::ParseGetPayload(const TMem& Payload, uchar& Cnt, TChV& ValIdV) {
 	EAssertR(Payload.Len() == PAYLOAD_LEN, "ParseGetPayload: invalid payload length: " + TInt::GetStr(Payload.Len()));
 #else
-void TRadioProtocol::parseGetPayload(const char* Payload, std::vector<char>& ValIdV) {
+void TRadioProtocol::parseGetPayload(const char* Payload, unsigned char& Cnt, std::vector<char>& ValIdV) {
 #endif
-	const int Vals = (int) Payload[0];
+	Cnt = (unsigned char) Payload[0];
+	const int Vals = (int) Payload[1];
 
 #ifndef ARDUINO
 	EAssertR(Vals <= VALS_PER_PAYLOAD, "Invalid number of values in payload: " + TInt::GetStr(Vals));
@@ -53,7 +54,7 @@ void TRadioProtocol::parseGetPayload(const char* Payload, std::vector<char>& Val
 #endif
 
 	for (int ValN = 0; ValN < Vals; ValN++) {
-		ValIdV[ValN] = Payload[ValN+1];
+		ValIdV[ValN] = Payload[ValN+2];
 	}
 }
 
@@ -80,18 +81,19 @@ void TRadioProtocol::parseSetPayload(const char* Payload, std::vector<TRadioValu
 }
 
 #ifndef ARDUINO
-void TRadioProtocol::GenGetPayload(const TChV& ValIdV, TMem& Payload) {
+void TRadioProtocol::GenGetPayload(const TChV& ValIdV, const uchar& Cnt, TMem& Payload) {
 	if (Payload.Len() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
 	const int& Vals = ValIdV.Len();
 	EAssertR(Vals <= VALS_PER_PAYLOAD, "Tried to send too many values!");
 #else
-void TRadioProtocol::genGetPayload(const int* ValIdV, const int& Vals,
+void TRadioProtocol::genGetPayload(const int* ValIdV, const unsigned char& Cnt, const int& Vals,
 		char* Payload) {
 #endif
 
-	Payload[0] = (char) Vals;
+	Payload[0] = (char) Cnt;
+	Payload[1] = (char) Vals;
 	for (int ValN = 0; ValN < Vals; ValN++) {
-		Payload[ValN+1] = ValIdV[ValN];
+		Payload[ValN+2] = ValIdV[ValN];
 	}
 }
 

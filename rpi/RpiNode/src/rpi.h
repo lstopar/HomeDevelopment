@@ -166,6 +166,9 @@ private:
 	RF24Network* Network;
 	TReadThread ReadThread;
 
+	THash<TUInt16, TUInt> SendCntH;
+	THash<TUInt16, TUInt> ReceiveCntH;
+
 	TRf24RadioCallback* Callback;
 
 	TCriticalSection CriticalSection;
@@ -192,6 +195,8 @@ private:
 
 	void UpdateNetwork();
 	bool Read(uint16& From, uchar& Type, TMem& Payload);
+
+	uchar GetSendCnt(const uint16& NodeId);
 };
 
 

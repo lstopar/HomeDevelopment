@@ -430,6 +430,8 @@ TRf24Radio::TRf24Radio(const uint16& NodeAddr, const uint8& PinCe,
 		Radio(nullptr),
 		Network(nullptr),
 		ReadThread(),
+		SendCntH(),
+		ReceiveCntH(),
 		Callback(nullptr),
 		Notify(_Notify) {
 
@@ -521,7 +523,7 @@ bool TRf24Radio::Get(const uint16& NodeId, const int& ValId) {
 	TChV ValIdV(1,1);
 	ValIdV[0] = (char) ValId;
 
-	TMem Payload;	TRadioProtocol::GenGetPayload(ValIdV, Payload);
+	TMem Payload;	TRadioProtocol::GenGetPayload(ValIdV, GetSendCount(NodeId), Payload);
 	return Send(NodeId, REQUEST_GET, Payload);
 }
 
@@ -640,4 +642,10 @@ bool TRf24Radio::Read(uint16& From, uchar& Type, TMem& Payload) {
 		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception while reading!");
 	}
 	return false;
+}
+
+uchar TRf24Radio::GetSendCnt(const uint16& NodeId) {
+	if (!SendCntH.IsKey(NodeId)) { SendCntH.AddDat(NodeId, 0); }
+
+	return (uchar) SendCntH.GetDat(NodeId)++;
 }

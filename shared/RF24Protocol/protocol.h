@@ -53,7 +53,7 @@ const uint64_t ACK_TIMEOUT = 80;
 
 const unsigned char COMM_CHANNEL = 0x4C;
 const int PAYLOAD_LEN = MAX_FRAME_SIZE - sizeof(RF24NetworkHeader);
-const int VALS_PER_PAYLOAD = (PAYLOAD_LEN - 1) / TRadioValue::BYTES;
+const int VALS_PER_PAYLOAD = (PAYLOAD_LEN - 2) / TRadioValue::BYTES;
 
 const unsigned char REQUEST_GET = 65;
 const unsigned char REQUEST_SET = 66;
@@ -69,17 +69,18 @@ public:
 	static bool HasPayload(const unsigned char& Type);
 
 #ifndef ARDUINO
-	static void ParseGetPayload(const TMem& Payload, TChV& ValIdV);
+	static void ParseGetPayload(const TMem& Payload, uchar& Cnt, TChV& ValIdV);
 	static void ParseSetPayload(const TMem& Payload, TVec<TRadioValue>& ValV);
 	static void ParsePushPayload(const TMem& Payload, TVec<TRadioValue>& ValV) { ParseSetPayload(Payload, ValV); }
-	static void GenGetPayload(const TChV& ValIdV, TMem& Payload);
+	static void GenGetPayload(const TChV& ValIdV, const uchar& Cnt, TMem& Payload);
 	static void GenSetPayload(const TVec<TRadioValue>& ValV, TMem& Payload);
 	static void GenPushPayload(const TVec<TRadioValue>& ValV, TMem& Payload) { GenSetPayload(ValV, Payload); }
 #else
-	static void parseGetPayload(const char* Payload, std::vector<char>& ValIdV);
+	static void parseGetPayload(const char* Payload, uchar& Cnt, std::vector<char>& ValIdV);
 	static void parseSetPayload(const char* Payload, std::vector<TRadioValue>& ValV);
 	static void parsePushPayload(const char* Payload, std::vector<TRadioValue>& ValV) { parseSetPayload(Payload, ValV); }
-	static void genGetPayload(const int* ValIdV, const int& ValIdVLen, char* Payload);
+	static void genGetPayload(const int* ValIdV, const int& ValIdVLen, const unsigned char& Cnt
+			, char* Payload);
 	static void genSetPayload(const std::vector<TRadioValue>& values, char* Payload);
 	static void genPushPayload(const std::vector<TRadioValue>& values, char* payload) { genSetPayload(values, payload); }
 #endif

@@ -419,6 +419,11 @@ bool TRf24Wrapper::send(const uint16_t& to, const unsigned char& type, const cha
 
 				if (TRadioProtocol::HasPayload(header.type)) {
 					network.read(header, receivePayload, PAYLOAD_LEN);
+
+					// acknowledge
+					RF24NetworkHeader ackHeader(header.from_node, REQUEST_ACK);
+					_send(ackHeader);
+
 					receiveQ.push(TRadioMsg(header.from_node, header.type, receivePayload, PAYLOAD_LEN));
 				}
 				else {
@@ -432,6 +437,10 @@ bool TRf24Wrapper::send(const uint16_t& to, const unsigned char& type, const cha
 						}
 					}
 					else {
+						// acknowledge
+						RF24NetworkHeader ackHeader(header.from_node, REQUEST_ACK);
+						_send(ackHeader);
+
 						receiveQ.push(TRadioMsg(header.from_node, header.type));
 					}
 				}
