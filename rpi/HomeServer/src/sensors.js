@@ -431,7 +431,7 @@ function initSensors() {
 				updateValue(val.id, trans);
 			});
 			radio.radio.onPong(function (nodeId) {
-				log.info('Received pong from node %d', nodeId);
+				log.info('Received pong from node %d, ignoring ...', nodeId);
 //				rf24Pinger.onPong(nodeId + '');
 			});
 		}
