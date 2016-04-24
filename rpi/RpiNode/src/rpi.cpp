@@ -309,8 +309,7 @@ void TYL40Adc::CleanUp() {
 
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
-const uint64 TRf24Radio::RETRY_DELAY = 30;
-const uint64 TRf24Radio::ACK_TIMEOUT = 100;
+const uint64 TRf24Radio::ACK_TIMEOUT = 80;
 
 void TRf24Radio::TReadThread::Run() {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Starting read thread ...");
@@ -540,13 +539,12 @@ bool TRf24Radio::GetAll(const uint16& NodeId) {
 }
 
 bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff) {
-	TLock Lock(CriticalSection);
+	bool ReceivedAck = false;
 
 	try {
 		Notify->OnNotifyFmt(ntInfo, "Sending message to node %d ...", NodeAddr);
 
 		RF24NetworkHeader Header(NodeAddr, Command);
-		TMsgInfoV ReceivedMsgV;
 
 		TRpiUtil::SetMaxPriority();
 
@@ -554,7 +552,8 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 		uchar Type;
 		TMem Payload;	Payload.Gen(PAYLOAD_LEN);
 
-		bool ReceivedAck = false;
+		TLock Lock(CriticalSection);
+
 		int RetryN = 0;
 		while (!ReceivedAck && RetryN < RetryCount) {
 			if (RetryN > 0) {
@@ -578,7 +577,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 							ReceivedAck = true;
 						}
 					} else {
-						ReceivedMsgV.Add(TMsgInfo(From, Type, Payload));
+						ReadThread.AddToQueue(TMsgInfo(From, Type, Payload));
 					}
 				}
 			}
@@ -587,22 +586,17 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 		}
 
 		TRpiUtil::SetDefaultPriority();
-
-		// process the messages that were queued
-		if (!ReceivedMsgV.Empty()) {
-			ReadThread.AddToQueue(ReceivedMsgV);
-		}
-
-		if (!ReceivedAck) {
-			Notify->OnNotifyFmt(ntInfo, "Failed to send message!");
-		}
-
-		return ReceivedAck;
 	} catch (const PExcept& Except) {
 		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception when sending!");
 		TRpiUtil::SetDefaultPriority();
 		return false;
 	}
+
+	if (!ReceivedAck) {
+		Notify->OnNotifyFmt(ntInfo, "Failed to send message!");
+	}
+
+	return ReceivedAck;
 }
 
 void TRf24Radio::UpdateNetwork() {
