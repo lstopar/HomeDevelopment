@@ -10,6 +10,9 @@
 #include "RF24.h"
 #include "RF24Network.h"
 
+#include "StandardCplusplus.h"
+#include <vector>
+
 #else
 
 #include "base.h"
@@ -70,174 +73,16 @@ public:
 	static void GenSetPayload(const TVec<TRadioValue>& ValV, TMem& Payload);
 	static void GenPushPayload(const TVec<TRadioValue>& ValV, TMem& Payload) { GenSetPayload(ValV, Payload); }
 #else
-	static int parseGetPayload(const char* Payload, char* buff);
-	static int parseSetPayload(const char* Payload, TRadioValue* vals);
-	static int parsePushPayload(const char* Payload, TRadioValue* vals) { return parseSetPayload(Payload, vals); }
+	static void parseGetPayload(const char* Payload, std::vector<char>& ValIdV);
+	static void parseSetPayload(const char* Payload, std::vector<TRadioValue>& ValV);
+	static void parsePushPayload(const char* Payload, std::vector<TRadioValue>& ValV) { parseSetPayload(Payload, ValV); }
 	static void genGetPayload(const int* ValIdV, const int& ValIdVLen, char* Payload);
-	static void genSetPayload(const TRadioValue* ValV, const int& Vals, char* Payload);
-	static void genPushPayload(const TRadioValue* ValV, const int& Vals, char* Payload) { genSetPayload(ValV, Vals, Payload); }
+	static void genSetPayload(const std::vector<TRadioValue>& values, char* Payload);
+	static void genPushPayload(const std::vector<TRadioValue>& values, char* payload) { genSetPayload(values, payload); }
 #endif
 
 	static void InitRadio(RF24& Radio, RF24Network& Network, const uint16_t& Addr,
 			const rf24_pa_dbm_e& Power=RF24_PA_HIGH);
 };
-
-#ifdef ARDUINO
-
-class TRgbStrip {
-private:
-	static const int UPDATE_INTERVAL;
-
-	static const int PIN_RED_N;
-	static const int PIN_GREEN_N;
-	static const int PIN_BLUE_N;
-
-	enum TRgbMode {
-		rmDefault,
-		rmBlink,
-		rmCycleHsv
-	};
-
-	int pins[3];
-	int pinVals[3];
-
-	TRgbMode mode;
-
-	int blinkPinN;
-	int currHue;
-
-	int iteration;
-
-public:
-	TRgbStrip(const int& pinR, const int& pinG, const int& pinB);
-
-	void update();
-
-	int getRed() const { return pinVals[PIN_RED_N]; }
-	int getGreen() const { return pinVals[PIN_GREEN_N]; }
-	int getBlue() const { return pinVals[PIN_BLUE_N]; }
-
-	void setRed(const int& val, const bool& resetModes=true) { setColor(PIN_RED_N, val, resetModes); }
-	void setGreen(const int& val, const bool& resetModes=true) { setColor(PIN_GREEN_N, val, resetModes); }
-	void setBlue(const int& val, const bool& resetModes=true) { setColor(PIN_BLUE_N, val, resetModes); }
-
-	void blink();
-	void cycleHsv();
-
-	bool isBlinking() const { return mode == TRgbMode::rmBlink; }
-	bool isCyclingHsv() const { return mode == TRgbMode::rmCycleHsv; }
-
-	void reset(const bool& resetModes=true, const bool& writePins=true);
-
-private:
-	int getColor(const int& colorN) const;
-	void setColor(const int& colorN, const int& val, const bool& resetModes=true);
-
-	static void hsl2rgb(const float& h, const float& s, const float& l,
-			int& r, int& g, int& b);
-};
-
-class TManualDimmer {
-private:
-	static const int THRESHOLD = 5;
-
-	const int vOutPin;
-	const int readPin;
-	const int pwmPin;
-
-	const int mnVal;
-	const int mxVal;
-
-	int currVal;
-
-public:
-	TManualDimmer(const int& vOutPin, const int& readPin, const int& pwmPin,
-			const int& mnVal=100, const int& mxVal=1000);
-
-	void init();
-	void update();
-	int getVal() const { return currVal; }
-
-private:
-	int readInput() const;
-};
-
-///////////////////////////////////////
-// Switch which can be toggled either by clicking
-// or programatically
-class TManualSwitch {
-private:
-	const int vOutPin;
-	const int readPin;
-	const int outputPin;
-
-	bool inputOn;
-	bool outputOn;
-
-	void (*onStateChanged)(const bool&);
-
-public:
-	TManualSwitch(const int& vOutPin, const int& readPin, const int& switchPin);
-
-	void init();
-	void update();
-
-	bool isOn() const { return outputOn; }
-
-	void on();
-	void off();
-	void toggle();
-
-	void setCallback(void (*_onStateChanged)(const bool&)) { onStateChanged = _onStateChanged; }
-
-private:
-	void setOutput(const bool& on);
-	bool readSwitch();
-};
-
-
-///////////////////////////////////////
-// Digital PIR sensor
-class TDigitalPir {
-protected:
-	const int readPin;
-
-private:
-	bool isMotionDetected;
-
-	void (*onStateChanged)(const bool&);
-
-public:
-	TDigitalPir(const int& readPin);
-	virtual ~TDigitalPir() {}
-
-	void init();
-	void update();
-
-	bool isOn() const { return isMotionDetected; }
-
-	void setCallback(void (*_onStateChanged)(const bool&)) { onStateChanged = _onStateChanged; }
-
-protected:
-	virtual bool readInput();
-};
-
-///////////////////////////////////////
-// Analog PIR sensor
-class TAnalogPir: public TDigitalPir {
-private:
-	const int threshold;
-	const uint64_t onTime;
-
-	uint64_t lastOnTime;
-
-public:
-	TAnalogPir(const int& readPin, const uint64_t& onTime, const int& threshold);
-
-protected:
-	bool readInput();
-};
-
-#endif
 
 #endif

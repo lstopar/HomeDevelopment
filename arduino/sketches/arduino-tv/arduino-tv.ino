@@ -8,6 +8,7 @@
 #include "printf.h"
 
 #include "protocol.h"
+#include "arduino_home.h"
 
 const uint16_t MY_ADDRESS = 01;
 
@@ -36,21 +37,16 @@ int pin3Val = 0;
 TRgbStrip rgb(PIN_RED, PIN_GREEN, PIN_BLUE);
 TDigitalPir pir(PIR_TV_PIN);
 
-RF24 radio(7,8);
-RF24Network network(radio);
-
-RF24NetworkHeader header;
-
-char recPayload[PAYLOAD_LEN];
-char sendPayload[PAYLOAD_LEN];
-TRadioValue* setValV = new TRadioValue[VALS_PER_PAYLOAD];
-char* getBuff = new char[VALS_PER_PAYLOAD];
+RF24 _radio(7,8);
+RF24Network network(_radio);
+TRf24Wrapper radio(MY_ADDRESS, _radio, network);
 
 //====================================================
 // INITIALIZATION
 //====================================================
 
-void writeRadio(const uint16_t& recipient, const unsigned char& type, const char* buff, const int& len);
+void processGet(const uint16_t&, const std::vector<char>&);
+void processSet(const uint16_t&, const std::vector<TRadioValue>&);
 void onPirEvent(const bool& motion);
 
 void setup() {
@@ -73,42 +69,18 @@ void setup() {
  
   SPI.begin();
 
-  TRadioProtocol::InitRadio(radio, network, MY_ADDRESS, RF24_PA_MAX);
-
+  radio.setProcessGet(processGet);
+  radio.setProcessSet(processSet);
+  radio.init();
+  
   Serial.print("My address: ");
   Serial.println(MY_ADDRESS);
   Serial.print("All val ID: ");
   Serial.println(VAL_ID_ALL, HEX);
   Serial.print("Values per payload: ");
   Serial.println(VALS_PER_PAYLOAD);
-  
-  if (MY_ADDRESS != 00) {
-    writeRadio(network.parent(), REQUEST_CHILD_CONFIG, NULL, 0);
-  }
 
   pir.setCallback(onPirEvent);
-}
-
-//====================================================
-// RADIO FUNCTIONS
-//====================================================
-
-void writeRadio(const uint16_t& recipient, const unsigned char& type, const char* buff, const int& len) {
-  RF24NetworkHeader header(recipient, type);
-  const bool success = network.write(header, buff, len);
-
-  if (!success) {
-    Serial.println("Failed to send message!");
-  }
-}
-
-void push(const uint16_t& to, const TRadioValue* valV, const int& len) {  
-  TRadioProtocol::genPushPayload(valV, len, sendPayload);
-  writeRadio(to, REQUEST_PUSH, sendPayload, PAYLOAD_LEN);
-}
-
-void push(const uint16_t& to, const TRadioValue& radioVal) {
-  push(to, &radioVal, 1);
 }
 
 //====================================================
@@ -159,72 +131,80 @@ bool getRadioVal(const char& valId, TRadioValue& rval) {
 
 void processGet(const uint16_t& callerAddr, const char& valId) {
   if (valId == VAL_ID_ALL) {
-    TRadioValue rvals[VALS_PER_PAYLOAD];
-    
-    int nsent = 0;
-    int valN;
-    while (nsent < N_VAL_IDS) {
-      valN = 0;
-      while (valN < VALS_PER_PAYLOAD && nsent + valN < N_VAL_IDS) {
-        getRadioVal(VAL_IDS[nsent + valN], rvals[valN]);
-        valN++;
-      }
+    std::vector<TRadioValue> rvals;
 
-      push(callerAddr, rvals, valN);
-      nsent += valN;
+    for (int valN = 0; valN < N_VAL_IDS; valN++) {
+      TRadioValue rval;
+      getRadioVal(VAL_IDS[valN], rval);
+      rvals.push_back(rval);
     }
 
+    radio.push(callerAddr, rvals);
+    
     Serial.println("Sent all values!");
   } else {
     TRadioValue rval;
     if (getRadioVal(valId, rval)) {
-      push(callerAddr, rval);
+      radio.push(callerAddr, rval);
     }
   }
 }
 
-void processSet(const uint16_t& callerAddr, const TRadioValue& rval) {
-  const char valId = rval.GetValId();
-  
-  if (valId == LED_PIN) {    
-    int transVal = (int) (double(rval.GetValInt())*2.55);
-    analogWrite(LED_PIN, transVal);
-    pin3Val = transVal;
+void processGet(const uint16_t& callerAddr, const std::vector<char>& valueIdV) {
+  Serial.println("Processing GET request ...");
+  for (int valN = 0; valN < valueIdV.size(); valN++) {
+    const char& valId = valueIdV[valN];
     processGet(callerAddr, valId);
   }
-  else if (valId == PIN_BLUE) {
-    rgb.setBlue(rval.GetValInt());
-    processGet(callerAddr, valId);
-  }
-  else if (valId == PIN_RED) {
-    rgb.setRed(rval.GetValInt());
-    processGet(callerAddr, valId);
-  }
-  else if (valId == PIN_GREEN) {
-    rgb.setGreen(rval.GetValInt());
-    processGet(callerAddr, valId);
-  }
-  else if (valId == MODE_BLINK_RGB) {
-    if (rval.GetValBool()) {
-      rgb.blink();
-    } else {
-      rgb.reset();
-    }
-    
-    processGet(callerAddr, valId);
-  }
-  else if (valId == MODE_CYCLE_HSV) {
-    if (rval.GetValBool()) {
-      rgb.cycleHsv();
-    } else {
-      rgb.reset();
-    }
+  Serial.println("Processed!");
+}
 
-    processGet(callerAddr, valId);
-  }
-  else {
-    Serial.print("Unknown val ID: ");
-    Serial.println(valId);
+void processSet(const uint16_t& callerAddr, const std::vector<TRadioValue>& valV) {
+  for (int valN = 0; valN < valV.size(); valN++) {
+    const TRadioValue& rval = valV[valN];
+
+    const char valId = rval.GetValId();
+  
+    if (valId == LED_PIN) {    
+      int transVal = (int) (double(rval.GetValInt())*2.55);
+      analogWrite(LED_PIN, transVal);
+      pin3Val = transVal;
+      processGet(callerAddr, valId);
+    }
+    else if (valId == PIN_BLUE) {
+      rgb.setBlue(rval.GetValInt());
+      processGet(callerAddr, valId);
+    }
+    else if (valId == PIN_RED) {
+      rgb.setRed(rval.GetValInt());
+      processGet(callerAddr, valId);
+    }
+    else if (valId == PIN_GREEN) {
+      rgb.setGreen(rval.GetValInt());
+      processGet(callerAddr, valId);
+    }
+    else if (valId == MODE_BLINK_RGB) {
+      if (rval.GetValBool()) {
+        rgb.blink();
+      } else {
+        rgb.reset();
+      }
+      
+      processGet(callerAddr, valId);
+    }
+    else if (valId == MODE_CYCLE_HSV) {
+      if (rval.GetValBool()) {
+        rgb.cycleHsv();
+      } else {
+        rgb.reset();
+      }
+  
+      processGet(callerAddr, valId);
+    }
+    else {
+      Serial.print("Unknown val ID: ");
+      Serial.println(valId);
+    }
   }
 }
 
@@ -241,58 +221,7 @@ void onPirEvent(const bool& motion) {
 //====================================================
 
 void loop(void) {
-  network.update();
-
-  while (network.available()) {
-    network.peek(header);
-    
-    const uint16_t& fromAddr = header.from_node;
-    // acknowledge
-    if (header.type != REQUEST_ACK) {
-      writeRadio(fromAddr, REQUEST_ACK, NULL, 0);
-    }
-
-    if (header.type == REQUEST_ACK || header.type == REQUEST_PONG) {
-      // TODO currently not supported
-    }
-    else if (header.type == REQUEST_CHILD_CONFIG) {
-      network.read(header, NULL, 0);
-      Serial.println("Received configuration message, ignoring ...");
-    }
-    else if (header.type == REQUEST_PING) {
-      network.read(header, NULL, 0);
-      Serial.println("Received ping, ponging ...");
-      writeRadio(fromAddr, REQUEST_PONG, NULL, 0);
-    }
-    else if (header.type == REQUEST_GET) {
-      network.read(header, recPayload, PAYLOAD_LEN);
-
-      Serial.println("Received GET request ...");
-
-      int nVals = TRadioProtocol::parseGetPayload(recPayload, getBuff);
-      for (int valN = 0; valN < nVals; valN++) {
-        const char& valId = getBuff[valN];
-        processGet(fromAddr, valId);
-      }
-    }
-    else if (header.type == REQUEST_SET) {
-      network.read(header, recPayload, PAYLOAD_LEN);
-
-      Serial.println("Received SET ...");
-
-      const int vals = TRadioProtocol::parseSetPayload(recPayload, setValV);
-      for (int valN = 0; valN < vals; valN++) {
-        const TRadioValue& val = setValV[valN];
-        processSet(fromAddr, val);
-      }
-    } 
-    else {
-      Serial.print("Unknown header type: ");
-      Serial.println(header.type);
-      network.read(header, NULL, 0);
-    }
-  }
-
+  radio.update();
   rgb.update();
   pir.update();
 }
