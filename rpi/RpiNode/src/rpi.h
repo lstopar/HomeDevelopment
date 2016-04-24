@@ -191,7 +191,10 @@ public:
 	void SetCallback(TRf24RadioCallback* Cb) { Callback = Cb; }
 
 private:
-	bool Send(const uint16& NodeAddr, const uchar& Command, const TMem& Buff);
+	bool Send(const uint16& To, const uchar& Command, const TMem& Buff);
+	void SendAck(const uint16& To);
+	void _Send(const RF24NetworkHeader& Header, const TMem& Buff=TMem());
+
 	void UpdateNetwork();
 	bool Read(uint16& From, uchar& Type, TMem& Payload);
 };
