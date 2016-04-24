@@ -129,37 +129,37 @@ bool getRadioVal(const char& valId, TRadioValue& rval) {
   return true;
 }
 
-void processGet(const uint16_t& callerAddr, const char& valId) {
+void processGet(const uint16_t& callerAddr, const char& valId, std::vector<TRadioValue>& values) {
   if (valId == VAL_ID_ALL) {
-    std::vector<TRadioValue> rvals;
-
     for (int valN = 0; valN < N_VAL_IDS; valN++) {
       TRadioValue rval;
       getRadioVal(VAL_IDS[valN], rval);
-      rvals.push_back(rval);
-    }
-
-    radio.push(callerAddr, rvals);
-    
-    Serial.println("Sent all values!");
+      values.push_back(rval);
+    }    
   } else {
     TRadioValue rval;
     if (getRadioVal(valId, rval)) {
-      radio.push(callerAddr, rval);
+      values.push_back(rval);
     }
   }
 }
 
 void processGet(const uint16_t& callerAddr, const std::vector<char>& valueIdV) {
   Serial.println("Processing GET request ...");
+  std::vector<TRadioValue> rvals;
+  
   for (int valN = 0; valN < valueIdV.size(); valN++) {
     const char& valId = valueIdV[valN];
-    processGet(callerAddr, valId);
+    processGet(callerAddr, valId, rvals);
   }
+  
+  radio.push(callerAddr, rvals);
   Serial.println("Processed!");
 }
 
 void processSet(const uint16_t& callerAddr, const std::vector<TRadioValue>& valV) {
+  std::vector<TRadioValue> rvals;
+  
   for (int valN = 0; valN < valV.size(); valN++) {
     const TRadioValue& rval = valV[valN];
 
@@ -169,19 +169,19 @@ void processSet(const uint16_t& callerAddr, const std::vector<TRadioValue>& valV
       int transVal = (int) (double(rval.GetValInt())*2.55);
       analogWrite(LED_PIN, transVal);
       pin3Val = transVal;
-      processGet(callerAddr, valId);
+      processGet(callerAddr, valId, rvals);
     }
     else if (valId == PIN_BLUE) {
       rgb.setBlue(rval.GetValInt());
-      processGet(callerAddr, valId);
+      processGet(callerAddr, valId, rvals);
     }
     else if (valId == PIN_RED) {
       rgb.setRed(rval.GetValInt());
-      processGet(callerAddr, valId);
+      processGet(callerAddr, valId, rvals);
     }
     else if (valId == PIN_GREEN) {
       rgb.setGreen(rval.GetValInt());
-      processGet(callerAddr, valId);
+      processGet(callerAddr, valId, rvals);
     }
     else if (valId == MODE_BLINK_RGB) {
       if (rval.GetValBool()) {
@@ -190,7 +190,7 @@ void processSet(const uint16_t& callerAddr, const std::vector<TRadioValue>& valV
         rgb.reset();
       }
       
-      processGet(callerAddr, valId);
+      processGet(callerAddr, valId, rvals);
     }
     else if (valId == MODE_CYCLE_HSV) {
       if (rval.GetValBool()) {
@@ -199,12 +199,16 @@ void processSet(const uint16_t& callerAddr, const std::vector<TRadioValue>& valV
         rgb.reset();
       }
   
-      processGet(callerAddr, valId);
+      processGet(callerAddr, valId, rvals);
     }
     else {
       Serial.print("Unknown val ID: ");
       Serial.println(valId);
     }
+  }
+
+  if (!rvals.empty()) {
+    radio.push(callerAddr, rvals);
   }
 }
 
@@ -213,7 +217,9 @@ void processSet(const uint16_t& callerAddr, const std::vector<TRadioValue>& valV
 //====================================================
 
 void onPirEvent(const bool& motion) {
-  processGet(ADDRESS_RPI, PIR_TV_PIN);
+  std::vector<TRadioValue> rvals;
+  processGet(ADDRESS_RPI, PIR_TV_PIN, rvals);
+  radio.push(ADDRESS_RPI, rvals);
 }
 
 //====================================================
