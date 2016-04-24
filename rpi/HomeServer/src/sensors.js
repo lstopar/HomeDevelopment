@@ -173,13 +173,13 @@ var rf24Pinger = (function () {
 	var nodePongH = {};
 	
 	return {
-		init: function () {
+		init: function () {	// TODO is not used
 			for (var nodeId in radio.nodes) {
 				nodePongH[nodeId] = true;
 			}
 		},
-		onPong: function (nodeId) {
-			log.info('Node %d ponged!', nodeId);
+		onPong: function (nodeId) {	// TODO is not used
+//			log.info('Node %d ponged!', nodeId);
 			nodePongH[nodeId] = true;
 		},
 		ping: function () {
@@ -190,13 +190,14 @@ var rf24Pinger = (function () {
 				var nodeIdH = radio.nodes;
 				
 				for (var nodeId in nodeIdH) {
-					onNodeConnected(nodeId, nodePongH[nodeId]);
-					nodePongH[nodeId] = false;
+//					onNodeConnected(nodeId, nodePongH[nodeId]);
+//					nodePongH[nodeId] = false;
 					
 					if (log.debug())
 						log.debug('Pinging node %d', nodeId)
 					
-					radio.radio.ping(parseInt(nodeId));
+					var success = radio.radio.ping(parseInt(nodeId));
+					onNodeConnected(success);
 				}
 			} catch (e) {
 				log.error(e, 'Exception while pinging radio nodes!');
@@ -431,7 +432,7 @@ function initSensors() {
 			});
 			radio.radio.onPong(function (nodeId) {
 				log.info('Received pong from node %d', nodeId);
-				rf24Pinger.onPong(nodeId + '');
+//				rf24Pinger.onPong(nodeId + '');
 			});
 		}
 		else if (type == 'EnOcean') {
