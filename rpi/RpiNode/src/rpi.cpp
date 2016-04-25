@@ -389,7 +389,7 @@ void TRf24Radio::TReadThread::ProcessMsg(const uint16& FromNode, const uchar& Ty
 			break;
 		}
 		case REQUEST_PONG: {
-			Notify->OnNotifyFmt(ntInfo, "Received pong from node %u ...", FromNode);
+//			Notify->OnNotifyFmt(ntInfo, "Received pong from node %u ...", FromNode);
 			Radio->Callback->OnPong(FromNode);
 			break;
 		}
