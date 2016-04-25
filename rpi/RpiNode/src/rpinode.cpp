@@ -480,7 +480,7 @@ void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueI
 		v8::HandleScope HandleScope(Isolate);
 
 		const int ValId = (int) ValueId;
-		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got value for value id %d", ValId);
+//		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got value for value id %d", ValId);
 
 		TIntPr NodeIdValIdPr(NodeId, (int) ValId);
 		EAssertR(NodeIdValIdPrValNmH.IsKey(NodeIdValIdPr), "Node-valueId pair not stored in the structures!");
@@ -516,7 +516,7 @@ void TNodeJsRf24Radio::OnPong(const uint16& NodeId) {
 }
 
 void TNodeJsRf24Radio::OnValue(const uint16& NodeId, const char& ValId, const int& Val) {
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Executing callback for value id: %d", ValId);
+//	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Executing callback for value id: %d", ValId);
 	TNodeJsAsyncUtil::ExecuteOnMainAndWait(new TOnMsgTask(this, NodeId, (int) ValId, Val), true);
 }
 
