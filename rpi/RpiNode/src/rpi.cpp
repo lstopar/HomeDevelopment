@@ -322,6 +322,12 @@ void TRf24Radio::TReadThread::Run() {
 
 	TMsgInfoV QueuedMsgV;
 
+	// statistics
+	uint64 LastStatTime = 0;
+	uint64 TotalMsgs = 0;
+	uint IntervalMsgs = 0;
+	uint64 IntervalIterN = 0;
+
 	while (true) {
 		try {
 			// process queued messages
@@ -347,9 +353,32 @@ void TRf24Radio::TReadThread::Run() {
 				for (int MsgN = 0; MsgN < QueuedMsgV.Len(); MsgN++) {
 					const TMsgInfo& Msg = QueuedMsgV[MsgN];
 					ProcessMsg(Msg.Val1, Msg.Val2, Msg.Val3);
+					IntervalMsgs++;
 				}
 				Notify->OnNotify(ntInfo, "Queued messages processed!");
 				QueuedMsgV.Clr();
+			}
+
+			IntervalIterN++;
+
+			const uint64 CurrTm = TTm::GetCurUniMSecs();
+			if (CurrTm - LastStatTime > STATISTICS_INTERVAL) {
+				TotalMsgs += IntervalMsgs;
+
+				const uint64 Dur = CurrTm - LastStatTime;
+
+				Notify->OnNotify(ntInfo, "===============================================================");
+				Notify->OnNotify(ntInfo, "READ THREAD STATISTICS");
+				Notify->OnNotifyFmt(ntInfo, "interval duration: %d msecs", Dur);
+				Notify->OnNotifyFmt(ntInfo, "iterations in interval: %u", IntervalIterN);
+				Notify->OnNotifyFmt(ntInfo, "iterations per second: %.3f", double(IntervalIterN) / double(Dur));
+				Notify->OnNotifyFmt(ntInfo, "total messages: %d", TotalMsgs);
+				Notify->OnNotifyFmt(ntInfo, "messages in interval: %d", IntervalMsgs);
+				Notify->OnNotify(ntInfo, "===============================================================");
+
+				LastStatTime = CurrTm;
+				IntervalMsgs = 0;
+				IntervalIterN++;
 			}
 
 			delayMicroseconds(500);

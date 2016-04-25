@@ -249,8 +249,8 @@ module.exports = exports = function (_getValue, _setValue) {
 	setInterval(periodicCheck, 1000*60);
 	
 	function onValue(sensorId, value) {
-		if (log.debug())
-			log.debug('Received value in devices: { %s, %d }', sensorId, value);
+		if (log.trace())
+			log.trace('Received value in devices: { %s, %d }', sensorId, value);
 		
 		if (sensorId == MOTION_TV_ID || sensorId == MOTION_SOFA_ID) {
 			motionDetector.onMotion(sensorId, value == 1);
