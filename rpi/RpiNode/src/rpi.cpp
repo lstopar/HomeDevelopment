@@ -547,8 +547,6 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 
 		RF24NetworkHeader Header(NodeAddr, Command);
 
-		TRpiUtil::SetMaxPriority();
-
 		uint16 From;
 		uchar Type;
 		TMem Payload;	Payload.Gen(PAYLOAD_LEN);
@@ -585,11 +583,8 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 
 			RetryN++;
 		}
-
-		TRpiUtil::SetDefaultPriority();
 	} catch (const PExcept& Except) {
 		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception when sending!");
-		TRpiUtil::SetDefaultPriority();
 		return false;
 	}
 
