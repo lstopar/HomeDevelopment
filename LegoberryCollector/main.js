@@ -66,7 +66,7 @@ var db = (function () {
 						}
 						
 						if (log.debug())
-							log.debug('Inserted!');
+							log.debug('Inserted %d values!', readings.length);
 						
 						if (conn != null)
 							conn.release();
