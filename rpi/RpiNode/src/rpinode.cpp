@@ -507,7 +507,7 @@ void TNodeJsRf24Radio::OnPongMainThread(const uint16& NodeId) {
 		bool IsValidNodeId = false;
 		int KeyId = NodeIdValIdPrValNmH.FFirstKeyId();
 		while (NodeIdValIdPrValNmH.FNextKeyId(KeyId)) {
-			const TIntPr& NodeIdValIdPr = NodeIdValIdPrValNmH[KeyId];
+			const TIntPr& NodeIdValIdPr = NodeIdValIdPrValNmH.GetKey(KeyId);
 			if (NodeIdValIdPr.Val1 == NodeId) {
 				IsValidNodeId = true;
 				break;
