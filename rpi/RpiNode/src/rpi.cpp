@@ -618,7 +618,10 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 		return false;
 	}
 
-	if (!ReceivedAck) {
+	if (ReceivedAck) {
+		Notify->OnNotifyFmt(ntInfo, "Sent!");
+	}
+	else {
 		Notify->OnNotifyFmt(ntInfo, "Failed to send message!");
 	}
 
