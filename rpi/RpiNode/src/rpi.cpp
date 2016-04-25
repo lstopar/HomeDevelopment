@@ -324,8 +324,6 @@ void TRf24Radio::TReadThread::Run() {
 
 	while (true) {
 		try {
-			Notify->OnNotify(ntInfo, "Reading radio ...");
-
 			// process queued messages
 			{
 				TLock Lock(Radio->CriticalSection);
@@ -396,9 +394,10 @@ void TRf24Radio::TReadThread::ProcessMsg(const uint16& FromNode, const uchar& Ty
 			break;
 		}
 		case REQUEST_PUSH: {
-			Notify->OnNotify(TNotifyType::ntInfo, "Received PUSH ...");
 			TVec<TRadioValue> ValV;
 			TRadioProtocol::ParsePushPayload(Payload, ValV);
+
+			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received PUSH, %d values ...", ValV.Len());
 
 			for (int ValN = 0; ValN < ValV.Len(); ValN++) {
 				Radio->Callback->OnValue(FromNode, ValV[ValN].GetValId(), ValV[ValN].GetValInt());
