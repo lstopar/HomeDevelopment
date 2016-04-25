@@ -166,7 +166,6 @@ void processSet(const uint16_t& callerAddr, const std::vector<TRadioValue>& valV
   
   for (int valN = 0; valN < valV.size(); valN++) {
     const TRadioValue& rval = valV[valN];
-
     const char valId = rval.GetValId();
   
     if (valId == LED_PIN) {    

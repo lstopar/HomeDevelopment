@@ -102,6 +102,9 @@ function updateValue(sensorId, value) {
 		if (value != previousVal) {
 			values[sensorId] = value;
 			
+			if (log.debug())
+				log.debug('Value of %s changed to %s', sensorId, value);
+			
 			var type = getSensorConfig(sensorId).type;
 			
 			// web sockets callback
@@ -159,8 +162,8 @@ function readDevices() {
 				
 				var trans = transform != null ? transform(vals) : vals;
 				
-				if (log.debug())
-					log.debug('Read values: %s, updating ...', JSON.stringify(trans));
+				if (log.trace())
+					log.trace('Read values: %s, updating ...', JSON.stringify(trans));
 				
 				for (var sensorId in trans)
 					updateValue(sensorId, trans[sensorId]);
@@ -183,18 +186,15 @@ var rf24Pinger = (function () {
 			nodePongH[nodeId] = true;
 		},
 		ping: function () {
-			if (log.debug())
-				log.debug('Pinging radio devices ...');
+			if (log.trace())
+				log.trace('Pinging radio devices ...');
 			
 			try {
 				var nodeIdH = radio.nodes;
 				
 				for (var nodeId in nodeIdH) {
-//					onNodeConnected(nodeId, nodePongH[nodeId]);
-//					nodePongH[nodeId] = false;
-					
-					if (log.debug())
-						log.debug('Pinging node %d', nodeId)
+					if (log.trace())
+						log.trace('Pinging node %d', nodeId)
 					
 					var success = radio.radio.ping(parseInt(nodeId));
 					onNodeConnected(nodeId, success);
@@ -208,8 +208,8 @@ var rf24Pinger = (function () {
 
 function readRadioDevices() {
 	if (radio != null) {
-		if (log.debug())
-			log.debug('Fetching all values from radio devices ...');
+		if (log.trace())
+			log.trace('Fetching all values from radio devices ...');
 		
 		var nodes = radio.nodes;
 		for (var nodeId in nodes) {
@@ -225,8 +225,8 @@ function readEnocean() {
 	if (enocean == null) return;
 	
 	try {
-		if (log.debug())
-			log.debug('Fetching all values from EnOcean devices ...');
+		if (log.trace())
+			log.trace('Fetching all values from EnOcean devices ...');
 		
 		enocean.readAll();
 	} catch (e) {
@@ -235,8 +235,8 @@ function readEnocean() {
 }
 
 function readAll() {
-	if (log.debug())
-		log.debug('Reading all devices ...');
+	if (log.trace())
+		log.trace('Reading all devices ...');
 	
 	readDevices();
 	readRadioDevices();
@@ -426,7 +426,7 @@ function initSensors() {
 				var trans = transFun(val.value);
 				
 				if (log.debug())
-					log.debug('Received %s: %d', val.id, trans);
+					log.debug('Received from radio %s: %d', val.id, trans);
 				
 				updateValue(val.id, trans);
 			});

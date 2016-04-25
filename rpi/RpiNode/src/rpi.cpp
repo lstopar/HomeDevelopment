@@ -324,6 +324,8 @@ void TRf24Radio::TReadThread::Run() {
 
 	while (true) {
 		try {
+			Notify->OnNotify(ntInfo, "Reading radio ...");
+
 			// process queued messages
 			{
 				TLock Lock(Radio->CriticalSection);
