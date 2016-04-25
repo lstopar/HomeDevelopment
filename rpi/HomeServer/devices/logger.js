@@ -43,7 +43,13 @@ exports.log = function (value) {
 						log.debug('Received chunk from logging server: %s', chunk);
 				});
 				res.on('end', function () {
-					log.info('Successfully posted the batch, items in queue: %d!', values.length);
+					if (res.statusCode >= 300) {
+						values = batch.concat(values);
+						log.warn('Failed to send values to sever!');
+					} else {
+						log.info('Successfully posted the batch, items in queue: %d!', values.length);
+					}
+					
 					requestActive = false;
 				});
 			});

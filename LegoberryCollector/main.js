@@ -45,7 +45,7 @@ var db = (function () {
 	}
 	
 	return {
-		insert: function (readings) {
+		insert: function (readings, callback) {
 			if (log.debug())
 				log.debug('Inserting readings ...');
 			
@@ -55,13 +55,16 @@ var db = (function () {
 				if (e != null) {
 					log.error(e, 'Failed to create a database connection!');
 					if (conn != null) conn.release();
+					callback(e);
 					return;
 				}
 				
 				try {
 					var q = conn.query(sql, [], function (e1) {
 						if (e1 != null) {
-							log.error('Exception while executing insert statement!');
+							log.error(e1, 'Exception while executing insert statement!');
+							if (conn != null) conn.release();
+							callback(e1);
 							return;
 						}
 						
@@ -70,10 +73,13 @@ var db = (function () {
 						
 						if (conn != null)
 							conn.release();
+						
+						callback();
 					});
 				} catch (e) {
 					log.error(e, 'Exception while executing query!');
 					if (conn != null) conn.release();
+					callback(e);
 				}
 			});
 		}
@@ -101,6 +107,8 @@ function initApi() {
 					handleServerError(e, req, res);
 					return;
 				}
+				
+				log.info('Inserted!');
 				
 				res.status(204);	// no content
 				res.end();
