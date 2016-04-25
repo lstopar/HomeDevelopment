@@ -370,11 +370,11 @@ void TRf24Radio::TReadThread::Run() {
 
 				Notify->OnNotify(ntInfo, "===============================================================");
 				Notify->OnNotify(ntInfo, "READ THREAD STATISTICS");
-				Notify->OnNotifyFmt(ntInfo, "interval duration: %d msecs", Dur);
-				Notify->OnNotifyFmt(ntInfo, "iterations in interval: %u", IntervalIterN);
+				Notify->OnNotifyFmt(ntInfo, "interval duration: %lu msecs", Dur);
+				Notify->OnNotifyFmt(ntInfo, "iterations in interval: %lu", IntervalIterN);
 				Notify->OnNotifyFmt(ntInfo, "iterations per second: %.3f", double(IntervalIterN) / double(Dur));
-				Notify->OnNotifyFmt(ntInfo, "total messages: %d", TotalMsgs);
-				Notify->OnNotifyFmt(ntInfo, "messages in interval: %d", IntervalMsgs);
+				Notify->OnNotifyFmt(ntInfo, "total messages: %lu", TotalMsgs);
+				Notify->OnNotifyFmt(ntInfo, "messages in interval: %u", IntervalMsgs);
 				Notify->OnNotify(ntInfo, "===============================================================");
 
 				LastStatTime = CurrTm;
@@ -613,7 +613,7 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 			RetryN++;
 		}
 	} catch (const PExcept& Except) {
-		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception when sending!");
+		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception while sending!");
 		return false;
 	}
 
