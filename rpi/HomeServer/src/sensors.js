@@ -458,7 +458,7 @@ function initSensors() {
 				var trans = transFun(value);
 				
 				if (log.debug())
-					log.debug('Received %s: %d', sensorId, trans);
+					log.debug('Received from enocean %s: %d', sensorId, trans);
 				
 				updateValue(sensorId, trans);
 			});
