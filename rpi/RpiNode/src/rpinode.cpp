@@ -399,6 +399,8 @@ void TNodeJsRf24Radio::set(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	if (ArgVal->IsArr()) {
 		THash<TInt, TIntPrV> NodeIdValIdValPrVH;
 
+		JsRadio->Notify->OnNotifyFmt(ntInfo, "Setting %d values ...", ArgVal->GetArrVals());
+
 		for (int ArgN = 0; ArgN < ArgVal->GetArrVals(); ArgN++) {
 			const PJsonVal& ValJson = ArgVal->GetArrVal(ArgN);
 

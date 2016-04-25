@@ -66,7 +66,7 @@ function setValue(vals) {
 			setValue(rpiDevices[i]);
 		}
 		// set radio devices
-		radio.radio.set(vals);	// TODO implement
+		radio.radio.set(vals);
 		// set EnOcean devices
 		for (var i = 0; i < enoceanDevices.length; i++) {
 			setValue(enoceanDevices[i]);
