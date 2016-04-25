@@ -4,7 +4,7 @@ var config = require('../config.js');
 
 var postOpts = {
 	host: config.logger.host,
-	post: config.logger.port,
+	port: config.logger.port,
 	path: config.logger.path,
 	method: 'POST',
 	
