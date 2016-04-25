@@ -503,7 +503,18 @@ void TNodeJsRf24Radio::OnPongMainThread(const uint16& NodeId) {
 
 		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got pong from node %u", NodeId);
 
-		// TODO check if this is a valid node ID!!
+		// TODO optimize check
+		bool IsValidNodeId = false;
+		int KeyId = NodeIdValIdPrValNmH.FFirstKeyId();
+		while (NodeIdValIdPrValNmH.FNextKeyId(KeyId)) {
+			const TIntPr& NodeIdValIdPr = NodeIdValIdPrValNmH[KeyId];
+			if (NodeIdValIdPr.Val1 == NodeId) {
+				IsValidNodeId = true;
+				break;
+			}
+		}
+
+		EAssertR(IsValidNodeId, "Received invalid node ID: " + TUInt::GetStr(NodeId));
 
 		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnPongCallback);
 		TNodeJsUtil::ExecuteVoid(Callback, v8::Integer::New(Isolate, (int) NodeId));
