@@ -2,14 +2,6 @@ var http = require('http');
 
 var config = require('../config.js');
 
-var postOpts = {
-	host: config.logger.host,
-	port: config.logger.port,
-	path: config.logger.path,
-	method: 'POST',
-	
-};
-
 var MAX_CACHE_SIZE = 1000000;
 var batchSize = config.logger.batchSize != null ? config.logger.batchSize : 1000;
 
@@ -31,9 +23,21 @@ exports.log = function (value) {
 		if (values.length > batchSize && !requestActive) {
 			log.info('Sending batch, values in queue: %d ...', values.length);
 			var batch = values.splice(0, batchSize);
+			var data = JSON.stringify(batch);
+			
+			var options = {
+				host: config.logger.host,
+				port: config.logger.port,
+				path: config.logger.path,
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Content-Length': Buffer.byteLength(data)
+				}
+			};
 			
 			requestActive = true;
-			var req = http.request(postOpts, function (res) {
+			var req = http.request(options, function (res) {
 				res.on('data', function (chunk) {
 					if (log.debug())
 						log.debug('Received chunk from logging server: %s', chunk);
@@ -50,7 +54,7 @@ exports.log = function (value) {
 				requestActive = false;
 			});
 			
-			req.write(JSON.stringify(batch));
+			req.write(data);
 			req.end();
 		}
 		
