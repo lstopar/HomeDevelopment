@@ -15,7 +15,7 @@ exports.log = function (value) {
 			timestamp: new Date().getTime()
 		};
 		for (var key in value) {
-			transformed[key] = value;
+			transformed[key] = value[key];
 		}
 		
 		values.push(transformed);

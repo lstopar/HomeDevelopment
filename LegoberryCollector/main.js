@@ -36,10 +36,15 @@ var db = (function () {
 			for (var keyN = 0; keyN < keys.length; keyN++) {
 				insert.push(fields[i][keys[keyN]]);
 			}
+			
+			log.debug(JSON.stringify(insert));
+			
 			sql += mysql.format(formatStr, insert);
 			if (i < fields.length-1)
 				sql += ',';
 		}
+		
+		log.debug('insert statement: %s', sql);
 		
 		return sql;
 	}
