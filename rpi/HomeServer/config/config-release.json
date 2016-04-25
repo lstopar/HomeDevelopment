@@ -8,7 +8,7 @@
 		"host": "brutalius.ijs.si",
 		"port": 80,
 		"path": "/legoberry/log",
-		"batchSize": 200
+		"batchSize": 500
 	},
 	"session": {
 		"secret": "enigma",
