@@ -126,6 +126,7 @@ private:
 	// structures to convert from JS to cpp IDs
 	THash<TStr, TIntPr> ValNmNodeIdValIdPrH;
 	THash<TIntPr, TStr> NodeIdValIdPrValNmH;
+	THashSet<TUInt16> NodeIdSet;
 
 	v8::Persistent<v8::Function> OnValueCallback;
 	v8::Persistent<v8::Function> OnPongCallback;

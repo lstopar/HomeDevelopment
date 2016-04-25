@@ -325,6 +325,7 @@ TNodeJsRf24Radio::TNodeJsRf24Radio(const uint16& NodeId, const int& PinCE, const
 	Radio(NodeId, PinCE, PinCSN, BCM2835_SPI_SPEED_8MHZ, _Notify),
 	ValNmNodeIdValIdPrH(),
 	NodeIdValIdPrValNmH(),
+	NodeIdSet(),
 	OnValueCallback(),
 	Notify(_Notify) {
 
@@ -341,6 +342,7 @@ TNodeJsRf24Radio::TNodeJsRf24Radio(const uint16& NodeId, const int& PinCE, const
 
 		ValNmNodeIdValIdPrH.AddDat(ValNm, TIntPr(NodeId, ValId));
 		NodeIdValIdPrValNmH.AddDat(TIntPr(NodeId, ValId), ValNm);
+		NodeIdSet.AddKey(NodeId);
 	}
 }
 
@@ -503,18 +505,7 @@ void TNodeJsRf24Radio::OnPongMainThread(const uint16& NodeId) {
 
 		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got pong from node %u", NodeId);
 
-		// TODO optimize check
-		bool IsValidNodeId = false;
-		int KeyId = NodeIdValIdPrValNmH.FFirstKeyId();
-		while (NodeIdValIdPrValNmH.FNextKeyId(KeyId)) {
-			const TIntPr& NodeIdValIdPr = NodeIdValIdPrValNmH.GetKey(KeyId);
-			if (NodeIdValIdPr.Val1 == NodeId) {
-				IsValidNodeId = true;
-				break;
-			}
-		}
-
-		EAssertR(IsValidNodeId, "Received invalid node ID: " + TUInt::GetStr(NodeId));
+		EAssertR(NodeIdSet.IsKey(NodeId), "Received invalid node ID: " + TUInt::GetStr(NodeId));
 
 		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnPongCallback);
 		TNodeJsUtil::ExecuteVoid(Callback, v8::Integer::New(Isolate, (int) NodeId));
