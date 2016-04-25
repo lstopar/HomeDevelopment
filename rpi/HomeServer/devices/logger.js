@@ -58,6 +58,7 @@ exports.log = function (value) {
 				log.error(e, 'Exception while posting to server!');
 				values = batch.concat(values);
 				requestActive = false;
+				log.info('I have put values back into the cache, cache size: %d ...', values.length);
 			});
 			
 			req.write(data);
