@@ -309,6 +309,7 @@ void TYL40Adc::CleanUp() {
 
 ///////////////////////////////////////////
 //// RF24 Radio transmitter
+const uint64 TRf24Radio::TReadThread::STATISTICS_INTERVAL = 10000;	// 10 seconds
 const uint64 TRf24Radio::ACK_TIMEOUT = 80;
 
 void TRf24Radio::TReadThread::Run() {

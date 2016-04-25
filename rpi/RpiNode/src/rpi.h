@@ -140,6 +140,8 @@ public:
 private:
 	class TReadThread: public TThread {
 	private:
+		static const uint64 STATISTICS_INTERVAL;
+
 		TRf24Radio* Radio;
 		TVec<TMsgInfo> MsgQ;
 		PNotify Notify;
