@@ -1,6 +1,10 @@
+var express = require('express');
 var mysql = require('mysql');
+var bodyParser = require('body-parser');
 
 var config = require('./config.js');
+
+var app = express();
 
 log.info('Creating MySQL connection pool ...');
 
@@ -41,7 +45,7 @@ var db = (function () {
 	}
 	
 	return {
-		insertReadings: function (readings) {
+		insert: function (readings) {
 			if (log.debug())
 				log.debug('Inserting readings ...');
 			
@@ -84,15 +88,23 @@ function handleServerError(e, req, res) {
 }
 
 function initApi() {
-	app.post('data/push', function (req, res) {
+	app.post('/log', function (req, res) {
 		try {
-			var readings = req.body.readings;
+			var readings = req.body;
 			
 			if (log.info())
 				log.info('Received %d readings ...', readings.length);
 			
-			res.status(204);	// no content
-			res.end();
+			db.insert(readings, function (e) {
+				if (e != null) {
+					log.error(e, 'Failed to insert readings!');
+					handleServerError(e, req, res);
+					return;
+				}
+				
+				res.status(204);	// no content
+				res.end();
+			});
 		} catch (e) {
 			handleServerError(e, req, res);
 		}
@@ -101,6 +113,8 @@ function initApi() {
 
 function initServer() {
 	log.info('Initializing web server ...');
+	
+	app.use('/log', bodyParser.json());
 	
 	initApi();
 		

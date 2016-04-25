@@ -2,6 +2,16 @@
 	"server": {
 		"port": 8080
 	},
+	"log": {
+		"logger": {
+			"level": "debug",
+			"outputMode": "short",
+			"stream": {
+				"type": "stdout",
+				"file": "log.log"
+			}
+		}
+	},
 	"database": {
 		"host": "localhost",
 		"user": "legoberry",
