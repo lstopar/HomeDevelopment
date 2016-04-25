@@ -6,7 +6,7 @@
 	},
 	"logger": {
 		"host": "brutalius.ijs.si",
-		"port": 7979,
+		"port": 80,
 		"path": "/legoberry/log",
 		"batchSize": 10
 	},
