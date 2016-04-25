@@ -372,7 +372,7 @@ void TRf24Radio::TReadThread::Run() {
 				Notify->OnNotify(ntInfo, "READ THREAD STATISTICS");
 				Notify->OnNotifyFmt(ntInfo, "interval duration: %lu msecs", Dur);
 				Notify->OnNotifyFmt(ntInfo, "iterations in interval: %lu", IntervalIterN);
-				Notify->OnNotifyFmt(ntInfo, "iterations per second: %.3f", double(IntervalIterN) / double(Dur));
+				Notify->OnNotifyFmt(ntInfo, "iterations per second: %.3f", 1000* double(IntervalIterN) / double(Dur));
 				Notify->OnNotifyFmt(ntInfo, "total messages: %lu", TotalMsgs);
 				Notify->OnNotifyFmt(ntInfo, "messages in interval: %u", IntervalMsgs);
 				Notify->OnNotify(ntInfo, "===============================================================");
