@@ -379,7 +379,7 @@ void TRf24Radio::TReadThread::Run() {
 
 				LastStatTime = CurrTm;
 				IntervalMsgs = 0;
-				IntervalIterN++;
+				IntervalIterN = 0;
 			}
 
 			delayMicroseconds(500);
