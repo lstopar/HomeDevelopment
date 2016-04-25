@@ -511,13 +511,13 @@ void TNodeJsRf24Radio::OnPongMainThread(const uint16& NodeId) {
 }
 
 void TNodeJsRf24Radio::OnPong(const uint16& NodeId) {
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Executing pong callback from node: %u", NodeId);
-	TNodeJsAsyncUtil::ExecuteOnMainAndWait(new TOnPongTask(this, NodeId), true);
+//	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Executing pong callback from node: %u", NodeId);
+	TNodeJsAsyncUtil::ExecuteOnMain(new TOnPongTask(this, NodeId), true);
 }
 
 void TNodeJsRf24Radio::OnValue(const uint16& NodeId, const char& ValId, const int& Val) {
 //	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Executing callback for value id: %d", ValId);
-	TNodeJsAsyncUtil::ExecuteOnMainAndWait(new TOnMsgTask(this, NodeId, (int) ValId, Val), true);
+	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, NodeId, (int) ValId, Val), true);
 }
 
 void TNodeJsRf24Radio::TOnMsgTask::Run() {
