@@ -66,7 +66,12 @@ function setValue(vals) {
 			setValue(rpiDevices[i]);
 		}
 		// set radio devices
-		radio.radio.set(vals);
+		if (radioDevices.length > 0) {
+			if (log.debug())
+				log.debug('Setting %d radio values ...', radioDevices.length);
+			
+			radio.radio.set(radioDevices);
+		}
 		// set EnOcean devices
 		for (var i = 0; i < enoceanDevices.length; i++) {
 			setValue(enoceanDevices[i]);
