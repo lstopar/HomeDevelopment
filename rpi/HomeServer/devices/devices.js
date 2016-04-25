@@ -1,4 +1,5 @@
 var utils = require('../src/utils.js');
+var logger = require('./logger.js');
 
 //=======================================================
 // IDs
@@ -251,6 +252,12 @@ module.exports = exports = function (_getValue, _setValue) {
 	function onValue(sensorId, value) {
 		if (log.trace())
 			log.trace('Received value in devices: { %s, %d }', sensorId, value);
+		
+		try {
+			logger.log({ sensorId: sensorId, value: value });
+		} catch (e) {
+			log.error(e, 'Exception while sending data to server!');
+		}
 		
 		if (sensorId == MOTION_TV_ID || sensorId == MOTION_SOFA_ID) {
 			motionDetector.onMotion(sensorId, value == 1);
