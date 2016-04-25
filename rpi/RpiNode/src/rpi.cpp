@@ -602,7 +602,6 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 						if (From != NodeAddr) {
 							Notify->OnNotifyFmt(ntWarn, "WTF!? received ACK from incorrect node, expected: %u, got: %u", NodeAddr, From);
 						} else {
-							Notify->OnNotifyFmt(ntInfo, "Received ack from node %u", NodeAddr);
 							ReceivedAck = true;
 						}
 					} else {
