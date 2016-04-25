@@ -386,11 +386,11 @@ void TRf24Radio::TReadThread::Run() {
 		} catch (const PExcept& Except) {
 			Notify->OnNotifyFmt(TNotifyType::ntErr, "Error on the read thread: %s", Except->GetMsgStr().CStr());
 			TFOut FOut("errors.txt", true);
-			FOut.Save(TStr("Exception on read thread: ") + Except->GetMsgStr());
+			FOut.PutStr(TStr("Exception on read thread: ") + Except->GetMsgStr());
 		} catch (...) {
 			Notify->OnNotifyFmt(TNotifyType::ntErr, "Unknown error on the read thread!");
 			TFOut FOut("errors.txt", true);
-			FOut.Save("Unknown exception on read thread!");
+			FOut.PutStr("Unknown exception on read thread!");
 		}
 	}
 }
