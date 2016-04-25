@@ -370,11 +370,11 @@ void TRf24Radio::TReadThread::Run() {
 
 				Notify->OnNotify(ntInfo, "===============================================================");
 				Notify->OnNotify(ntInfo, "READ THREAD STATISTICS");
-				Notify->OnNotifyFmt(ntInfo, "interval duration: %lu msecs", Dur);
-				Notify->OnNotifyFmt(ntInfo, "iterations in interval: %lu", IntervalIterN);
+				Notify->OnNotifyFmt(ntInfo, "interval duration: %s msecs", TUInt64::GetStr(Dur).CStr());
+				Notify->OnNotifyFmt(ntInfo, "iterations in interval: %s", TUInt64::GetStr(IntervalIterN).CStr());
 				Notify->OnNotifyFmt(ntInfo, "iterations per second: %.3f", 1000* double(IntervalIterN) / double(Dur));
-				Notify->OnNotifyFmt(ntInfo, "total messages: %lu", TotalMsgs);
-				Notify->OnNotifyFmt(ntInfo, "messages in interval: %u", IntervalMsgs);
+				Notify->OnNotifyFmt(ntInfo, "total messages: %s", TUInt64::GetStr(TotalMsgs).CStr());
+				Notify->OnNotifyFmt(ntInfo, "messages in interval: %s", TUInt::GetStr(IntervalMsgs).CStr());
 				Notify->OnNotify(ntInfo, "===============================================================");
 
 				LastStatTime = CurrTm;
