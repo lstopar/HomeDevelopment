@@ -178,7 +178,6 @@ void TEoGateway::Read() {
 			Notify->OnNotify(TNotifyType::ntInfo, "Received telegram ...");
 
 			Msg = eoMessage(Gateway.telegram);
-			eoDebug::Print(Msg);
 
 			if (RecV & RECV_PROFILE) {
 				DeviceId = Gateway.device->ID;
@@ -193,27 +192,6 @@ void TEoGateway::Read() {
 			Callback->OnMsg(DeviceId, Msg);
 		}
 	}
-//
-//	if ((RecV & RECV_TELEGRAM_SEC) > 0) {
-//		printf("Received secure telegram!\n");
-//		// TODO
-//	}
-//	if ((RecV & RECV_ERROR) > 0) {
-//		printf("Received error telegram!\n");
-//		// TODO
-//	}
-//	if ((RecV & RECV_DEVICE_ADDED) > 0) {
-//		printf("Device added!\n");
-//		// TODO
-//	}
-//	if ((RecV & RECV_SECTEACHIN) > 0) {
-//		printf("Received second teachIN!\n");
-//		// TODO
-//	}
-//	if ((RecV & RECV_REMAN) > 0) {
-//		printf("Received remote management message!\n");
-//		// TODO
-//	}
 }
 
 void TEoGateway::OnDeviceConnected(const uint32& DeviceId) const {
