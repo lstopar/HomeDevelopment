@@ -497,6 +497,7 @@ void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueI
 
 		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnValueCallback);
 		TNodeJsUtil::ExecuteVoid(Callback, TNodeJsUtil::ParseJson(Isolate, JsonVal));
+		Notify->OnNotify(ntInfo, "Callback Executed!");
 	}
 	else {
 		Notify->OnNotify(ntWarn, "Callback is empty, cannot execute!");
