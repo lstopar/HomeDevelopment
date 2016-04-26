@@ -477,7 +477,7 @@ void TNodeJsRf24Radio::onPong(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 
 void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueId,
 		const int& Val) {
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received value id %d from node %u in main thread!", ValId, NodeId);
+	Notify->OnNotifyFmt(ntInfo, "Received value id %d from node %u in main thread!", ValueId, NodeId);
 
 	if (!OnValueCallback.IsEmpty()) {
 		v8::Isolate* Isolate = v8::Isolate::GetCurrent();
