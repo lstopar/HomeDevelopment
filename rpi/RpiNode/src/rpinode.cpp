@@ -477,12 +477,14 @@ void TNodeJsRf24Radio::onPong(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 
 void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueId,
 		const int& Val) {
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received value id %d from node %u in main thread!", ValId, NodeId);
+
 	if (!OnValueCallback.IsEmpty()) {
 		v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 		v8::HandleScope HandleScope(Isolate);
 
 		const int ValId = (int) ValueId;
-//		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got value for value id %d", ValId);
+		Notify->OnNotify(ntInfo, "Executing callback");
 
 		TIntPr NodeIdValIdPr(NodeId, (int) ValId);
 		EAssertR(NodeIdValIdPrValNmH.IsKey(NodeIdValIdPr), "Node-valueId pair not stored in the structures!");
@@ -495,6 +497,9 @@ void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueI
 
 		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnValueCallback);
 		TNodeJsUtil::ExecuteVoid(Callback, TNodeJsUtil::ParseJson(Isolate, JsonVal));
+	}
+	else {
+		Notify->OnNotify(ntWarn, "Callback is empty, cannot execute!");
 	}
 }
 
@@ -518,7 +523,7 @@ void TNodeJsRf24Radio::OnPong(const uint16& NodeId) {
 }
 
 void TNodeJsRf24Radio::OnValue(const uint16& NodeId, const char& ValId, const int& Val) {
-//	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Executing callback for value id: %d", ValId);
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received value id: %d from node %u in wrapper ...", ValId, NodeId);
 	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, NodeId, (int) ValId, Val), true);
 }
 
