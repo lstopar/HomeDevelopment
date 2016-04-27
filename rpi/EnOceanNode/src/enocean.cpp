@@ -27,9 +27,9 @@ void TEoGateway::TReadThread::Run() {
 
 				Gateway->Notify->OnNotify(ntInfo, "==========================================");
 				Gateway->Notify->OnNotify(ntInfo, "ENOCEAN READ THREAD STATISTICS");
-				Gateway->Notify->OnNotifyFmt(ntInfo, "Interval length: %ssecs", TFlt::GetStr(double(CurrTm - PrintTm) / 1000, 3));
-				Gateway->Notify->OnNotifyFmt(ntInfo, "Iterations in interval: ", IterN);
-				Gateway->Notify->OnNotifyFmt(ntInfo, "Total iterations: ", TotalIterN);
+				Gateway->Notify->OnNotifyFmt(ntInfo, "Interval length: %s secs", TFlt::GetStr(double(CurrTm - PrintTm) / 1000, 3).CStr());
+				Gateway->Notify->OnNotifyFmt(ntInfo, "Iterations in interval: %s", TUInt64::GetStr(IterN).CStr());
+				Gateway->Notify->OnNotifyFmt(ntInfo, "Total iterations: %s", TUInt64::GetStr(TotalIterN).CStr());
 				Gateway->Notify->OnNotify(ntInfo, "==========================================");
 
 				IterN = 0;
