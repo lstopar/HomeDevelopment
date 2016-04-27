@@ -621,7 +621,10 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 			RetryN++;
 		}
 	} catch (const PExcept& Except) {
-		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception while sending!");
+		Notify->OnNotifyFmt(TNotifyType::ntErr, "Exception while sending to node %u: %s!", NodeAddr, Except->GetMsgStr().CStr());
+		return false;
+	} catch (...) {
+		Notify->OnNotify(TNotifyType::ntErr, "Unknown exception while sending to node %u!", NodeAddr);
 		return false;
 	}
 
