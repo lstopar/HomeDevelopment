@@ -17,17 +17,17 @@ const int LED_PIN = 3;
 const int PIN_BLUE = 5;
 const int PIN_RED = 6;
 const int PIN_GREEN = 9;
-const int PIR_TV_PIN = 4;
+//const int PIR_TV_PIN = 4;
 const int MODE_BLINK_RGB = 15;
 const int MODE_CYCLE_HSV = 14;
 
-const int N_VAL_IDS = 7;
+const int N_VAL_IDS = 6;
 const int VAL_IDS[N_VAL_IDS] = {
   LED_PIN,
   PIN_BLUE,
   PIN_RED,
   PIN_GREEN,
-  PIR_TV_PIN,
+//  PIR_TV_PIN,
   MODE_BLINK_RGB,
   MODE_CYCLE_HSV
 };
@@ -35,7 +35,6 @@ const int VAL_IDS[N_VAL_IDS] = {
 int pin3Val = 0;
 
 TRgbStrip rgb(PIN_RED, PIN_GREEN, PIN_BLUE);
-TDigitalPir pir(PIR_TV_PIN);
 
 RF24 _radio(7,8);
 RF24Network network(_radio);
@@ -65,7 +64,7 @@ void setup() {
 
   analogWrite(LED_PIN, 0);
   rgb.reset();
-  pir.init();
+//  pir.init();
  
   SPI.begin();
 
@@ -80,7 +79,7 @@ void setup() {
   Serial.print("Values per payload: ");
   Serial.println(VALS_PER_PAYLOAD);
 
-  pir.setCallback(onPirEvent);
+//  pir.setCallback(onPirEvent);
 }
 
 //====================================================
@@ -118,9 +117,9 @@ bool getRadioVal(const char& valId, TRadioValue& rval) {
   else if (valId == MODE_CYCLE_HSV) {
     rval.SetVal(rgb.isCyclingHsv());
   }
-  else if (valId == PIR_TV_PIN) {
-    rval.SetVal(pir.isOn());
-  }
+//  else if (valId == PIR_TV_PIN) {
+//    rval.SetVal(pir.isOn());
+//  }
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId, HEX);
     return false;
@@ -215,15 +214,15 @@ void processSet(const uint16_t& callerAddr, const std::vector<TRadioValue>& valV
   }
 }
 
-//====================================================
-// CALLBACK FUNCTIONS
-//====================================================
-
-void onPirEvent(const bool& motion) {
-  std::vector<TRadioValue> outV;
-  processGet(ADDRESS_RPI, PIR_TV_PIN, outV);
-  radio.push(ADDRESS_RPI, outV);
-}
+////====================================================
+//// CALLBACK FUNCTIONS
+////====================================================
+//
+//void onPirEvent(const bool& motion) {
+//  std::vector<TRadioValue> outV;
+//  processGet(ADDRESS_RPI, PIR_TV_PIN, outV);
+//  radio.push(ADDRESS_RPI, outV);
+//}
 
 //====================================================
 // MAIN LOOP
@@ -232,6 +231,6 @@ void onPirEvent(const bool& motion) {
 void loop(void) {
   radio.update();
   rgb.update();
-  pir.update();
+//  pir.update();
 }
 

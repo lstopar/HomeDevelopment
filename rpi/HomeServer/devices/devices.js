@@ -319,14 +319,6 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	id: 01,
 				    	name: 'Arduino - TV',
 				    	sensors: [
-							{
-								id: MOTION_TV_ID,
-								internalId: 4,
-								type: 'pir',
-								unit: '',
-								name: 'Motion TV',
-								description: ''
-							},
 				    	    {
 				    	    	id: INDICATOR_LED_ID,
 				    	    	internalId: 3,
@@ -406,7 +398,15 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	    	unit: '',
 				    	    	name: 'Motion sofa',
 				    	    	description: ''
-				    	    }
+				    	    },
+							{
+								id: MOTION_TV_ID,
+								internalId: 5,
+								type: 'pir',
+								unit: '',
+								name: 'Motion TV',
+								description: ''
+							}
 				    	]
 				    }
 				],

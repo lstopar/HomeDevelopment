@@ -12,13 +12,16 @@
 
 const uint16_t MY_ADDRESS = 02;
 const int PIR_PIN = 4;
-const int LUM_PIN = 3;
-const int VOUT_PIN = 5;
+const int PIR_TV_PIN = 5;
 
-const int N_VAL_IDS = 2;
+const int LUM_PIN = 3;
+//const int VOUT_PIN = 5;
+
+const int N_VAL_IDS = 3;
 const int VAL_IDS[N_VAL_IDS] = {
   PIR_PIN,
-  LUM_PIN
+  LUM_PIN,
+  PIR_TV_PIN
 };
 
 RF24 _radio(7,8);
@@ -26,11 +29,13 @@ RF24Network network(_radio);
 TRf24Wrapper radio(MY_ADDRESS, _radio, network);
 
 TAnalogPir pir(PIR_PIN, 1000, 500);
+TDigitalPir tvPir(PIR_TV_PIN);
 
 void processGet(const uint16_t&, const std::vector<char>&);
 void processSet(const uint16_t&, const std::vector<TRadioValue>&);
 void onPirEvent(const bool& motion);
-void onSwitchEvent(const bool& isOn);
+void onTvPirEvent(const bool& motion);
+//void onSwitchEvent(const bool& isOn);
 
 void setup() {
   Serial.begin(9600);
@@ -42,11 +47,8 @@ void setup() {
   pinMode(PIR_PIN, INPUT);
   pinMode(LUM_PIN, INPUT);
   
-  pinMode(VOUT_PIN, OUTPUT);
-
-  digitalWrite(VOUT_PIN, HIGH);
-
   pir.init();
+  tvPir.init();
  
   SPI.begin();
 
@@ -59,6 +61,7 @@ void setup() {
 
   // set callbacks
   pir.setCallback(onPirEvent);
+  tvPir.setCallback(onTvPirEvent);
 }
 
 //====================================================
@@ -73,6 +76,9 @@ bool getRadioVal(const char& valId, TRadioValue& rval) {
   }
   else if (valId == LUM_PIN) {
     rval.SetVal(analogRead(LUM_PIN) >> 2);
+  }
+  else if (valId == PIR_TV_PIN) {
+    rval.SetVal(tvPir.isOn());
   }
   else {
     Serial.print("Unknown val ID: "); Serial.println(valId, HEX);
@@ -128,8 +134,13 @@ void onPirEvent(const bool& motion) {
   processGet(ADDRESS_RPI, PIR_PIN);
 }
 
+void onTvPirEvent(const bool& motion) {
+  processGet(ADDRESS_RPI, PIR_TV_PIN);
+}
+
 void loop(void) {
   radio.update();
   pir.update();
+  tvPir.update();
 }
 
