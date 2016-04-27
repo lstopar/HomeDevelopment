@@ -88,33 +88,35 @@ bool getRadioVal(const char& valId, TRadioValue& rval) {
   return true;
 }
 
-void processGet(const uint16_t& callerAddr, const char& valId) {
+void internalGet(const char& valId, std::vector<TRadioValue>& valV) {
   if (valId == VAL_ID_ALL) {
-    std::vector<TRadioValue> rvals;
-
     for (int valN = 0; valN < N_VAL_IDS; valN++) {
       TRadioValue rval;
       getRadioVal(VAL_IDS[valN], rval);
-      rvals.push_back(rval);
+      valV.push_back(rval);
     }
-
-    radio.push(callerAddr, rvals);
-    
-    Serial.println("Sent all values!");
   } else {
     TRadioValue radioVal;
     if (getRadioVal(valId, radioVal)) {
-      radio.push(callerAddr, radioVal);
+      valV.push_back(radioVal);
     }
   }
 }
 
 void processGet(const uint16_t& callerAddr, const std::vector<char>& valueIdV) {
   Serial.println("Processing GET request ...");
+
+  std::vector<TRadioValue> valV;
+  
   for (int valN = 0; valN < valueIdV.size(); valN++) {
     const char& valId = valueIdV[valN];
-    processGet(callerAddr, valId);
+    internalGet(valId, valV);
   }
+
+  if (!valV.empty()) {
+    radio.push(callerAddr, valV);
+  }
+  
   Serial.println("Processed!");
 }
 
@@ -131,11 +133,23 @@ void processSet(const uint16_t& callerAddr, const std::vector<TRadioValue>& valV
 //====================================================
 
 void onPirEvent(const bool& motion) {
-  processGet(ADDRESS_RPI, PIR_PIN);
+  std::vector<TRadioValue> outV;
+  
+  internalGet(PIR_PIN, outV);
+
+  if (!outV.empty()) {
+    radio.push(ADDRESS_RPI, outV);
+  }
 }
 
 void onTvPirEvent(const bool& motion) {
-  processGet(ADDRESS_RPI, PIR_TV_PIN);
+  std::vector<TRadioValue> outV;
+  
+  internalGet(PIR_TV_PIN, outV);
+  
+  if (!outV.empty()) {
+    radio.push(ADDRESS_RPI, outV);
+  }
 }
 
 void loop(void) {

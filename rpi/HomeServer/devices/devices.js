@@ -5,7 +5,7 @@ var logger = require('./logger.js');
 // IDs
 //=======================================================
 
-var MOTION_SOFA_ID = 'motion-sofa';
+var MOTION_DOOR_ID = 'motion-entrance';
 var MOTION_TV_ID = 'motion-tv';
 var TV_ID = 'lr-tv';
 var LUMINOSITY_ID = 'lr-lum';
@@ -47,12 +47,12 @@ function getMotionTv() {
 	return getValue(MOTION_TV_ID) == 1;
 }
 
-function getMotionSofa() {
-	return getValue(MOTION_SOFA_ID) == 1;
+function getMotionDoor() {
+	return getValue(MOTION_DOOR_ID) == 1;
 }
 
 function getMotion() {
-	return getMotionTv() || getMotionSofa()	;
+	return getMotionTv() || getMotionDoor()	;
 }
 
 function isAmbientOn() {
@@ -143,7 +143,7 @@ var MotionDetector = function () {
 	var that = {
 		onMotion: function (sensorId, motion) {
 			if (getMotion()) {
-				setValue({ sensorId: INDICATOR_LED_ID, value: 100 });
+				setValue({ sensorId: INDICATOR_LED_ID, value: 255 });
 								
 				if (getLuminosity() < LUMINOSITY_THRESHOLD && that.timeSinceMotion() > EMPTY_ROOM_THRESHOLD) {
 					ambientOn();
@@ -259,7 +259,7 @@ module.exports = exports = function (_getValue, _setValue) {
 			log.error(e, 'Exception while sending data to server!');
 		}
 		
-		if (sensorId == MOTION_TV_ID || sensorId == MOTION_SOFA_ID) {
+		if (sensorId == MOTION_TV_ID || sensorId == MOTION_DOOR_ID) {
 			motionDetector.onMotion(sensorId, value == 1);
 		}
 		else if (sensorId == TV_ID) {
@@ -296,7 +296,7 @@ module.exports = exports = function (_getValue, _setValue) {
 		    	img: 'img/motion.svg',
 		    	sensorIds: [
 		    	    MOTION_TV_ID,
-		    	    MOTION_SOFA_ID
+		    	    MOTION_DOOR_ID
 		    	]
 		    },
 		    {
@@ -392,11 +392,11 @@ module.exports = exports = function (_getValue, _setValue) {
 								}
 							},
 				    	    {
-				    	    	id: MOTION_SOFA_ID,
+				    	    	id: MOTION_DOOR_ID,
 				    	    	internalId: 4,
 				    	    	type: 'pir',
 				    	    	unit: '',
-				    	    	name: 'Motion sofa',
+				    	    	name: 'Motion door',
 				    	    	description: ''
 				    	    },
 							{

@@ -223,7 +223,9 @@ void TDigitalPir::update() {
 }
 
 bool TDigitalPir::readInput() {
-	return digitalRead(readPin) == HIGH;
+	const int val = digitalRead(readPin);
+	//Serial.println(val);
+	return val == HIGH;
 }
 
 ///////////////////////////////////////
