@@ -638,7 +638,7 @@ exports.init = function () {
 				log.error(e, 'Exception while reading all devices!');
 			}
 		}, config.samplingInterval);
-	}, 5000);
+	}, 1000);
 	
 	log.info('Sensors initialized!');
 }
