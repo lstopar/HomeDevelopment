@@ -5,8 +5,8 @@ var logger = require('./logger.js');
 // IDs
 //=======================================================
 
-var MOTION_DOOR_ID = 'motion-entrance';
 var MOTION_TV_ID = 'motion-tv';
+var MOTION_DOOR_ID = 'motion-door';
 var TV_ID = 'lr-tv';
 var LUMINOSITY_ID = 'lr-lum';
 var TEMPERATURE_ID = 'lr-temp';
@@ -43,16 +43,16 @@ function getLuminosity() {
 	return getValue(LUMINOSITY_ID);
 }
 
-function getMotionTv() {
-	return getValue(MOTION_TV_ID) == 1;
-}
-
 function getMotionDoor() {
 	return getValue(MOTION_DOOR_ID) == 1;
 }
 
+function getMotionTv() {
+	return getValue(MOTION_TV_ID) == 1;
+}
+
 function getMotion() {
-	return getMotionTv() || getMotionDoor()	;
+	return getMotionDoor() || getMotionTv()	;
 }
 
 function isAmbientOn() {
@@ -259,7 +259,7 @@ module.exports = exports = function (_getValue, _setValue) {
 			log.error(e, 'Exception while sending data to server!');
 		}
 		
-		if (sensorId == MOTION_TV_ID || sensorId == MOTION_DOOR_ID) {
+		if (sensorId == MOTION_DOOR_ID || sensorId == MOTION_TV_ID) {
 			motionDetector.onMotion(sensorId, value == 1);
 		}
 		else if (sensorId == TV_ID) {
@@ -295,8 +295,8 @@ module.exports = exports = function (_getValue, _setValue) {
 		    	id: 'group-motion',
 		    	img: 'img/motion.svg',
 		    	sensorIds: [
-		    	    MOTION_TV_ID,
-		    	    MOTION_DOOR_ID
+		    	    MOTION_DOOR_ID,
+		    	    MOTION_TV_ID
 		    	]
 		    },
 		    {
@@ -392,19 +392,19 @@ module.exports = exports = function (_getValue, _setValue) {
 								}
 							},
 				    	    {
-				    	    	id: MOTION_DOOR_ID,
+				    	    	id: MOTION_TV_ID,
 				    	    	internalId: 4,
 				    	    	type: 'pir',
 				    	    	unit: '',
-				    	    	name: 'Motion door',
+				    	    	name: 'Motion TV',
 				    	    	description: ''
 				    	    },
 							{
-								id: MOTION_TV_ID,
+								id: MOTION_DOOR_ID,
 								internalId: 5,
 								type: 'pir',
 								unit: '',
-								name: 'Motion TV',
+								name: 'Motion door',
 								description: ''
 							}
 				    	]
