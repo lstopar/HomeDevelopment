@@ -25,12 +25,12 @@ void TEoGateway::TReadThread::Run() {
 			if (CurrTm - PrintTm > 11000) {
 				TotalIterN += IterN;
 
-				Notify->OnNotify(ntInfo, "==========================================");
-				Notify->OnNotify(ntInfo, "ENOCEAN READ THREAD STATISTICS");
-				Notify->OnNotifyFmt(ntInfo, "Interval length: %ssecs", TFlt::GetStr(double(CurrTm - PrintTm) / 1000, 3));
-				Notify->OnNotifyFmt(ntInfo, "Iterations in interval: ", IterN);
-				Notify->OnNotifyFmt(ntInfo, "Total iterations: ", TotalIterN);
-				Notify->OnNotify(ntInfo, "==========================================");
+				Gateway->Notify->OnNotify(ntInfo, "==========================================");
+				Gateway->Notify->OnNotify(ntInfo, "ENOCEAN READ THREAD STATISTICS");
+				Gateway->Notify->OnNotifyFmt(ntInfo, "Interval length: %ssecs", TFlt::GetStr(double(CurrTm - PrintTm) / 1000, 3));
+				Gateway->Notify->OnNotifyFmt(ntInfo, "Iterations in interval: ", IterN);
+				Gateway->Notify->OnNotifyFmt(ntInfo, "Total iterations: ", TotalIterN);
+				Gateway->Notify->OnNotify(ntInfo, "==========================================");
 
 				IterN = 0;
 				PrintTm = CurrTm;

@@ -1,3 +1,5 @@
+var SegfaultHandler = require('segfault-handler');
+
 var config = require('./config.js');
 var server = require('./src/server.js');
 var sensors = require('./src/sensors.js');
@@ -23,6 +25,8 @@ function hackClasses() {
 }
 
 try {
+	SegfaultHandler.registerHandler("crash.log");
+	
 	hackClasses();
 	
 	sensors.init();
