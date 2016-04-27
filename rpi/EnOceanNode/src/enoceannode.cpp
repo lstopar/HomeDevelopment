@@ -134,35 +134,39 @@ void TNodeJsD201Device::type(v8::Local<v8::String> Name, const v8::PropertyCallb
 }
 
 void TNodeJsD201Device::OnMsg(const eoMessage& Msg) {
-	Notify->OnNotify(ntInfo, "Got message in JsDevice ...");
-	d2_01Command Command = eoEEP_D201xx::GetCommand(Msg);
+	try {
+		Notify->OnNotify(ntInfo, "Got enocean message in JsDevice ...");
+		d2_01Command Command = eoEEP_D201xx::GetCommand(Msg);
 
-	switch (Command) {
-	case ACTUATOR_STATUS_RESPONSE: {
-		eoEEP_D201xx Profile;
-		Profile.Parse(Msg);
+		switch (Command) {
+		case ACTUATOR_STATUS_RESPONSE: {
+			eoEEP_D201xx Profile;
+			Profile.Parse(Msg);
 
-		uint8 Channel, Value;
-		Profile.GetValue(E_IO_CHANNEL, Channel);
-		Profile.GetValue(F_ON_OFF, Value);
-		OnStatus(Channel, Value);
-		break;
-	}
-	case ACTUATOR_MEASUREMENT_RESPONSE: {
-		// TODO
-		break;
-	}
-	case ACTUATOR_PILOT_WIRE_MODE_RESPONSE: {
-		// TODO
-		break;
-	}
-	case ACTUATOR_SET_EXTERNAL_INTERFACE_SETTINGS_RESPONSE: {
-		// TODO
-		break;
-	}
-	default: {
-		throw TExcept::New("Unhandled command: " + TCh::GetHex(Command));
-	}
+			uint8 Channel, Value;
+			Profile.GetValue(E_IO_CHANNEL, Channel);
+			Profile.GetValue(F_ON_OFF, Value);
+			OnStatus(Channel, Value);
+			break;
+		}
+		case ACTUATOR_MEASUREMENT_RESPONSE: {
+			// TODO
+			break;
+		}
+		case ACTUATOR_PILOT_WIRE_MODE_RESPONSE: {
+			// TODO
+			break;
+		}
+		case ACTUATOR_SET_EXTERNAL_INTERFACE_SETTINGS_RESPONSE: {
+			// TODO
+			break;
+		}
+		default: {
+			throw TExcept::New("Unhandled command: " + TCh::GetHex(Command));
+		}
+		}
+	} catch (...) {
+		Notify->OnNotifyFmt(ntErr, "Unknown exception in EnOcean device!");
 	}
 }
 
@@ -170,11 +174,16 @@ void TNodeJsD201Device::OnStatus(const uint8& Channel, const uint8& Val) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
-	Notify->OnNotify(ntInfo, "Got message in OnStatus ...");
+	Notify->OnNotifyFmt(ntInfo, "Got message in OnStatus, channel: %u, value: %u ...", Channel, Val);
 
 	if (!StatusCb.IsEmpty()) {
+		Notify->OnNotify(ntInfo, "Executing EnOcean callback ...");
 		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, StatusCb);
 		TNodeJsUtil::ExecuteVoid(Callback, v8::Integer::New(Isolate, (int) Channel), v8::Integer::New(Isolate, (int) Val));
+		Notify->OnNotify(ntInfo, "EnOcean callback executed!");
+	}
+	else {
+		Notify->OnNotify(ntErr, "EnOcean callback is empty!");
 	}
 }
 
@@ -284,7 +293,8 @@ void TNodeJsEoGateway::OnDeviceConnected(const uint32& DeviceId) {
 }
 
 void TNodeJsEoGateway::OnMsg(const uint32& DeviceId, const eoMessage& Msg) {
-	TNodeJsAsyncUtil::ExecuteOnMainAndWait(new TOnMsgTask(this, DeviceId, Msg), true);
+	Notify->OnNotifyFmt(ntInfo, "Received EnOcean message from device %u, pushing to main thread ...", DeviceId);
+	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, DeviceId, Msg), true);
 }
 
 void TNodeJsEoGateway::AddDevice(const uint32& DeviceId, v8::Local<v8::Object>& JsDevice) {
@@ -298,8 +308,13 @@ void TNodeJsEoGateway::AddDevice(const uint32& DeviceId, v8::Local<v8::Object>& 
 }
 
 void TNodeJsEoGateway::OnMsgMainThread(const uint32& DeviceId, const eoMessage& Msg) {
-	TNodeJsEoDevice* Device = GetDevice(DeviceId);
-	Device->OnMsg(Msg);
+	try {
+		Notify->OnNotifyFmt(ntInfo, "Received EnOcean message from device %u on main thread ...", DeviceId);
+		TNodeJsEoDevice* Device = GetDevice(DeviceId);
+		Device->OnMsg(Msg);
+	} catch (const PExcept& Except) {
+		Notify->OnNotifyFmt(ntErr, "Failed to callback device %u!", DeviceId);
+	}
 }
 
 TNodeJsEoDevice* TNodeJsEoGateway::GetDevice(const uint32& DeviceId) const {

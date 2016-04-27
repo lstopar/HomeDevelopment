@@ -13,9 +13,37 @@ const uint64 TEoGateway::LEARN_MODE_TIME = 30000;
 void TEoGateway::TReadThread::Run() {
 	Gateway->Notify->OnNotify(TNotifyType::ntInfo, "Started EnOcean read thread ...");
 
+	uint64 TotalIterN = 0;
+	uint64 IterN = 0;
+	uint64 PrintTm = TTm::GetCurUniMSecs();
+
 	while (true) {
-		Gateway->Read();
-		TSysProc::Sleep(1);
+		try {
+			Gateway->Read();
+
+			const uint64 CurrTm = TTm::GetCurUniMSecs();
+			if (CurrTm - PrintTm > 11000) {
+				TotalIterN += IterN;
+
+				Notify->OnNotify(ntInfo, "==========================================");
+				Notify->OnNotify(ntInfo, "ENOCEAN READ THREAD STATISTICS");
+				Notify->OnNotifyFmt(ntInfo, "Interval length: %ssecs", TFlt::GetStr(double(CurrTm - PrintTm) / 1000, 3));
+				Notify->OnNotifyFmt(ntInfo, "Iterations in interval: ", IterN);
+				Notify->OnNotifyFmt(ntInfo, "Total iterations: ", TotalIterN);
+				Notify->OnNotify(ntInfo, "==========================================");
+
+				IterN = 0;
+				PrintTm = CurrTm;
+			}
+
+			TSysProc::Sleep(1);
+
+			IterN++;
+		} catch (const PExcept& Except) {
+			Gateway->Notify->OnNotify(ntErr, "Unknown exception on EnOcean read thread!");
+			TFOut FOut("errors.txt", true);
+			FOut.PutStr("Unknown error on EnOcean read thread!\n");
+		}
 	}
 }
 

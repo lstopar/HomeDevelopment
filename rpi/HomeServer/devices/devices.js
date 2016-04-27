@@ -454,7 +454,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				configuration: {
 					storageFile: 'config/enocean.txt',
 					serialPort: '/dev/ttyUSB0',
-					verbose: false
+					verbose: true
 				}
 			},
 	  		{

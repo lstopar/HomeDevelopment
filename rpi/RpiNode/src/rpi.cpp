@@ -611,7 +611,9 @@ bool TRf24Radio::Send(const uint16& NodeAddr, const uchar& Command, const TMem& 
 							ReceivedAck = true;
 						}
 					} else {
+						Notify->OnNotify(ntInfo, "Adding to queue ...");
 						ReadThread.AddToQueue(TMsgInfo(From, Type, Payload));
+						Notify->OnNotify(ntInfo, "Added!");
 					}
 				}
 			}
