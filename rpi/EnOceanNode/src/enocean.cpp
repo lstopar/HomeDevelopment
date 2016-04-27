@@ -151,6 +151,8 @@ void TEoGateway::Read() {
 
 	if (RecV == 0) { return; }
 
+	Notify->OnNotify(TNotifyType::ntInfo, "Received message ...");
+
 	if (InLearnMode) {
 		if (RecV & RECV_TEACHIN) {
 			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received TeachIn ...");
@@ -200,10 +202,10 @@ void TEoGateway::Read() {
 		uint32 DeviceId = TUInt::Mn;
 		eoMessage Msg;
 
+		Notify->OnNotify(TNotifyType::ntInfo, "Received telegram ...");
+
 		{
 			TLock Lock(GatewaySection);
-
-			Notify->OnNotify(TNotifyType::ntInfo, "Received telegram ...");
 
 			Msg = eoMessage(Gateway.telegram);
 
