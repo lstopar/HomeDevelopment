@@ -451,7 +451,7 @@ void TNodeJsRf24Radio::ping(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	Args.GetReturnValue().Set(v8::Boolean::New(Isolate, Success));
 }
 
-void TNodeJsRf24Radio::onValue(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+void TNodeJsRf24Radio::on(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
