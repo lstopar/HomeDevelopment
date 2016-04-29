@@ -141,8 +141,7 @@ private:
 	JsDeclareFunction(ping);
 
 	// callbacks
-	JsDeclareFunction(onValue);
-	JsDeclareFunction(onPong);
+	JsDeclareFunction(on);
 
 	void OnMsgMainThread(const uint16& NodeId, const uint8& ValueId,
 			const int& Val);

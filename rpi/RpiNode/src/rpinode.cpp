@@ -282,8 +282,7 @@ void TNodeJsRf24Radio::Init(v8::Handle<v8::Object> Exports) {
 	NODE_SET_PROTOTYPE_METHOD(tpl, "getAll", _getAll);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "set", _set);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "ping", _ping);
-	NODE_SET_PROTOTYPE_METHOD(tpl, "onValue", _onValue);
-	NODE_SET_PROTOTYPE_METHOD(tpl, "onPong", _onPong);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "on", _on);
 
 	Exports->Set(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()), tpl->GetFunction());
 }
@@ -457,23 +456,32 @@ void TNodeJsRf24Radio::onValue(const v8::FunctionCallbackInfo<v8::Value>& Args) 
 	v8::HandleScope HandleScope(Isolate);
 
 	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
-	v8::Local<v8::Function> Cb = TNodeJsUtil::GetArgFun(Args, 0);
+	const TStr EventNm = TNodeJsUtil::GetArgStr(Args, 0);
 
-	JsRadio->OnValueCallback.Reset(Isolate, Cb);
+	if (EventNm == "value") {
+		if (TNodeJsUtil::IsArgNullOrUndef(Args, 1)) {
+			JsRadio->OnValueCallback.Reset();
+		}
+		else {
+			v8::Local<v8::Function> Cb = TNodeJsUtil::GetArgFun(Args, 1);
+			JsRadio->OnValueCallback.Reset(Isolate, Cb);
+		}
+	}
+	else if (EventNm == "pong") {
+		if (TNodeJsUtil::IsArgNullOrUndef(Args, 1)) {
+			JsRadio->OnPongCallback.Reset();
+		}
+		else {
+			v8::Local<v8::Function> Cb = TNodeJsUtil::GetArgFun(Args, 1);
+			JsRadio->OnPongCallback.Reset(Isolate, Cb);
+		}
+	}
+	else {
+		throw TExcept::New("Unknown event: " + EventNm);
+	}
+
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
-
-void TNodeJsRf24Radio::onPong(const v8::FunctionCallbackInfo<v8::Value>& Args) {
-	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
-	v8::HandleScope HandleScope(Isolate);
-
-	TNodeJsRf24Radio* JsRadio = ObjectWrap::Unwrap<TNodeJsRf24Radio>(Args.Holder());
-	v8::Local<v8::Function> Cb = TNodeJsUtil::GetArgFun(Args, 0);
-
-	JsRadio->OnPongCallback.Reset(Isolate, Cb);
-	Args.GetReturnValue().Set(v8::Undefined(Isolate));
-}
-
 
 void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueId,
 		const int& Val) {

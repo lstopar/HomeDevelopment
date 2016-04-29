@@ -426,7 +426,7 @@ function initSensors() {
 			};
 			
 			log.info('Setting callback ...');
-			radio.radio.onValue(function (val) {	// TODO move this somewhere, make a common interface
+			radio.radio.on('value', function (val) {	// TODO move this somewhere, make a common interface
 				var transFun = transformH[val.id];
 				var trans = transFun(val.value);
 				
@@ -435,7 +435,7 @@ function initSensors() {
 				
 				updateValue(val.id, trans);
 			});
-			radio.radio.onPong(function (nodeId) {
+			radio.radio.on('pong', function (nodeId) {
 				log.info('Received pong from node %d, ignoring ...', nodeId);
 //				rf24Pinger.onPong(nodeId + '');
 			});
