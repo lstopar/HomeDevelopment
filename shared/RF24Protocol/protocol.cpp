@@ -12,7 +12,7 @@ void TRadioValue::SetVal(const int& IntVal) {
 
 void TRadioValue::WriteToBuff(char* Buff) const {
 	Buff[0] = ValId;
-	Buff[1] = Val & 0xFF;
+	Buff[1] = char(Val & 0xFF);
 }
 
 void TRadioValue::ReadFromBuff(const char* Buff) {
@@ -46,7 +46,7 @@ void TRadioProtocol::parseGetPayload(const char* Payload, std::vector<char>& Val
 	const int Vals = (int) Payload[0];
 
 #ifndef ARDUINO
-	EAssertR(Vals <= VALS_PER_PAYLOAD, "Invalid number of values in payload: " + TInt::GetStr(Vals));
+	EAssertR(0 <= Vals && Vals <= VALS_PER_PAYLOAD, "Invalid number of values in payload: " + TInt::GetStr(Vals));
 	ValIdV.Gen(Vals);
 #else
 	ValIdV.resize(Vals);
@@ -67,7 +67,7 @@ void TRadioProtocol::parseSetPayload(const char* Payload, std::vector<TRadioValu
 	const int Vals = (int) Payload[0];
 
 #ifndef ARDUINO
-	EAssertR(Vals <= VALS_PER_PAYLOAD, "Invalid number of values in payload: " + TInt::GetStr(Vals));
+	EAssertR(0 <= Vals && Vals <= VALS_PER_PAYLOAD, "Invalid number of values in payload: " + TInt::GetStr(Vals));
 	ValV.Gen(Vals);
 #else
 	ValV.resize(Vals);
@@ -83,7 +83,7 @@ void TRadioProtocol::parseSetPayload(const char* Payload, std::vector<TRadioValu
 void TRadioProtocol::GenGetPayload(const TChV& ValIdV, TMem& Payload) {
 	if (Payload.Len() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
 	const int& Vals = ValIdV.Len();
-	EAssertR(Vals <= VALS_PER_PAYLOAD, "Tried to send too many values!");
+	EAssertR(0 <= Vals && Vals <= VALS_PER_PAYLOAD, "Tried to send too many values!");
 #else
 void TRadioProtocol::genGetPayload(const int* ValIdV, const int& Vals,
 		char* Payload) {
@@ -99,7 +99,7 @@ void TRadioProtocol::genGetPayload(const int* ValIdV, const int& Vals,
 void TRadioProtocol::GenSetPayload(const TVec<TRadioValue>& ValV, TMem& Payload) {
 	if (Payload.Len() != PAYLOAD_LEN) { Payload.Gen(PAYLOAD_LEN); }
 	const int& Vals = ValV.Len();
-	EAssert(Vals*TRadioValue::BYTES + 1 <= PAYLOAD_LEN);
+	EAssert(0 <= Vals && Vals <= VALS_PER_PAYLOAD);
 #else
 void TRadioProtocol::genSetPayload(const std::vector<TRadioValue>& ValV, char* Payload) {
 	const int Vals = ValV.size();
