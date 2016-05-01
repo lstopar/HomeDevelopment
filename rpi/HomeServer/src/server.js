@@ -78,7 +78,7 @@ function handleBadInput(res, msg) {
 //=====================================================
 
 function initApi() {
-	app.post(API_PATH + '/exit', function (req, res) {
+	app.get(API_PATH + '/exit', function (req, res) {
 		try {
 			log.info('Exiting in 1 second ...');
 			setTimeout(function () {
