@@ -78,6 +78,21 @@ function handleBadInput(res, msg) {
 //=====================================================
 
 function initApi() {
+	app.post(API_PATH + '/exit', function (req, res) {
+		try {
+			log.info('Exiting in 1 second ...');
+			setTimeout(function () {
+				log.info('Exiting!');
+				process.exit(0);
+			}, 1000);
+			
+			res.status(204);	// no content
+			res.end();
+		} catch (e) {
+			handleServerError(e, req, res);
+		}
+	});
+	
 	app.post(API_PATH + '/set', function (req, res) {
 		try {
 			var sensorId = req.body.id;

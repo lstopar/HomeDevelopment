@@ -10,11 +10,12 @@
                 'defines': [
                     'DEBUG'
                 ],
+                'cflags': [ '-g' ]
             },
             'Release': {
                 'defines': [
                     'NDEBUG'
-                ],
+                ]
             }
         },
         'defines': [
