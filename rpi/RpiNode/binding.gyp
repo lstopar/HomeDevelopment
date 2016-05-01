@@ -9,8 +9,7 @@
             'Debug': {
                 'defines': [
                     'DEBUG'
-                ],
-                'cflags': [ '-g' ]
+                ]
             },
             'Release': {
                 'defines': [
