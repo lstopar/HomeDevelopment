@@ -130,38 +130,32 @@ eoDevice* TEoGateway::GetDevice(const uint32& DeviceId) {
 }
 
 void TEoGateway::Read() {
-	bool InLearnMode;
-	uint16 RecV;
+	bool DeviceLearned = false;
+	bool ReceivedTelegram = false;
+
+	uint32 DeviceId = TUInt::Mx;
+	eoMessage Msg;
 
 	{
 		TLock Lock(GatewaySection);
+
 		if (Gateway.LearnMode && TTm::GetCurUniMSecs() - LearnModeStartTm > LEARN_MODE_TIME) {
 			Notify->OnNotify(TNotifyType::ntInfo, "Leaving learn mode!");
 			Gateway.LearnModeOff();
 			StorageManager.Save(StorageFNm.CStr());
 		}
 
-		InLearnMode = Gateway.LearnMode;
-	}
+		const uint16 RecV = Gateway.Receive();
 
-	{
-		TLock Lock(GatewaySection);
-		RecV = Gateway.Receive();
-	}
+		if (RecV == 0) { return; }
 
-	if (RecV == 0) { return; }
+		Notify->OnNotify(TNotifyType::ntInfo, "Received message ...");
 
-	Notify->OnNotify(TNotifyType::ntInfo, "Received message ...");
+		if (Gateway.LearnMode) {
+			if (RecV & RECV_TEACHIN) {
+				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received TeachIn ...");
 
-	if (InLearnMode) {
-		if (RecV & RECV_TEACHIN) {
-			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received TeachIn ...");
-
-			uint32 DeviceId = TUInt::Mx;
-			uint8 Dir;
-
-			{
-				TLock Lock(GatewaySection);
+				uint8 Dir;
 
 				eoDebug::Print(Gateway.telegram);
 
@@ -185,42 +179,38 @@ void TEoGateway::Read() {
 						Notify->OnNotify(TNotifyType::ntInfo, "Response sent!");
 						Notify->OnNotifyFmt(TNotifyType::ntInfo, "Learned device: %u, saving ...", Device->ID);
 						DeviceId = Device->ID;
+						DeviceLearned = true;
 					} else {
 						Device = nullptr;
 						Notify->OnNotify(TNotifyType::ntWarn, "Failed to send response!");
 					}
 				}
 			}
-
-			Notify->OnNotify(ntInfo, "Calling device callback ...");
-			if (DeviceId != TUInt::Mx) {
-				OnDeviceConnected(DeviceId);
-			}
 		}
-	}
-	else if (RecV & RECV_TELEGRAM) {
-		uint32 DeviceId = TUInt::Mn;
-		eoMessage Msg;
-
-		Notify->OnNotify(TNotifyType::ntInfo, "Received telegram ...");
-
-		{
-			TLock Lock(GatewaySection);
+		else if (RecV & RECV_TELEGRAM) {
+			Notify->OnNotify(TNotifyType::ntInfo, "Received telegram ...");
 
 			Msg = eoMessage(Gateway.telegram);
 
 			if (RecV & RECV_PROFILE) {
 				DeviceId = Gateway.device->ID;
 				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Telegram from device %u", DeviceId);
+				ReceivedTelegram = true;
 			} else {
 				Notify->OnNotify(ntInfo, "Do not know the device!");
 			}
 		}
+	}
 
-		if (DeviceId != TUInt::Mn && Callback != nullptr) {
-			Notify->OnNotify(ntInfo, "Calling callback ...");
-			Callback->OnMsg(DeviceId, Msg);
+	if (DeviceLearned) {
+		Notify->OnNotify(ntInfo, "Calling device callback ...");
+		if (DeviceId != TUInt::Mx) {
+			OnDeviceConnected(DeviceId);
 		}
+	}
+	if (ReceivedTelegram && DeviceId != TUInt::Mx && Callback != nullptr) {
+		Notify->OnNotify(ntInfo, "Calling callback ...");
+		Callback->OnMsg(DeviceId, Msg);
 	}
 }
 
