@@ -45,8 +45,6 @@
             	'<(SHARED_PATH)/protocol.cpp',
             	'src/rpinode.h',
             	'src/rpinode.cpp',
-            	'src/enoceannode.h',
-            	'src/enoceannode.cpp',
             	'src/threads.h',
             	'src/threads.cpp',
                 '<(QMINER_PATH)/src/nodejs/nodeutil.h',
