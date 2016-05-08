@@ -1,5 +1,6 @@
 var config = require('../config.js');
-var enocean = require(config.enoceanLib);
+var rpi = require('../' + config.rpilib);
+//var enocean = require(config.enoceanLib);
 
 var gateway = null;
 
@@ -182,7 +183,7 @@ module.exports = exports = function (opts) {
 	}
 	
 	log.info('Creating Gateway ...');
-	gateway = new enocean.Gateway(config);
+	gateway = new rpi.Gateway(config);
 	gateway.on('device', function (device) {
 		log.info('New EnOcean device of type %s', device.type);
 		
