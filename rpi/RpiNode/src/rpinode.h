@@ -129,12 +129,12 @@ private:
 	TRf24Radio Radio;
 
 	// structures to convert from JS to cpp IDs
-	THash<TStr, TIntPr> ValNmNodeIdValIdPrH;
-	THash<TIntPr, TStr> NodeIdValIdPrValNmH;
+	THash<TStr,TIntPr> ValNmNodeIdValIdPrH;
+	THash<TIntPr,TStr> NodeIdValIdPrValNmH;
 	THashSet<TUInt16> NodeIdSet;
 
 	TVec<TUInt16> PongQ;
-	TVec<TTriple<TUInt16, TCh, TInt>> ValQ;
+	TVec<TTriple<TUInt16,TCh,TInt>> ValQ;
 
 	v8::Persistent<v8::Function> OnValueCallback;
 	v8::Persistent<v8::Function> OnPongCallback;
