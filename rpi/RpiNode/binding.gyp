@@ -59,7 +59,8 @@
                 '<(QMINER_PATH)/src/nodejs/',
                 '<(QMINER_PATH)/src/glib/base/',
                 '<(QMINER_PATH)/src/glib/mine/',
-                '<(QMINER_PATH)/src/glib/misc/'
+                '<(QMINER_PATH)/src/glib/misc/',
+                '<(QMINER_PATH)/src/glib/concurrent/'
             ],
             'defines': [
             ],
@@ -88,12 +89,15 @@
                 '<(QMINER_PATH)/src/glib/base/base.h',
                 '<(QMINER_PATH)/src/glib/base/base.cpp',
                 '<(QMINER_PATH)/src/glib/mine/mine.h',
-                '<(QMINER_PATH)/src/glib/mine/mine.cpp'
+                '<(QMINER_PATH)/src/glib/mine/mine.cpp',
+                '<(QMINER_PATH)/src/glib/concurrent/thread.h',
+                '<(QMINER_PATH)/src/glib/concurrent/thread.cpp',
             ],
             'include_dirs': [
                 '<(QMINER_PATH)/src/glib/base/',
                 '<(QMINER_PATH)/src/glib/mine/',
                 '<(QMINER_PATH)/src/glib/misc/',
+                '<(QMINER_PATH)/src/glib/concurrent/',
                 '<(QMINER_PATH)/src/third_party/sole/'
             ],
             'defines': [

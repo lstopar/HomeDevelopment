@@ -202,11 +202,9 @@ void TEoGateway::Read() {
 		}
 	}
 
-	if (DeviceLearned) {
+	if (DeviceLearned && DeviceId != TUInt::Mx) {
 		Notify->OnNotify(ntInfo, "Calling device callback ...");
-		if (DeviceId != TUInt::Mx) {
-			OnDeviceConnected(DeviceId);
-		}
+		OnDeviceConnected(DeviceId);
 	}
 	if (ReceivedTelegram && DeviceId != TUInt::Mx && Callback != nullptr) {
 		Notify->OnNotify(ntInfo, "Calling callback ...");

@@ -133,8 +133,14 @@ private:
 	THash<TIntPr, TStr> NodeIdValIdPrValNmH;
 	THashSet<TUInt16> NodeIdSet;
 
+	TVec<TUInt16> PongQ;
+	TVec<TTriple<TUInt16, TCh, TInt>> ValQ;
+
 	v8::Persistent<v8::Function> OnValueCallback;
 	v8::Persistent<v8::Function> OnPongCallback;
+
+	TMainThreadHandle* CallbackHandle;
+	TCriticalSection CallbackSection;
 
 	PNotify Notify;
 
@@ -148,38 +154,19 @@ private:
 	// callbacks
 	JsDeclareFunction(on);
 
-	void OnMsgMainThread(const uint16& NodeId, const uint8& ValueId,
-			const int& Val);
-	void OnPongMainThread(const uint16& NodeId);
+	void ProcessQueues();
 
 public:
 	void OnPong(const uint16& NodeId);
 	void OnValue(const uint16& NodeId, const char& ValId, const int& Val);
 
-	class TOnMsgTask: public TMainThreadTask {
+	class TProcessQueuesTask: public TMainThreadTask {
 	private:
 		TNodeJsRf24Radio* JsRadio;
-		const uint16 NodeId;
-		const int ValueId;
-		const int Val;
 	public:
-		TOnMsgTask(TNodeJsRf24Radio* _JsRadio, const uint16& _NodeId, const int& _ValueId, const int& _Val):
-			JsRadio(_JsRadio),
-			NodeId(_NodeId),
-			ValueId(_ValueId),
-			Val(_Val) {}
+		TProcessQueuesTask(TNodeJsRf24Radio* _JsRadio):
+			JsRadio(_JsRadio) {}
 
-		void Run();
-	};
-
-	class TOnPongTask: public TMainThreadTask {
-	private:
-		TNodeJsRf24Radio* JsRadio;
-		const uint16 NodeId;
-	public:
-		TOnPongTask(TNodeJsRf24Radio* _JsRadio, const uint16& _NodeId):
-			JsRadio(_JsRadio),
-			NodeId(_NodeId) {}
 		void Run();
 	};
 };
@@ -254,6 +241,12 @@ private:
 	v8::Persistent<v8::Object> DeviceMap;
 	v8::Persistent<v8::Function> OnDeviceCallback;
 
+	TUIntV NewDeviceIdQ;
+	TVec<TPair<TUInt, eoMessage>> DeviceIdMsgPrQ;
+
+	TMainThreadHandle* CallbackHandle;
+	TCriticalSection CallbackSection;
+
 	PNotify Notify;
 
 	TNodeJsEoGateway(const TStr& SerialPort, const TStr& StorageFNm,
@@ -272,27 +265,15 @@ public:
 
 private:
 	void AddDevice(const uint32& DeviceId, v8::Local<v8::Object>& JsDevice);
-	void OnMsgMainThread(const uint32& DeviceId, const eoMessage& Msg);
+	void ProcessQueues();
 
 	TNodeJsEoDevice* GetDevice(const uint32& DeviceId) const;
 
-	class TOnDeviceConnectedTask: public TMainThreadTask {
+	class TProcessQueuesTask: public TMainThreadTask {
 	private:
 		TNodeJsEoGateway* JsGateway;
-		const uint32 DeviceId;
 	public:
-		TOnDeviceConnectedTask(TNodeJsEoGateway* JsGateway, const uint32& DeviceId);
-		void Run();
-	};
-
-	class TOnMsgTask: public TMainThreadTask {
-	private:
-		TNodeJsEoGateway* Gateway;
-		const uint32 DeviceId;
-		const eoMessage Msg;
-	public:
-		TOnMsgTask(TNodeJsEoGateway* _Gateway, const uint32& DeviceId,
-				const eoMessage& Msg);
+		TProcessQueuesTask(TNodeJsEoGateway* JsGateway);
 		void Run();
 	};
 };

@@ -325,7 +325,12 @@ TNodeJsRf24Radio::TNodeJsRf24Radio(const uint16& NodeId, const int& PinCE, const
 	ValNmNodeIdValIdPrH(),
 	NodeIdValIdPrValNmH(),
 	NodeIdSet(),
+	PongQ(),
+	ValQ(),
 	OnValueCallback(),
+	OnPongCallback(),
+	CallbackHandle(TNodeJsAsyncUtil::NewHandle()),
+	CallbackSection(),
 	Notify(_Notify) {
 
 	Notify->OnNotify(TNotifyType::ntInfo, "Setting radio cpp callback ...");
@@ -348,6 +353,8 @@ TNodeJsRf24Radio::TNodeJsRf24Radio(const uint16& NodeId, const int& PinCE, const
 TNodeJsRf24Radio::~TNodeJsRf24Radio() {
 	OnValueCallback.Reset();
 	OnPongCallback.Reset();
+
+	TNodeJsAsyncUtil::DelHandle(CallbackHandle);
 }
 
 void TNodeJsRf24Radio::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {
@@ -484,72 +491,85 @@ void TNodeJsRf24Radio::on(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
-void TNodeJsRf24Radio::OnMsgMainThread(const uint16& NodeId, const uint8& ValueId,
-		const int& Val) {
-	Notify->OnNotifyFmt(ntInfo, "Received value id %d from node %u in main thread!", ValueId, NodeId);
+void TNodeJsRf24Radio::ProcessQueues() {
+	TVec<TUInt16> TempPongQ;
+	TVec<TTriple<TUInt16, TCh, TInt>> TempValQ;
 
-	if (!OnValueCallback.IsEmpty()) {
-		v8::Isolate* Isolate = v8::Isolate::GetCurrent();
-		v8::HandleScope HandleScope(Isolate);
+	{
+		TLock Lock(CallbackSection);
 
-		const int ValId = (int) ValueId;
-		Notify->OnNotify(ntInfo, "Executing callback");
+		TempPongQ = PongQ;
+		TempValQ = ValQ;
 
-		TIntPr NodeIdValIdPr(NodeId, (int) ValId);
-		EAssertR(NodeIdValIdPrValNmH.IsKey(NodeIdValIdPr), "Node-valueId pair not stored in the structures!");
-
-		const TStr& ValueNm = NodeIdValIdPrValNmH.GetDat(NodeIdValIdPr);
-
-		PJsonVal JsonVal = TJsonVal::NewObj();
-		JsonVal->AddToObj("id", ValueNm);
-		JsonVal->AddToObj("value", Val);
-
-		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnValueCallback);
-		TNodeJsUtil::ExecuteVoid(Callback, TNodeJsUtil::ParseJson(Isolate, JsonVal));
-		Notify->OnNotify(ntInfo, "Callback Executed!");
+		PongQ.Clr();
+		ValQ.Clr();
 	}
-	else {
-		Notify->OnNotify(ntWarn, "Callback is empty, cannot execute!");
-	}
-}
 
-void TNodeJsRf24Radio::OnPongMainThread(const uint16& NodeId) {
-	if (!OnValueCallback.IsEmpty()) {
-		v8::Isolate* Isolate = v8::Isolate::GetCurrent();
-		v8::HandleScope HandleScope(Isolate);
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
 
-		Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got pong from node %u", NodeId);
-
-		EAssertR(NodeIdSet.IsKey(NodeId), "Received invalid node ID: " + TUInt::GetStr(NodeId));
-
+	if (!TempPongQ.Empty() && !OnPongCallback.IsEmpty()) {
 		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnPongCallback);
-		TNodeJsUtil::ExecuteVoid(Callback, v8::Integer::New(Isolate, (int) NodeId));
+
+		for (int PongN = 0; PongN < TempPongQ.Len(); PongN++) {
+			const uint16& NodeId = TempPongQ[PongN];
+
+			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Got pong from node %u", NodeId);
+			EAssertR(NodeIdSet.IsKey(NodeId), "Received invalid node ID: " + TUInt::GetStr(NodeId));
+
+			TNodeJsUtil::ExecuteVoid(Callback, v8::Integer::New(Isolate, (int) NodeId));
+		}
+	}
+
+	if (!TempValQ.Empty() && !OnValueCallback.IsEmpty()) {
+		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnValueCallback);
+
+		for (int ValN = 0; ValN < TempValQ.Len(); ValN++) {
+			const TTriple<TUInt16, TCh, TInt>& ValTr = TempValQ[ValN];
+
+			const uint16& NodeId = ValTr.Val1;
+			const char ValId = ValTr.Val2;
+			const int& Val = ValTr.Val3;
+
+			TIntPr NodeIdValIdPr(NodeId, (int) ValId);
+			EAssertR(NodeIdValIdPrValNmH.IsKey(NodeIdValIdPr), "Node-valueId pair not stored in the structures!");
+
+			const TStr& ValueNm = NodeIdValIdPrValNmH.GetDat(NodeIdValIdPr);
+
+			PJsonVal JsonVal = TJsonVal::NewObj();
+			JsonVal->AddToObj("id", ValueNm);
+			JsonVal->AddToObj("value", Val);
+
+			TNodeJsUtil::ExecuteVoid(Callback, TNodeJsUtil::ParseJson(Isolate, JsonVal));
+		}
 	}
 }
 
 void TNodeJsRf24Radio::OnPong(const uint16& NodeId) {
-//	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Executing pong callback from node: %u", NodeId);
-	TNodeJsAsyncUtil::ExecuteOnMain(new TOnPongTask(this, NodeId), true);
+	{
+		TLock Lock(CallbackSection);
+		PongQ.Add(NodeId);
+	}
+
+	TNodeJsAsyncUtil::ExecuteOnMain(new TProcessQueuesTask(this), CallbackHandle, true);
 }
 
 void TNodeJsRf24Radio::OnValue(const uint16& NodeId, const char& ValId, const int& Val) {
 	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received value id: %d from node %u in wrapper ...", ValId, NodeId);
-	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, NodeId, (int) ValId, Val), true);
+
+	{
+		TLock Lock(CallbackSection);
+		ValQ.Add(TTriple<TUInt16, TCh, TInt>(NodeId, ValId, Val));
+	}
+
+	TNodeJsAsyncUtil::ExecuteOnMain(new TProcessQueuesTask(this), CallbackHandle, true);
 }
 
-void TNodeJsRf24Radio::TOnMsgTask::Run() {
+void TNodeJsRf24Radio::TProcessQueuesTask::Run() {
 	try {
-		JsRadio->OnMsgMainThread(NodeId, ValueId, Val);
+		JsRadio->ProcessQueues();
 	} catch (const PExcept& Except) {
 		JsRadio->Notify->OnNotifyFmt(TNotifyType::ntErr, "Failed to execute value callback: %s!", Except->GetMsgStr().CStr());
-	}
-}
-
-void TNodeJsRf24Radio::TOnPongTask::Run() {
-	try {
-		JsRadio->OnPongMainThread(NodeId);
-	} catch (const PExcept& Except) {
-		JsRadio->Notify->OnNotifyFmt(TNotifyType::ntErr, "Failed to execute pong callback: %s!", Except->GetMsgStr().CStr());
 	}
 }
 
@@ -781,6 +801,10 @@ TNodeJsEoGateway::TNodeJsEoGateway(const TStr& SerialPort, const TStr& StorageFN
 		Gateway(SerialPort, StorageFNm, _Notify),
 		DeviceMap(),
 		OnDeviceCallback(),
+		NewDeviceIdQ(),
+		DeviceIdMsgPrQ(),
+		CallbackHandle(TNodeJsAsyncUtil::NewHandle()),
+		CallbackSection(),
 		Notify(_Notify) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
@@ -794,6 +818,8 @@ TNodeJsEoGateway::TNodeJsEoGateway(const TStr& SerialPort, const TStr& StorageFN
 TNodeJsEoGateway::~TNodeJsEoGateway() {
 	DeviceMap.Reset();
 	OnDeviceCallback.Reset();
+
+	TNodeJsAsyncUtil::DelHandle(CallbackHandle);
 }
 
 void TNodeJsEoGateway::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {
@@ -842,12 +868,24 @@ void TNodeJsEoGateway::on(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 
 void TNodeJsEoGateway::OnDeviceConnected(const uint32& DeviceId) {
 	Notify->OnNotifyFmt(ntInfo, "Device connected in wrapper, ID %u ...", DeviceId);
-	TNodeJsAsyncUtil::ExecuteOnMain(new TOnDeviceConnectedTask(this, DeviceId), true);
+
+	{
+		TLock Lock(CallbackSection);
+		NewDeviceIdQ.Add(DeviceId);
+	}
+
+	TNodeJsAsyncUtil::ExecuteOnMain(new TProcessQueuesTask(this), CallbackHandle, true);
 }
 
 void TNodeJsEoGateway::OnMsg(const uint32& DeviceId, const eoMessage& Msg) {
 	Notify->OnNotifyFmt(ntInfo, "Received EnOcean message from device %u, pushing to main thread ...", DeviceId);
-	TNodeJsAsyncUtil::ExecuteOnMain(new TOnMsgTask(this, DeviceId, Msg), true);
+
+	{
+		TLock Lock(CallbackSection);
+		DeviceIdMsgPrQ.Add(TPair<TUInt, eoMessage>(DeviceId, Msg));
+	}
+
+	TNodeJsAsyncUtil::ExecuteOnMain(new TProcessQueuesTask(this), CallbackHandle, true);
 }
 
 void TNodeJsEoGateway::AddDevice(const uint32& DeviceId, v8::Local<v8::Object>& JsDevice) {
@@ -860,13 +898,52 @@ void TNodeJsEoGateway::AddDevice(const uint32& DeviceId, v8::Local<v8::Object>& 
 	Map->Set(v8::Integer::New(Isolate, DeviceId), JsDevice);
 }
 
-void TNodeJsEoGateway::OnMsgMainThread(const uint32& DeviceId, const eoMessage& Msg) {
-	try {
-		Notify->OnNotifyFmt(ntInfo, "Received EnOcean message from device %u on main thread ...", DeviceId);
-		TNodeJsEoDevice* Device = GetDevice(DeviceId);
-		Device->OnMsg(Msg);
-	} catch (const PExcept& Except) {
-		Notify->OnNotifyFmt(ntErr, "Failed to callback device %u!", DeviceId);
+void TNodeJsEoGateway::ProcessQueues() {
+	TUIntV TempNewDeviceIdQ;
+	TVec<TPair<TUInt, eoMessage>> TempDeviceIdMsgPrQ;
+
+	{
+		TLock Lock(CallbackSection);
+
+		TempNewDeviceIdQ = NewDeviceIdQ;
+		TempDeviceIdMsgPrQ = DeviceIdMsgPrQ;
+
+		NewDeviceIdQ.Clr();
+		DeviceIdMsgPrQ.Clr();
+	}
+
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	if (!TempNewDeviceIdQ.Empty() && !OnDeviceCallback.IsEmpty()) {
+		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnDeviceCallback);
+
+		for (int DeviceN = 0; DeviceN < TempNewDeviceIdQ.Len(); DeviceN++) {
+			const uint& DeviceId = TempNewDeviceIdQ[DeviceN];
+
+			Notify->OnNotifyFmt(ntInfo, "Creating new JS device with ID %u ...", DeviceId);
+
+			// add the device to the internal structures
+			// TODO check which type of device this is
+			v8::Local<v8::Object> JsDevice = TNodeJsUtil::NewInstance(TNodeJsD201Device::New(DeviceId, &Gateway, Notify));
+
+			AddDevice(DeviceId, JsDevice);
+
+			// execute callback
+			TNodeJsUtil::ExecuteVoid(Callback, JsDevice);
+		}
+	}
+
+	if (!TempDeviceIdMsgPrQ.Empty()) {
+		for (int MsgN = 0; MsgN < TempDeviceIdMsgPrQ.Len(); MsgN++) {
+			const TPair<TUInt, eoMessage>& DeviceIdMsgPr = TempDeviceIdMsgPrQ[MsgN];
+			const uint& DeviceId = DeviceIdMsgPr.Val1;
+			const eoMessage& Msg = DeviceIdMsgPr.Val2;
+
+			Notify->OnNotifyFmt(ntInfo, "Received EnOcean message from device %u on main thread ...", DeviceId);
+			TNodeJsEoDevice* Device = GetDevice(DeviceId);
+			Device->OnMsg(Msg);
+		}
 	}
 }
 
@@ -885,38 +962,15 @@ TNodeJsEoDevice* TNodeJsEoGateway::GetDevice(const uint32& DeviceId) const {
 	return ObjectWrap::Unwrap<TNodeJsEoDevice>(JsDevice);
 }
 
-TNodeJsEoGateway::TOnDeviceConnectedTask::TOnDeviceConnectedTask(TNodeJsEoGateway* _JsGateway,
-		const uint32& _DeviceId):
-			JsGateway(_JsGateway),
-			DeviceId(_DeviceId) {}
+TNodeJsEoGateway::TProcessQueuesTask::TProcessQueuesTask(TNodeJsEoGateway* _JsGateway):
+			JsGateway(_JsGateway) {}
 
-void TNodeJsEoGateway::TOnDeviceConnectedTask::Run() {
-	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
-	v8::HandleScope HandleScope(Isolate);
-
-	// add the device to the internal structures
-
-	JsGateway->Notify->OnNotifyFmt(ntInfo, "Creating new JS device with ID %u ...", DeviceId);
-
-	// TODO check which type of device this is
-	v8::Local<v8::Object> JsDevice = TNodeJsUtil::NewInstance(TNodeJsD201Device::New(DeviceId, &JsGateway->Gateway, JsGateway->Notify));
-
-	JsGateway->AddDevice(DeviceId, JsDevice);
-
-	if (!JsGateway->OnDeviceCallback.IsEmpty()) {
-		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, JsGateway->OnDeviceCallback);
-		TNodeJsUtil::ExecuteVoid(Callback, JsDevice);
+void TNodeJsEoGateway::TProcessQueuesTask::Run() {
+	try {
+		JsGateway->ProcessQueues();
+	} catch (const PExcept& Except) {
+		JsGateway->Notify->OnNotifyFmt(ntErr, "Exception while processing queues!");
 	}
-}
-
-TNodeJsEoGateway::TOnMsgTask::TOnMsgTask(TNodeJsEoGateway* _Gateway,
-		const uint32& _DeviceId, const eoMessage& _Msg):
-		Gateway(_Gateway),
-		DeviceId(_DeviceId),
-		Msg(_Msg) {}
-
-void TNodeJsEoGateway::TOnMsgTask::Run() {
-	Gateway->OnMsgMainThread(DeviceId, Msg);
 }
 
 
