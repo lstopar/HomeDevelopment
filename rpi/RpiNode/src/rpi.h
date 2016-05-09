@@ -15,7 +15,7 @@
 #include <RF24Network/RF24Network.h>
 
 #include "base.h"
-#include "threads.h"
+#include "thread.h"
 #include "protocol.h"
 
 enum TGpioLayout {
