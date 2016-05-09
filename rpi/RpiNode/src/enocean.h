@@ -10,7 +10,7 @@
 
 #include <eoLink.h>
 #include "base.h"
-#include "threads.h"
+#include "thread.h"
 
 class TEoGateway {
 public:
