@@ -511,6 +511,7 @@ void TNodeJsRf24Radio::ProcessQueues() {
 	if (!TempPongQ.Empty() && !OnPongCallback.IsEmpty()) {
 		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnPongCallback);
 
+		Notify->OnNotifyFmt(ntInfo, "Processing %d pong requests ...", TempPongQ.Len());
 		for (int PongN = 0; PongN < TempPongQ.Len(); PongN++) {
 			const uint16& NodeId = TempPongQ[PongN];
 
@@ -524,6 +525,7 @@ void TNodeJsRf24Radio::ProcessQueues() {
 	if (!TempValQ.Empty() && !OnValueCallback.IsEmpty()) {
 		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnValueCallback);
 
+		Notify->OnNotifyFmt(ntInfo, "Processing %d value requests ...", TempValQ.Len());
 		for (int ValN = 0; ValN < TempValQ.Len(); ValN++) {
 			const TTriple<TUInt16, TCh, TInt>& ValTr = TempValQ[ValN];
 
