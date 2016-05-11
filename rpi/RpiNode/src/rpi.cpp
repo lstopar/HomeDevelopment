@@ -436,9 +436,12 @@ void TRf24Radio::TReadThread::ProcessMsg(const uint16& FromNode, const uchar& Ty
 			Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received PUSH, %d values ...", ValV.Len());
 
 			TVec<TTriple<TUInt16, TCh, TInt>> NodeIdValIdValV(ValV.Len(), ValV.Len());
-
 			for (int ValN = 0; ValN < ValV.Len(); ValN++) {
-				NodeIdValIdValV.Add(TTriple<TUInt16, TCh, TInt>(FromNode, ValV[ValN].GetValId(), ValV[ValN].GetValInt()));
+				TTriple<TUInt16, TCh, TInt>& NodeIdValIdValTr = NodeIdValIdValV[ValN];
+
+				NodeIdValIdValTr.Val1 = FromNode;
+				NodeIdValIdValTr.Val2 = ValV[ValN].GetValId();
+				NodeIdValIdValTr.Val3 = ValV[ValN].GetValInt();
 			}
 
 			if (!NodeIdValIdValV.Empty()) {
