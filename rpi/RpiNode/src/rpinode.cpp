@@ -556,12 +556,12 @@ void TNodeJsRf24Radio::OnPong(const uint16& NodeId) {
 	TNodeJsAsyncUtil::ExecuteOnMain(new TProcessQueuesTask(this), CallbackHandle, true);
 }
 
-void TNodeJsRf24Radio::OnValue(const uint16& NodeId, const char& ValId, const int& Val) {
-	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received value id: %d from node %u in wrapper ...", ValId, NodeId);
+void TNodeJsRf24Radio::OnValV(const TVec<TTriple<TUInt16, TCh, TInt>>& NodeIdValIdValV) {
+	Notify->OnNotifyFmt(TNotifyType::ntInfo, "Received value %d values in wrapper ...", NodeIdValIdValV.Len());
 
 	{
 		TLock Lock(CallbackSection);
-		ValQ.Add(TTriple<TUInt16, TCh, TInt>(NodeId, ValId, Val));
+		ValQ.AddV(NodeIdValIdValV);
 	}
 
 	TNodeJsAsyncUtil::ExecuteOnMain(new TProcessQueuesTask(this), CallbackHandle, true);

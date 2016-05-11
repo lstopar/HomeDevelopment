@@ -134,7 +134,7 @@ public:
 	class TRf24RadioCallback {
 	public:
 		virtual void OnPong(const uint16& NodeId) = 0;
-		virtual void OnValue(const uint16& NodeId, const char& ValId, const int& Val) = 0;
+		virtual void OnValV(const TVec<TTriple<TUInt16, TCh, TInt>>& NodeIdValIdValV) = 0;
 	};
 
 private:

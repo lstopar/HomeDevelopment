@@ -158,7 +158,7 @@ private:
 
 public:
 	void OnPong(const uint16& NodeId);
-	void OnValue(const uint16& NodeId, const char& ValId, const int& Val);
+	void OnValV(const TVec<TTriple<TUInt16, TCh, TInt>>& NodeIdValIdValV);
 
 	class TProcessQueuesTask: public TMainThreadTask {
 	private:
