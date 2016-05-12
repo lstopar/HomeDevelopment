@@ -1096,6 +1096,8 @@ v8::Local<v8::Object> TNodeJsEoGateway::CreateNewDevice(const uint32& DeviceId, 
 		throw TExcept::New("Invalid RORG: " + TInt::GetStr(ROrg));
 	}
 	}
+
+	throw TExcept::New("Could not create a new EnOcean device!");
 }
 
 TNodeJsEoGateway::TProcessQueuesTask::TProcessQueuesTask(TNodeJsEoGateway* _JsGateway):
