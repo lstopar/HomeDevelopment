@@ -305,8 +305,10 @@ var enoceanController = (function () {
 						mainVal = val;
 						if (mainVal > 0) {
 							mainLightOn();
+							onMainChanged({ id: MAIN_LIGHT_ID, value: val });
 						} else {
 							mainLightOff();
+							onMainChanged({ id: MAIN_LIGHT_ID, value: val });
 						}
 					}
 				},
@@ -328,8 +330,10 @@ var enoceanController = (function () {
 						ambientVal = val;
 						if (ambientVal > 0) {
 							ambientOn();
+							onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: val });
 						} else {
 							ambientOff();
+							onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: val });
 						}
 					}
 				},
