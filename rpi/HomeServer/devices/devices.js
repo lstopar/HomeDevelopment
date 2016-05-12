@@ -270,6 +270,9 @@ module.exports = exports = function (_getValue, _setValue) {
 		else if (sensorId == AMBIENT_LIGHT_ID) {
 			onAmbientLight(value);
 		}
+		else if (sensorId == ROCKER_MAIN_LIGHT_ID || sensorId == ROCKER_AMBIENT_LIGHT_ID) {
+			log.info('RECEIVED VALUE FROM FOCKER: %s = %d', sensorId, value);
+		}
 	}
 	
 	return {
