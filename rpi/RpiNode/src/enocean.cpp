@@ -164,7 +164,7 @@ void TEoGateway::Read() {
 				eoDevice* Device = Gateway.device;
 				DeviceProfile = Device->GetProfile();
 
-				Profile->GetValue(E_DIRECTION, Dir);
+				DeviceProfile->GetValue(E_DIRECTION, Dir);
 
 				if (Dir == UTE_DIRECTION_BIDIRECTIONAL) {
 					Notify->OnNotify(TNotifyType::ntInfo, "Response expected ...");
