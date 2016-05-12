@@ -134,6 +134,7 @@ void TEoGateway::Read() {
 	bool ReceivedTelegram = false;
 
 	uint32 DeviceId = TUInt::Mx;
+	eoProfile* DeviceProfile = nullptr;
 	eoMessage Msg;
 
 	{
@@ -160,7 +161,7 @@ void TEoGateway::Read() {
 				eoDebug::Print(Gateway.telegram);
 
 				eoDevice* Device = Gateway.device;
-				eoProfile* Profile = Device->GetProfile();
+				DeviceProfile = Device->GetProfile();
 
 				Profile->GetValue(E_DIRECTION, Dir);
 
@@ -209,7 +210,8 @@ void TEoGateway::Read() {
 
 	if (DeviceLearned && DeviceId != TUInt::Mx) {
 		Notify->OnNotify(ntInfo, "Calling device callback ...");
-		OnDeviceConnected(DeviceId);
+		EAssert(DeviceProfile != nullptr);
+		OnDeviceConnected(DeviceId, DeviceProfile->rorg, DeviceProfile->func, DeviceProfile->type);
 	}
 	if (ReceivedTelegram && DeviceId != TUInt::Mx && Callback != nullptr) {
 		Notify->OnNotify(ntInfo, "Calling callback ...");
@@ -217,11 +219,12 @@ void TEoGateway::Read() {
 	}
 }
 
-void TEoGateway::OnDeviceConnected(const uint32& DeviceId) const {
+void TEoGateway::OnDeviceConnected(const uint32& DeviceId, const uchar& ROrg,
+		const uchar& Func, const uchar& Type) const {
 	Notify->OnNotify(ntInfo, "Received device in EnOceam Gateway ...");
 	if (Callback != nullptr) {
 		Notify->OnNotifyFmt(ntInfo, "Calling callback for device ID %u ...", DeviceId);
-		Callback->OnDeviceConnected(DeviceId);
+		Callback->OnDeviceConnected(DeviceId, ROrg, Func, Type);
 	}
 }
 
