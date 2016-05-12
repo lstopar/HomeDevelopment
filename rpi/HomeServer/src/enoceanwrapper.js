@@ -69,6 +69,9 @@ var devices = function () {
 				case 'D2-01-xx':
 					device.readStatus();
 					break;
+				case 'F6-02-xx':
+					// this is not a readable device
+					break;
 				default:
 					throw new Error('Unknown device type: ' + device.type);
 				}
@@ -93,6 +96,9 @@ var devices = function () {
 				var channelN = sensorConf.internalId;
 				
 				device.setOutput(channelN, value);
+				break;
+			case 'F6-02-xx':
+				// not a readable device
 				break;
 			default:
 				throw new Error('Unknown device type: ' + device.type);
