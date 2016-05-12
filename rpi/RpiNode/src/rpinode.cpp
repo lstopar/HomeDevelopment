@@ -1031,7 +1031,7 @@ void TNodeJsEoGateway::ProcessQueues() {
 			Notify->OnNotifyFmt(ntInfo, "Creating new JS device with ID %u ...", DeviceId);
 
 			// add the device to the internal structures
-			v8::Local<v8::Object> JsDevice = CreateNewDevice(ROrg, Func, Type);
+			v8::Local<v8::Object> JsDevice = CreateNewDevice(DeviceId, ROrg, Func, Type);
 			AddDevice(DeviceId, JsDevice);
 
 			// execute callback
@@ -1067,7 +1067,7 @@ TNodeJsEoDevice* TNodeJsEoGateway::GetDevice(const uint32& DeviceId) const {
 	return ObjectWrap::Unwrap<TNodeJsEoDevice>(JsDevice);
 }
 
-v8::Local<v8::Object> TNodeJsEoGateway::CreateNewDevice(const uchar& ROrg,
+v8::Local<v8::Object> TNodeJsEoGateway::CreateNewDevice(const uint32& DeviceId, const uchar& ROrg,
 		const uchar& Func, const uchar& Type) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::EscapableHandleScope HandleScope(Isolate);

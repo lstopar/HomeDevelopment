@@ -305,8 +305,8 @@ private:
 	void ProcessQueues();
 
 	TNodeJsEoDevice* GetDevice(const uint32& DeviceId) const;
-	v8::Local<v8::Object> CreateNewDevice(const uchar& ROrg, const uchar& Func,
-			const uchar& Type);
+	v8::Local<v8::Object> CreateNewDevice(const uint32& DeviceId, const uchar& ROrg,
+			const uchar& Func, const uchar& Type);
 
 	class TProcessQueuesTask: public TMainThreadTask {
 	private:
