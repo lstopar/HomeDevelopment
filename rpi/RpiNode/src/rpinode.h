@@ -12,6 +12,7 @@
 #include <node_object_wrap.h>
 
 #include <eoLink.h>
+#include <eoEEP_F602xx.h>
 #include <eoEEP_D201xx.h>
 
 #include "rpi.h"
@@ -172,7 +173,7 @@ public:
 };
 
 class TNodeJsEoDevice: public node::ObjectWrap {
-protected:
+private:
 	const uint32 DeviceId;
 	TEoGateway* Gateway;
 	PNotify Notify;
@@ -183,8 +184,43 @@ public:
 	virtual void OnMsg(const eoMessage& Msg) = 0;
 
 protected:
+	const uint32& GetDeviceId() const { return DeviceId; }
 	TEoGateway* GetGateway() { return Gateway; }
 	eoDevice* GetDevice() const;
+};
+
+/////////////////////////////////////////////
+// EnOcean F6-02 double button wall rocker
+class TNodeJsF602Rocker: public TNodeJsEoDevice {
+	friend class TNodeJsUtil;
+public:
+	static void Init(v8::Handle<v8::Object> Exports);
+	static const TStr GetClassId() { return "F602Rocker"; };
+
+private:
+	static v8::Persistent<v8::Function> Constructor;
+
+	// callbacks
+	v8::Persistent<v8::Function> MsgCallback;
+
+public:
+	TNodeJsF602Rocker(const uint32& DeviceId, TEoGateway* Gateway, const PNotify& Notify):
+		TNodeJsEoDevice(DeviceId, Gateway, Notify),
+		MsgCallback() {}
+	~TNodeJsF602Rocker();
+
+	static TNodeJsF602Rocker* New(const uint32& DeviceId, TEoGateway* Gateway, const PNotify& Notify)
+			{ return new TNodeJsF602Rocker(DeviceId, Gateway, Notify); }
+
+	void OnMsg(const eoMessage& Msg);
+
+private:
+	JsDeclareProperty(id);
+	JsDeclareProperty(type);
+	JsDeclareFunction(on);
+
+private:
+	void OnRocker(const int& RockerId, const bool& Pressed);
 };
 
 /////////////////////////////////////////////
@@ -268,6 +304,8 @@ private:
 	void ProcessQueues();
 
 	TNodeJsEoDevice* GetDevice(const uint32& DeviceId) const;
+	v8::Local<v8::Object> CreateNewDevice(const uchar& ROrg, const uchar& Func,
+			const uchar& Type);
 
 	class TProcessQueuesTask: public TMainThreadTask {
 	private:

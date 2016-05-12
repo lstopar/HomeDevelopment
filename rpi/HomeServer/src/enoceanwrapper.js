@@ -158,7 +158,7 @@ var devices = function () {
 
 function initHandlers(device) {
 	switch (device.type) {
-	case 'D2-01-xx':
+	case 'D2-01-xx': {
 		device.on('status', function (channel, value) {
 			try {
 				var sensorId = devices.getExternalSensorId(device.id, channel);
@@ -168,6 +168,14 @@ function initHandlers(device) {
 			}
 		});
 		break;
+	}
+	case 'F6-02-xx': {
+		device.on('button', function (buttonId, pressed) {
+			var sensorId = devices.getExternalSensorId(device.id, buttonId);
+			callbacks.onValue(sensorId, pressed ? 1 : 0);
+		});
+		break;
+	}
 	default: {
 		throw new Error('Unknown EnOcean device type: ' + device.type);
 	}

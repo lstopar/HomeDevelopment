@@ -589,6 +589,103 @@ eoDevice* TNodeJsEoDevice::GetDevice() const {
 	return Device;
 }
 
+/////////////////////////////////////////////
+// EnOcean F6-02 double button wall rocker
+v8::Persistent<v8::Function> TNodeJsF602Rocker::Constructor;
+
+void TNodeJsF602Rocker::Init(v8::Handle<v8::Object> exports) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+	// template for creating function from javascript using "new", uses _NewJs callback
+	v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(Isolate, TNodeJsUtil::_NewCpp<TNodeJsF602Rocker>);
+
+
+	tpl->SetClassName(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()));
+	// ObjectWrap uses the first internal field to store the wrapped pointer
+	tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+	NODE_SET_PROTOTYPE_METHOD(tpl, "on", _on);
+
+	tpl->InstanceTemplate()->SetAccessor(v8::String::NewFromUtf8(Isolate, "id"), _id);
+	tpl->InstanceTemplate()->SetAccessor(v8::String::NewFromUtf8(Isolate, "type"), _type);
+
+	Constructor.Reset(Isolate, tpl->GetFunction());
+
+	// we need to export the class for calling using "new FIn(...)"
+	exports->Set(v8::String::NewFromUtf8(Isolate, GetClassId().CStr()),
+		tpl->GetFunction());
+}
+
+TNodeJsF602Rocker::~TNodeJsF602Rocker() {
+	MsgCallback.Reset();
+}
+
+void TNodeJsF602Rocker::OnMsg(const eoMessage& Msg) {
+	eoGateway* Gateway = GetGateway();
+
+	eoEEP_F602xx Profile;
+	Profile.SetType(0x01);
+
+	EAssertR(Profile.Parse(Msg) == EO_OK, "Failed to parse F6-02 rocker message!");
+
+	uchar RockerA, RockerB;
+
+	EAssertR(Profile.GetValue(E_ROCKER_A, RockerA) == EO_OK, "Failed to get the value of rocker A!");
+	EAssertR(Profile.GetValue(E_ROCKER_B, RockerB) == EO_OK, "Failed to get the value of rocker B!");
+
+	// TODO E_ENERGYBOW
+	// TODO E_MULTIPRESS
+
+	if (RockerA != STATE_NP) {
+		OnRocker(0, RockerA == STATE_I);
+	}
+	if (RockerB != STATE_NP) {
+		OnRocker(1, RockerB == STATE_I);
+	}
+}
+
+void TNodeJsF602Rocker::id(v8::Local<v8::String> Name, const v8::PropertyCallbackInfo<v8::Value>& Info) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	TNodeJsF602Rocker* JsDevice = ObjectWrap::Unwrap<TNodeJsF602Rocker>(Info.Holder());
+	Info.GetReturnValue().Set(v8::Number::New(Isolate, JsDevice->GetDeviceId()));
+}
+
+void TNodeJsF602Rocker::type(v8::Local<v8::String> Name, const v8::PropertyCallbackInfo<v8::Value>& Info) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	Info.GetReturnValue().Set(v8::String::NewFromUtf8(Isolate, "F6-02-xx"));
+}
+
+void TNodeJsF602Rocker::on(const v8::FunctionCallbackInfo<v8::Value>& Args) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+	// unwrap
+	TNodeJsF602Rocker* JsDevice = ObjectWrap::Unwrap<TNodeJsF602Rocker>(Args.Holder());
+
+	const TStr EventId = TNodeJsUtil::GetArgStr(Args, 0);
+
+	if (EventId == "button") {
+		v8::Local<v8::Function> Cb = TNodeJsUtil::GetArgFun(Args, 1);
+		JsDevice->MsgCallback.Reset(Isolate, Cb);
+	} else {
+		throw TExcept::New("EventId: " + EventId + " not supported!");
+	}
+
+	Args.GetReturnValue().Set(v8::Undefined(Isolate));
+}
+
+void TNodeJsF602Rocker::OnRocker(const int& RockerId, const bool& Pressed) {
+	if (!MsgCallback.IsEmpty()) {
+		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, MsgCallback);
+		TNodeJsUtil::ExecuteVoid(Callback, v8::Integer::New(Isolate, RockerId), v8::Boolean::New(Isolate, Pressed));
+	}
+}
+
+/////////////////////////////////////////////
+// EnOcean D2-01 device
 v8::Persistent<v8::Function> TNodeJsD201Device::Constructor;
 
 void TNodeJsD201Device::Init(v8::Handle<v8::Object> exports) {
@@ -901,13 +998,14 @@ void TNodeJsEoGateway::AddDevice(const uint32& DeviceId, v8::Local<v8::Object>& 
 }
 
 void TNodeJsEoGateway::ProcessQueues() {
+	TVec<TQuad<TUInt, TUCh, TUCh, TUCh>> TempDevIdRorgFuncTypeQuV;
 	TUIntV TempNewDeviceIdQ;
 	TVec<TPair<TUInt, eoMessage>> TempDeviceIdMsgPrQ;
 
 	{
 		TLock Lock(CallbackSection);
 
-		TempNewDeviceIdQ = NewDeviceIdQ;
+		TempDevIdRorgFuncTypeQuV = NewDeviceIdQ;
 		TempDeviceIdMsgPrQ = DeviceIdMsgPrQ;
 
 		NewDeviceIdQ.Clr();
@@ -917,18 +1015,21 @@ void TNodeJsEoGateway::ProcessQueues() {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
-	if (!TempNewDeviceIdQ.Empty() && !OnDeviceCallback.IsEmpty()) {
+	if (!TempDevIdRorgFuncTypeQuV.Empty() && !OnDeviceCallback.IsEmpty()) {
 		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnDeviceCallback);
 
-		for (int DeviceN = 0; DeviceN < TempNewDeviceIdQ.Len(); DeviceN++) {
-			const uint& DeviceId = TempNewDeviceIdQ[DeviceN];
+		for (int DeviceN = 0; DeviceN < TempDevIdRorgFuncTypeQuV.Len(); DeviceN++) {
+			const TQuad<TUInt, TUCh, TUCh, TUCh>& TempDevIdRorgFuncTypeQu = TempDevIdRorgFuncTypeV[DeviceN];
+
+			const uint& DeviceId = TempDevIdRorgFuncTypeQu.Val1;
+			const uchar& ROrg = TempDevIdRorgFuncTypeQu.Val2;
+			const uchar& Func = TempDevIdRorgFuncTypeQu.Val3;
+			const uchar& Type = TempDevIdRorgFuncTypeQu.Val4;
 
 			Notify->OnNotifyFmt(ntInfo, "Creating new JS device with ID %u ...", DeviceId);
 
 			// add the device to the internal structures
-			// TODO check which type of device this is
-			v8::Local<v8::Object> JsDevice = TNodeJsUtil::NewInstance(TNodeJsD201Device::New(DeviceId, &Gateway, Notify));
-
+			v8::Local<v8::Object> JsDevice = CreateNewDevice(ROrg, Func, Type);
 			AddDevice(DeviceId, JsDevice);
 
 			// execute callback
@@ -962,6 +1063,37 @@ TNodeJsEoDevice* TNodeJsEoGateway::GetDevice(const uint32& DeviceId) const {
 
 	v8::Local<v8::Object> JsDevice = Map->Get(Key)->ToObject();
 	return ObjectWrap::Unwrap<TNodeJsEoDevice>(JsDevice);
+}
+
+v8::Local<v8::Object> TNodeJsEoGateway::CreateNewDevice(const uchar& ROrg,
+		const uchar& Func, const uchar& Type) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::EscapableHandleScope HandleScope(Isolate);
+
+	switch (ROrg) {
+	case RORG_RPS: {
+		switch (Func) {
+		case 0x02:
+			return HandleScope.Escape(TNodeJsUtil::NewInstance(TNodeJsF602Rocker::New(DeviceId, &Gateway, Notify)));
+		default:
+			throw TExcept::New("Invalid profile combination: RORG: " + TInt::GetStr(ROrg) + ", Func: " + TInt::GetStr(Func));
+		}
+		break;
+	}
+	case RORG_VLD: {
+		switch (Func) {
+		case 0x01: {
+			return HandleScope.Escape(TNodeJsUtil::NewInstance(TNodeJsD201Device::New(DeviceId, &Gateway, Notify)));
+		}
+		default:
+			throw TExcept::New("Invalid profile combination: RORG: " + TInt::GetStr(ROrg) + ", Func: " + TInt::GetStr(Func));
+		}
+		break;
+	}
+	default: {
+		throw TExcept::New("Invalid RORG: " + TInt::GetStr(ROrg));
+	}
+	}
 }
 
 TNodeJsEoGateway::TProcessQueuesTask::TProcessQueuesTask(TNodeJsEoGateway* _JsGateway):

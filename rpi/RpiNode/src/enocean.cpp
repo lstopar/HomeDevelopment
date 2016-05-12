@@ -164,8 +164,8 @@ void TEoGateway::Read() {
 
 				Profile->GetValue(E_DIRECTION, Dir);
 
-				if (Dir == UTE_DIRECTION_BIDIRECTIONAL) {	// TODO need to handle uni-directional devices
-					Notify->OnNotify(TNotifyType::ntInfo, "Resonse expected ...");
+				if (Dir == UTE_DIRECTION_BIDIRECTIONAL) {
+					Notify->OnNotify(TNotifyType::ntInfo, "Response expected ...");
 
 					eoMessage Response(7);
 					if (Gateway.TeachInModule->CreateUTEResponse(Gateway.telegram, Response, TEACH_IN_ACCEPTED, UTE_DIRECTION_BIDIRECTIONAL) != EO_OK) {
@@ -184,6 +184,11 @@ void TEoGateway::Read() {
 						Device = nullptr;
 						Notify->OnNotify(TNotifyType::ntWarn, "Failed to send response!");
 					}
+				}
+				else {
+					Notify->OnNotifyFmt(TNotifyType::ntInfo, "Learned device: %u, saving ...", Device->ID);
+					DeviceId = Device->ID;
+					DeviceLearned = true;
 				}
 			}
 		}
