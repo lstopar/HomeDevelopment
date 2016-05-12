@@ -260,13 +260,6 @@ var enoceanController = (function () {
 	var that = {
 		onValue: function (sensorId, value) {
 			if (sensorId == ROCKER_MAIN_LIGHT_ID || sensorId == INT_MAIN_LIGHT_ID) {
-				if (sensorId == ROCKER_MAIN_LIGHT_ID) {
-					log.info('RECEIVED VALUE FROM ROCKER!!!!!!!!!!!!!!!!!!!');
-					log.info('RECEIVED VALUE FROM ROCKER!!!!!!!!!!!!!!!!!!!');
-					log.info('RECEIVED VALUE FROM ROCKER!!!!!!!!!!!!!!!!!!!');
-					log.info('RECEIVED VALUE FROM ROCKER!!!!!!!!!!!!!!!!!!!');
-				}
-				
 				if (value != mainVal) {
 					if (log.debug())
 						log.debug('Setting value of main light from sensor: %s', sensorId);
@@ -275,18 +268,11 @@ var enoceanController = (function () {
 					// notify sensors
 					onMainChanged({ id: MAIN_LIGHT_ID, value: value });
 				}
-				else {
+				else if (log.debug()) {
 					log.debug('Received value for main light from %s, already set!', sensorId);
 				}
 			}
 			else if (sensorId == ROCKER_AMBIENT_LIGHT_ID || sensorId == INT_AMBIENT_LIGHT_ID) {	// ambient light
-				if (sensorId == ROCKER_AMBIENT_LIGHT_ID) {
-					log.info('RECEIVED VALUE FROM ROCKER!!!!!!!!!!!!!!!!!!!');
-					log.info('RECEIVED VALUE FROM ROCKER!!!!!!!!!!!!!!!!!!!');
-					log.info('RECEIVED VALUE FROM ROCKER!!!!!!!!!!!!!!!!!!!');
-					log.info('RECEIVED VALUE FROM ROCKER!!!!!!!!!!!!!!!!!!!');
-				}
-				
 				if (value != ambientVal) {
 					if (log.debug())
 						log.debug('Setting value of ambient light from sensor: %s', sensorId);
@@ -295,7 +281,7 @@ var enoceanController = (function () {
 					// notify sensors
 					onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: value });
 				}
-				else {
+				else if (log.debug()) {
 					log.debug('Received value for ambient light from %s, already set!', sensorId);
 				}
 			}
