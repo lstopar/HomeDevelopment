@@ -463,18 +463,15 @@ module.exports = exports = function (_getValue, _setValue) {
 								internalId: 0,
 								type: 'rocker',
 								unit: '',
-								name: 'Main Light',
-								description: '',
-								transform: function (val) {
-									return Math.min(1, val);
-								}
+								name: 'Main Light Rocker',
+								description: ''
 							},
 							{
 								id: ROCKER_AMBIENT_LIGHT_ID,
 								internalId: 1,
 								type: 'rocker',
 								unit: '',
-								name: 'Ambient Light',
+								name: 'Ambient Light Rocker',
 								description: '',
 								transform: function (val) {
 									return Math.min(1, val);
