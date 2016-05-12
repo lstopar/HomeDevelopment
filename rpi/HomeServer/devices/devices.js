@@ -15,10 +15,12 @@ var INDICATOR_LED_ID = 'led-test';
 var LED_BLUE_ID = 'led-blue';
 var LED_RED_ID = 'led-red';
 var LED_GREEN_ID = 'led-green';
-var AMBIENT_LIGHT_ID = 'light-ambient';
-var MAIN_LIGHT_ID = 'light-main';
+var AMBIENT_LIGHT_ID = 'light-ambient-internal';
+var MAIN_LIGHT_ID = 'light-main-internal';
 var BLINK_RGB_ID = 'rgb-blink';
 var CYCLE_HSL_ID = 'hsl-cycle';
+var ROCKER_MAIN_LIGHT_ID = 'rocker-main';
+var ROCKER_AMBIENT_LIGHT_ID = 'rocker-ambient';
 
 //=======================================================
 // CONSTANTS
@@ -450,36 +452,36 @@ module.exports = exports = function (_getValue, _setValue) {
 							}
 				    	]
 				    },
-//				    {
-//				    	id: 'wall-rocker',
-//				    	internalId: 26243606,
-//				    	name: 'NodOn Relay',
-//				    	type: 'D2-01-xx',
-//				    	sensors: [
-//							{
-//								id: MAIN_LIGHT_ID,
-//								internalId: 0,
-//								type: 'actuator',
-//								unit: '',
-//								name: 'Main Light',
-//								description: '',
-//								transform: function (val) {
-//									return Math.min(1, val);
-//								}
-//							},
-//							{
-//								id: AMBIENT_LIGHT_ID,
-//								internalId: 1,
-//								type: 'actuator',
-//								unit: '',
-//								name: 'Ambient Light',
-//								description: '',
-//								transform: function (val) {
-//									return Math.min(1, val);
-//								}
-//							}
-//				    	]
-//				    }
+				    {
+				    	id: 'wall-rocker',
+				    	internalId: 4277920223,
+				    	name: 'Rocker Switch',
+				    	type: 'F6-02-xx',
+				    	sensors: [
+							{
+								id: ROCKER_MAIN_LIGHT_ID,
+								internalId: 0,
+								type: 'rocker',
+								unit: '',
+								name: 'Main Light',
+								description: '',
+								transform: function (val) {
+									return Math.min(1, val);
+								}
+							},
+							{
+								id: ROCKER_AMBIENT_LIGHT_ID,
+								internalId: 1,
+								type: 'rocker',
+								unit: '',
+								name: 'Ambient Light',
+								description: '',
+								transform: function (val) {
+									return Math.min(1, val);
+								}
+							}
+				    	]
+				    }
 				],
 				configuration: {
 					storageFile: 'config/enocean.txt',
