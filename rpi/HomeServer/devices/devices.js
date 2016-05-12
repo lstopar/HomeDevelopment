@@ -262,10 +262,13 @@ var enoceanController = (function () {
 			if (sensorId == ROCKER_MAIN_LIGHT_ID || sensorId == INT_MAIN_LIGHT_ID) {
 				if (value != mainVal) {
 					if (log.debug())
-						log.debug('Setting value of ambient light from sensor: %s', sensorId);
+						log.debug('Setting value of main light from sensor: %s', sensorId);
 					
 					// notify sensors
 					onMainChanged({ id: MAIN_LIGHT_ID, value: mainVal });
+				}
+				else {
+					log.debug('Received value for main light from %s, already set!', sensorId);
 				}
 			}
 			else if (sensorId == ROCKER_AMBIENT_LIGHT_ID || sensorId == INT_AMBIENT_LIGHT_ID) {	// ambient light
@@ -275,6 +278,9 @@ var enoceanController = (function () {
 					
 					// notify sensors
 					onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: ambientVal });
+				}
+				else {
+					log.debug('Received value for ambient light from %s, already set!', sensorId);
 				}
 			}
 			else {
@@ -658,7 +664,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	id: AMBIENT_LIGHT_ID,
 				    	type: 'actuator',
 				    	unit: '',
-						name: 'Main Light',
+						name: 'Ambient Light',
 						description: '',
 				    	controller: enoceanController.controllers.ambientLight
 				    }
