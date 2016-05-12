@@ -1021,7 +1021,7 @@ void TNodeJsEoGateway::ProcessQueues() {
 		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, OnDeviceCallback);
 
 		for (int DeviceN = 0; DeviceN < TempDevIdRorgFuncTypeQuV.Len(); DeviceN++) {
-			const TQuad<TUInt, TUCh, TUCh, TUCh>& TempDevIdRorgFuncTypeQu = TempDevIdRorgFuncTypeV[DeviceN];
+			const TQuad<TUInt, TUCh, TUCh, TUCh>& TempDevIdRorgFuncTypeQu = TempDevIdRorgFuncTypeQuV[DeviceN];
 
 			const uint& DeviceId = TempDevIdRorgFuncTypeQu.Val1;
 			const uchar& ROrg = TempDevIdRorgFuncTypeQu.Val2;
