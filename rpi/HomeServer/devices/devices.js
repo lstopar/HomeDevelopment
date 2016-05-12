@@ -271,6 +271,7 @@ var enoceanController = (function () {
 					if (log.debug())
 						log.debug('Setting value of main light from sensor: %s', sensorId);
 					
+					mainVal = value;
 					// notify sensors
 					onMainChanged({ id: MAIN_LIGHT_ID, value: value });
 				}
@@ -290,6 +291,7 @@ var enoceanController = (function () {
 					if (log.debug())
 						log.debug('Setting value of ambient light from sensor: %s', sensorId);
 					
+					ambientVal = value;
 					// notify sensors
 					onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: value });
 				}
