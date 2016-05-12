@@ -431,36 +431,36 @@ module.exports = exports = function (_getValue, _setValue) {
 			{
 				type: 'EnOcean',
 				nodes: [
-//				    {
-//				    	id: 'nodon-module',
-//				    	internalId: 26243606,
-//				    	name: 'NodOn Relay',
-//				    	type: 'D2-01-xx',
-//				    	sensors: [
-//							{
-//								id: MAIN_LIGHT_ID,
-//								internalId: 0,
-//								type: 'actuator',
-//								unit: '',
-//								name: 'Main Light',
-//								description: '',
-//								transform: function (val) {
-//									return Math.min(1, val);
-//								}
-//							},
-//							{
-//								id: AMBIENT_LIGHT_ID,
-//								internalId: 1,
-//								type: 'actuator',
-//								unit: '',
-//								name: 'Ambient Light',
-//								description: '',
-//								transform: function (val) {
-//									return Math.min(1, val);
-//								}
-//							}
-//				    	]
-//				    },
+				    {
+				    	id: 'nodon-module',
+				    	internalId: 26243606,
+				    	name: 'NodOn Relay',
+				    	type: 'D2-01-xx',
+				    	sensors: [
+							{
+								id: MAIN_LIGHT_ID,
+								internalId: 0,
+								type: 'actuator',
+								unit: '',
+								name: 'Main Light',
+								description: '',
+								transform: function (val) {
+									return Math.min(1, val);
+								}
+							},
+							{
+								id: AMBIENT_LIGHT_ID,
+								internalId: 1,
+								type: 'actuator',
+								unit: '',
+								name: 'Ambient Light',
+								description: '',
+								transform: function (val) {
+									return Math.min(1, val);
+								}
+							}
+				    	]
+				    },
 				    {
 				    	id: 'wall-rocker',
 				    	internalId: 4277920223,
