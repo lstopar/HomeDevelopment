@@ -621,15 +621,20 @@ TNodeJsF602Rocker::~TNodeJsF602Rocker() {
 }
 
 void TNodeJsF602Rocker::OnMsg(const eoMessage& Msg) {
+	Notify->OnNotify(ntInfo, "Received message in TNodeJsF602Rocker::OnMsg ...");
 	eoEEP_F602xx Profile;
 	Profile.SetType(0x01);
 
 	EAssertR(Profile.Parse(Msg) == EO_OK, "Failed to parse F6-02 rocker message!");
 
+	Notify->OnNotify(ntInfo, "Message parsed!");
+
 	uchar RockerA, RockerB;
 
 	EAssertR(Profile.GetValue(E_ROCKER_A, RockerA) == EO_OK, "Failed to get the value of rocker A!");
 	EAssertR(Profile.GetValue(E_ROCKER_B, RockerB) == EO_OK, "Failed to get the value of rocker B!");
+
+	Notify->OnNotifyFmt(ntInfo, "Extracted values: A = %u, B = %u", RockerA, RockerB);
 
 	// TODO E_ENERGYBOW
 	// TODO E_MULTIPRESS
@@ -679,9 +684,13 @@ void TNodeJsF602Rocker::OnRocker(const int& RockerId, const bool& Pressed) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
+	Notify->OnNotifyFmt(ntInfo, "In OnRocker ...");
+
 	if (!MsgCallback.IsEmpty()) {
+		Notify->OnNotify(ntInfo, "Calling callback ...");
 		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, MsgCallback);
 		TNodeJsUtil::ExecuteVoid(Callback, v8::Integer::New(Isolate, RockerId), v8::Boolean::New(Isolate, Pressed));
+		Notify->OnNotify(ntInfo, "Callback finished!");
 	}
 }
 
