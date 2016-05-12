@@ -265,7 +265,7 @@ var enoceanController = (function () {
 						log.debug('Setting value of main light from sensor: %s', sensorId);
 					
 					// notify sensors
-					onMainChanged({ id: MAIN_LIGHT_ID, value: mainVal });
+					onMainChanged({ id: MAIN_LIGHT_ID, value: value });
 				}
 				else {
 					log.debug('Received value for main light from %s, already set!', sensorId);
@@ -277,7 +277,7 @@ var enoceanController = (function () {
 						log.debug('Setting value of ambient light from sensor: %s', sensorId);
 					
 					// notify sensors
-					onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: ambientVal });
+					onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: value });
 				}
 				else {
 					log.debug('Received value for ambient light from %s, already set!', sensorId);
