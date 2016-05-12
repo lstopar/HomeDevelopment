@@ -96,11 +96,12 @@ void TEoGateway::Init() {
 		const uint32& DeviceId = It->second->ID;
 
 		Notify->OnNotifyFmt(ntInfo, "Initializing device %u ...", DeviceId);
-		if (Device->GetProfile() == nullptr) {
-			Notify->OnNotify(ntWarn, "Device does not have a profile!");
-		}
 
-		OnDeviceConnected(DeviceId);
+		EAssert(Device->GetProfile() != nullptr);
+
+		const eoProfile* Profile = Device->GetProfile();
+
+		OnDeviceConnected(DeviceId, Profile->rorg, Profile->func, Profile->type);
 	}
 
 	// start the read thread
