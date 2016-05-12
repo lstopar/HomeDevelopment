@@ -496,6 +496,7 @@ function initSensors() {
 					
 					var device = {
 						read: controller.read,
+						set: controller.set,
 						init: controller.init != null ? controller.init : function () {}
 					};
 					
