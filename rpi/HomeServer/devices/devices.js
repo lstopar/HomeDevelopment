@@ -463,7 +463,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				    },
 				    {
 				    	id: 'wall-rocker',
-				    	internalId: 4277920223,
+				    	internalId: 0xfefbe1df,
 				    	name: 'Rocker Switch',
 				    	type: 'F6-02-xx',
 				    	sensors: [
