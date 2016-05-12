@@ -621,8 +621,6 @@ TNodeJsF602Rocker::~TNodeJsF602Rocker() {
 }
 
 void TNodeJsF602Rocker::OnMsg(const eoMessage& Msg) {
-	eoGateway* Gateway = GetGateway();
-
 	eoEEP_F602xx Profile;
 	Profile.SetType(0x01);
 
@@ -678,6 +676,9 @@ void TNodeJsF602Rocker::on(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 }
 
 void TNodeJsF602Rocker::OnRocker(const int& RockerId, const bool& Pressed) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
 	if (!MsgCallback.IsEmpty()) {
 		v8::Local<v8::Function> Callback = v8::Local<v8::Function>::New(Isolate, MsgCallback);
 		TNodeJsUtil::ExecuteVoid(Callback, v8::Integer::New(Isolate, RockerId), v8::Boolean::New(Isolate, Pressed));
