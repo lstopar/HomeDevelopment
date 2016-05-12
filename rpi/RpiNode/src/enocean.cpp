@@ -204,7 +204,7 @@ void TEoGateway::Read() {
 				Notify->OnNotifyFmt(TNotifyType::ntInfo, "Telegram from device %u", DeviceId);
 				ReceivedTelegram = true;
 			} else {
-				Notify->OnNotify(ntInfo, "Do not know the device!");
+				Notify->OnNotifyFmt(ntInfo, "Do not know device %u!", Gateway.device->ID);
 			}
 		}
 	}
