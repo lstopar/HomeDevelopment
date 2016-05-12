@@ -268,7 +268,7 @@ var enoceanController = (function () {
 					onMainChanged({ id: MAIN_LIGHT_ID, value: mainVal });
 				}
 			}
-			else {	// ambient light
+			else if (sensorId == ROCKER_AMBIENT_LIGHT_ID || sensorId == INT_AMBIENT_LIGHT_ID) {	// ambient light
 				if (value != ambientVal) {
 					if (log.debug())
 						log.debug('Setting value of ambient light from sensor: %s', sensorId);
@@ -277,14 +277,14 @@ var enoceanController = (function () {
 					onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: ambientVal });
 				}
 			}
+			else {
+				throw new Error('Unknown sensor ID in enoceanController: ' + sensorId);
+			}
 		},
 		
 		controllers: {
 			mainLight: {
-				init: function () {
-					log.info('Initializing TV ...');
-					setInterval(readTv, TV_SAMPLE_TIME);
-				},
+				init: function () {},
 				read: function (callback) {
 					var result = {};
 					result[MAIN_LIGHT_ID] = mainVal;
