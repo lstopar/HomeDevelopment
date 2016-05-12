@@ -993,7 +993,7 @@ void TNodeJsEoGateway::AddDevice(const uint32& DeviceId, v8::Local<v8::Object>& 
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
-	EAssert(!DeviceMap.IsEmpty());
+	EAssertR(!DeviceMap.IsEmpty(), "Persistent device object not set!");
 
 	v8::Local<v8::Object> Map = v8::Local<v8::Object>::New(Isolate, DeviceMap);
 	Map->Set(v8::Integer::New(Isolate, DeviceId), JsDevice);
@@ -1121,6 +1121,7 @@ void Init(v8::Handle<v8::Object> Exports) {
 	TNodeJsRf24Radio::Init(Exports);
 
 	// EnOcean
+	TNodeJsF602Rocker::Init(Exports);
 	TNodeJsD201Device::Init(Exports);
 	TNodeJsEoGateway::Init(Exports);
 }
