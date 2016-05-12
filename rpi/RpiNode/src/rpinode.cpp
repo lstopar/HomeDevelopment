@@ -1107,7 +1107,7 @@ void TNodeJsEoGateway::TProcessQueuesTask::Run() {
 	try {
 		JsGateway->ProcessQueues();
 	} catch (const PExcept& Except) {
-		JsGateway->Notify->OnNotifyFmt(ntErr, "Exception while processing queues!");
+		JsGateway->Notify->OnNotifyFmt(ntErr, "Exception while processing queues: " + Except->GetMsgStr() + "!");
 	}
 }
 
