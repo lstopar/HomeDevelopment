@@ -23,10 +23,12 @@ var BLINK_RGB_ID = 'rgb-blink';
 var CYCLE_HSL_ID = 'hsl-cycle';
 
 // EnOcean devices
-var AMBIENT_LIGHT_ID = 'light-ambient-internal';
-var MAIN_LIGHT_ID = 'light-main-internal';
-var ROCKER_MAIN_LIGHT_ID = 'rocker-main';
+var AMBIENT_LIGHT_ID = 'light-ambient';
+var MAIN_LIGHT_ID = 'light-main';
+var INT_AMBIENT_LIGHT_ID = 'int-light-amb';
+var INT_MAIN_LIGHT_ID = 'int-light-main';
 var ROCKER_AMBIENT_LIGHT_ID = 'rocker-ambient';
+var ROCKER_MAIN_LIGHT_ID = 'rocker-main';
 
 //=======================================================
 // CONSTANTS
@@ -76,19 +78,19 @@ function isMainLightOn() {
 }
 
 function mainLightOn() {
-	setValue({ sensorId: MAIN_LIGHT_ID, value: 1 });
+	setValue({ sensorId: INT_MAIN_LIGHT_ID, value: 1 });
 }
 
 function mainLightOff() {
-	setValue({ sensorId: MAIN_LIGHT_ID, value: 0 });
+	setValue({ sensorId: INT_MAIN_LIGHT_ID, value: 0 });
 }
 
 function ambientOn() {
-	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 1 });
+	setValue({ sensorId: INT_AMBIENT_LIGHT_ID, value: 1 });
 }
 
 function ambientOff() {
-	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 0 });
+	setValue({ sensorId: INT_AMBIENT_LIGHT_ID, value: 0 });
 }
 
 function ledStripOff() {
@@ -176,7 +178,7 @@ var TvController = function () {
 	var isOn = false;
 	var isReading = false;
 	
-	var push = function () {}
+	var onValueChanged = function () {}
 	
 	function readTv() {
 		if (isReading) return;
@@ -193,7 +195,7 @@ var TvController = function () {
 						log.trace('Received response from TV: ' + isAlive);
 					
 					if (isOn != isAlive) {
-						push({ id: TV_ID, value: isAlive ? 1 : 0 });
+						onValueChanged({ id: TV_ID, value: isAlive ? 1 : 0 });
 					}
 				} catch (e) {
 					log.error(e, 'Exception while processing TV state!');
@@ -240,13 +242,122 @@ var TvController = function () {
 			result[TV_ID] = isOn ? 1 : 0;
 			callback(undefined, result);
 		},
-		setPushCallback: function (callback) {
-			push = callback;
+		setOnChange: function (callback) {
+			onValueChanged = callback;
 		}
 	}
 	
 	return that;
 }
+
+var enoceanController = (function () {
+	var mainVal = 0;
+	var ambientVal = 0;
+	
+	var onMainChanged = function () {}
+	var onAmbientChanged = function () {}
+	
+	var that = {
+		onValue: function (sensorId, value) {
+			if (sensorId == ROCKER_MAIN_LIGHT_ID || sensorId == INT_MAIN_LIGHT_ID) {
+				if (value != mainVal) {
+					if (log.debug())
+						log.debug('Setting value of ambient light from sensor: %s', sensorId);
+					
+					// notify sensors
+					onMainChanged({ id: MAIN_LIGHT_ID, value: mainVal });
+				}
+			}
+			else {	// ambient light
+				if (value != ambientVal) {
+					if (log.debug())
+						log.debug('Setting value of ambient light from sensor: %s', sensorId);
+					
+					// notify sensors
+					onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: ambientVal });
+				}
+			}
+		},
+		
+		controllers: {
+			mainLight: {
+				init: function () {
+					log.info('Initializing TV ...');
+					setInterval(readTv, TV_SAMPLE_TIME);
+				},
+				read: function (callback) {
+					var result = {};
+					result[MAIN_LIGHT_ID] = mainVal;
+					callback(undefined, result);
+				},
+				set: function (opts) {
+					var val = opts.value;
+					
+					if (val != mainVal) {
+						mainVal = val;
+						if (mainVal > 0) {
+							mainLightOn();
+						} else {
+							mainLightOff();
+						}
+					}
+				},
+				setOnChange: function (callback) {
+					onMainChanged = callback;
+				}
+			},
+			ambientLight: {
+				init: function () {},
+				read: function (callback) {
+					var result = {};
+					result[AMBIENT_LIGHT_ID] = ambientVal;
+					callback(undefined, result);
+				},
+				set: function (opts) {
+					var val = opts.value;
+					
+					if (val != ambientVal) {
+						ambientVal = val;
+						if (ambientVal > 0) {
+							ambientOn();
+						} else {
+							ambientOff();
+						}
+					}
+				},
+				setOnChange: function (callback) {
+					onAmbientChanged = callback;
+				}
+			}
+		}
+	};
+	
+	/*
+
+// sensors
+var MOTION_TV_ID = 'motion-tv';
+var MOTION_DOOR_ID = 'motion-door';
+var TV_ID = 'lr-tv';
+var LUMINOSITY_ID = 'lr-lum';
+var TEMPERATURE_ID = 'lr-temp';
+var HUMIDITY_ID = 'lr-hum';
+
+// RGB strip
+var LED_BLUE_ID = 'led-blue';
+var LED_RED_ID = 'led-red';
+var LED_GREEN_ID = 'led-green';
+var BLINK_RGB_ID = 'rgb-blink';
+var CYCLE_HSL_ID = 'hsl-cycle';
+
+// EnOcean devices
+var AMBIENT_LIGHT_ID = 'light-ambient-internal';
+var MAIN_LIGHT_ID = 'light-main-internal';
+var ROCKER_AMBIENT_LIGHT_ID = 'rocker-ambient';
+var ROCKER_MAIN_LIGHT_ID = 'rocker-main';
+	 */
+	
+	return that;
+})()
 
 module.exports = exports = function (_getValue, _setValue) {
 	getValue = _getValue;
@@ -276,8 +387,9 @@ module.exports = exports = function (_getValue, _setValue) {
 		else if (sensorId == AMBIENT_LIGHT_ID) {
 			onAmbientLight(value);
 		}
-		else if (sensorId == ROCKER_MAIN_LIGHT_ID || sensorId == ROCKER_AMBIENT_LIGHT_ID) {
-			log.info('RECEIVED VALUE FROM FOCKER: %s = %d', sensorId, value);
+		else if (sensorId == ROCKER_AMBIENT_LIGHT_ID || sensorId == ROCKER_MAIN_LIGHT_ID
+				|| sensorId == INT_AMBIENT_LIGHT_ID || sensorId == INT_MAIN_LIGHT_ID) {
+			enoceanController.onValue(sensorId, value);
 		}
 	}
 	
@@ -438,7 +550,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	type: 'D2-01-xx',
 				    	sensors: [
 							{
-								id: MAIN_LIGHT_ID,
+								id: INT_MAIN_LIGHT_ID,
 								internalId: 0,
 								type: 'actuator',
 								unit: '',
@@ -446,10 +558,11 @@ module.exports = exports = function (_getValue, _setValue) {
 								description: '',
 								transform: function (val) {
 									return Math.min(1, val);
-								}
+								},
+								hidden: true
 							},
 							{
-								id: AMBIENT_LIGHT_ID,
+								id: INT_AMBIENT_LIGHT_ID,
 								internalId: 1,
 								type: 'actuator',
 								unit: '',
@@ -457,7 +570,8 @@ module.exports = exports = function (_getValue, _setValue) {
 								description: '',
 								transform: function (val) {
 									return Math.min(1, val);
-								}
+								},
+								hidden: true
 							}
 				    	]
 				    },
@@ -468,23 +582,22 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	type: 'F6-02-xx',
 				    	sensors: [
 							{
-								id: ROCKER_MAIN_LIGHT_ID,
+								id: ROCKER_AMBIENT_LIGHT_ID,
 								internalId: 0,
-								type: 'rocker',
+								type: 'binary',
 								unit: '',
 								name: 'Main Light Rocker',
-								description: ''
+								description: '',
+								hidden: true
 							},
 							{
-								id: ROCKER_AMBIENT_LIGHT_ID,
+								id: ROCKER_MAIN_LIGHT_ID,
 								internalId: 1,
-								type: 'rocker',
+								type: 'binary',	// TODO change the type in the future
 								unit: '',
 								name: 'Ambient Light Rocker',
 								description: '',
-								transform: function (val) {
-									return Math.min(1, val);
-								}
+								hidden: true
 							}
 				    	]
 				    }
@@ -532,7 +645,23 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	name: 'TV',
 				    	description: 'Television',
 				    	controller: tv
-				    }      
+				    },
+				    {
+				    	id: MAIN_LIGHT_ID,
+				    	type: 'actuator',
+				    	unit: '',
+						name: 'Main Light',
+						description: '',
+				    	controller: enoceanController.controllers.mainLight
+				    },
+				    {
+				    	id: AMBIENT_LIGHT_ID,
+				    	type: 'actuator',
+				    	unit: '',
+						name: 'Main Light',
+						description: '',
+				    	controller: enoceanController.controllers.ambientLight
+				    }
 				]
 			}
 		]

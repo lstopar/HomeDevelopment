@@ -55,10 +55,12 @@ function setValue(vals) {
 			
 			if (sensorId in sensors)
 				rpiDevices.push(vals[i]);
-			if (sensorId in radio.sensorH)
+			else if (sensorId in radio.sensorH)
 				radioDevices.push(vals[i]);
-			if (enocean != null && enocean.hasSensor(sensorId))
+			else if (enocean != null && enocean.hasSensor(sensorId))
 				enoceanDevices.push(vals[i]);
+			else
+				throw new Error('Could not find sensor: ' + sensorId);
 		}
 		
 		// set RPi devices
@@ -482,10 +484,11 @@ function initSensors() {
 					if (devSensor.name == null) throw new Error('Sensor name is not defined!');
 					if (controller == null) throw new Error('Controller not defined for virtual sensor %s', devSensor.name);
 					if (controller.read == null) throw new Error('Read is not defined for virtual sensor %s!', devSensor.name);
+					if (controller.setOnChange == null) throw new Error('setOnChange is not defined for virtual sensor %s!', devSensor.name);
 					
 					log.info('Initializing sensor %s ...', id);
 					
-					controller.setPushCallback(function (val) {
+					controller.setOnChange(function (val) {
 						if (log.debug())
 							log.debug('Received virtual sensor value %s', JSON.stringify(val));
 						updateValue(val.id, val.value);
