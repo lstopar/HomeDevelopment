@@ -966,12 +966,13 @@ void TNodeJsEoGateway::on(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
-void TNodeJsEoGateway::OnDeviceConnected(const uint32& DeviceId) {
+void TNodeJsEoGateway::OnDeviceConnected(const uint32& DeviceId, const uchar& ROrg,
+		const uchar& Func, const uchar& Type) {
 	Notify->OnNotifyFmt(ntInfo, "Device connected in wrapper, ID %u ...", DeviceId);
 
 	{
 		TLock Lock(CallbackSection);
-		NewDeviceIdQ.Add(DeviceId);
+		NewDeviceIdQ.Add(TQuad<TUInt, TUCh, TUCh, TUCh>(DeviceId, ROrg, Func, Type));
 	}
 
 	TNodeJsAsyncUtil::ExecuteOnMain(new TProcessQueuesTask(this), CallbackHandle, true);

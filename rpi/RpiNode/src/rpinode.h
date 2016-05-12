@@ -173,7 +173,7 @@ public:
 };
 
 class TNodeJsEoDevice: public node::ObjectWrap {
-private:
+protected:
 	const uint32 DeviceId;
 	TEoGateway* Gateway;
 	PNotify Notify;
@@ -277,7 +277,7 @@ private:
 	v8::Persistent<v8::Object> DeviceMap;
 	v8::Persistent<v8::Function> OnDeviceCallback;
 
-	TUIntV NewDeviceIdQ;
+	TVec<TQuad<TUInt, TUCh, TUCh, TUCh>> NewDeviceIdQ;
 	TVec<TPair<TUInt, eoMessage>> DeviceIdMsgPrQ;
 
 	TMainThreadHandle* CallbackHandle;
@@ -296,7 +296,8 @@ private:	// JS functions
 	JsDeclareFunction(on);
 
 public:
-	void OnDeviceConnected(const uint32& DeviceId);
+	void OnDeviceConnected(const uint32& DeviceId, const uchar& ROrg,
+			const uchar& Func, const uchar& Type);
 	void OnMsg(const uint32& DeviceId, const eoMessage& Msg);
 
 private:
