@@ -5,20 +5,26 @@ var logger = require('./logger.js');
 // IDs
 //=======================================================
 
+var INDICATOR_LED_ID = 'led-test';
+
+// sensors
 var MOTION_TV_ID = 'motion-tv';
 var MOTION_DOOR_ID = 'motion-door';
 var TV_ID = 'lr-tv';
 var LUMINOSITY_ID = 'lr-lum';
 var TEMPERATURE_ID = 'lr-temp';
 var HUMIDITY_ID = 'lr-hum';
-var INDICATOR_LED_ID = 'led-test';
+
+// RGB strip
 var LED_BLUE_ID = 'led-blue';
 var LED_RED_ID = 'led-red';
 var LED_GREEN_ID = 'led-green';
-var AMBIENT_LIGHT_ID = 'light-ambient-internal';
-var MAIN_LIGHT_ID = 'light-main-internal';
 var BLINK_RGB_ID = 'rgb-blink';
 var CYCLE_HSL_ID = 'hsl-cycle';
+
+// EnOcean devices
+var AMBIENT_LIGHT_ID = 'light-ambient-internal';
+var MAIN_LIGHT_ID = 'light-main-internal';
 var ROCKER_MAIN_LIGHT_ID = 'rocker-main';
 var ROCKER_AMBIENT_LIGHT_ID = 'rocker-ambient';
 
