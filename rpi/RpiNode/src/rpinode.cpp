@@ -989,16 +989,6 @@ void TNodeJsEoGateway::OnMsg(const uint32& DeviceId, const eoMessage& Msg) {
 	TNodeJsAsyncUtil::ExecuteOnMain(new TProcessQueuesTask(this), CallbackHandle, true);
 }
 
-void TNodeJsEoGateway::AddDevice(const uint32& DeviceId, v8::Local<v8::Object>& JsDevice) {
-	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
-	v8::HandleScope HandleScope(Isolate);
-
-	EAssertR(!DeviceMap.IsEmpty(), "Persistent device object not set!");
-
-	v8::Local<v8::Object> Map = v8::Local<v8::Object>::New(Isolate, DeviceMap);
-	Map->Set(v8::Integer::New(Isolate, DeviceId), JsDevice);
-}
-
 void TNodeJsEoGateway::ProcessQueues() {
 	TVec<TQuad<TUInt, TUCh, TUCh, TUCh>> TempDevIdRorgFuncTypeQuV;
 	TUIntV TempNewDeviceIdQ;
@@ -1042,7 +1032,7 @@ void TNodeJsEoGateway::ProcessQueues() {
 	if (!TempDeviceIdMsgPrQ.Empty()) {
 		for (int MsgN = 0; MsgN < TempDeviceIdMsgPrQ.Len(); MsgN++) {
 			const TPair<TUInt, eoMessage>& DeviceIdMsgPr = TempDeviceIdMsgPrQ[MsgN];
-			const uint& DeviceId = DeviceIdMsgPr.Val1;
+			const uint32& DeviceId = DeviceIdMsgPr.Val1;
 			const eoMessage& Msg = DeviceIdMsgPr.Val2;
 
 			Notify->OnNotifyFmt(ntInfo, "Received EnOcean message from device %u on main thread ...", DeviceId);
@@ -1052,6 +1042,16 @@ void TNodeJsEoGateway::ProcessQueues() {
 	}
 }
 
+void TNodeJsEoGateway::AddDevice(const uint32& DeviceId, v8::Local<v8::Object>& JsDevice) {
+	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
+	v8::HandleScope HandleScope(Isolate);
+
+	EAssertR(!DeviceMap.IsEmpty(), "Persistent device object not set!");
+
+	v8::Local<v8::Object> Map = v8::Local<v8::Object>::New(Isolate, DeviceMap);
+	Map->Set(v8::Number::New(Isolate, DeviceId), JsDevice);
+}
+
 TNodeJsEoDevice* TNodeJsEoGateway::GetDevice(const uint32& DeviceId) const {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
@@ -1059,7 +1059,7 @@ TNodeJsEoDevice* TNodeJsEoGateway::GetDevice(const uint32& DeviceId) const {
 	v8::Local<v8::Number> Key = v8::Number::New(Isolate, DeviceId);
 	v8::Local<v8::Object> Map = v8::Local<v8::Object>::New(Isolate, DeviceMap);
 
-	Notify->OnNotifyFmt(ntInfo, "Fetching device %d\n", DeviceId);
+	Notify->OnNotifyFmt(ntInfo, "Fetching device %u\n", DeviceId);
 
 	EAssertR(Map->Has(Key), "Device " + TUInt::GetStr(DeviceId) + " missing!");
 

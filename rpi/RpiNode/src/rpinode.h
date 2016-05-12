@@ -301,12 +301,12 @@ public:
 	void OnMsg(const uint32& DeviceId, const eoMessage& Msg);
 
 private:
-	void AddDevice(const uint32& DeviceId, v8::Local<v8::Object>& JsDevice);
 	void ProcessQueues();
 
+	void AddDevice(const uint32& DeviceId, v8::Local<v8::Object>& JsDevice);
 	TNodeJsEoDevice* GetDevice(const uint32& DeviceId) const;
 	v8::Local<v8::Object> CreateNewDevice(const uint32& DeviceId, const uchar& ROrg,
-			const uchar& Func, const uchar& Type);
+				const uchar& Func, const uchar& Type);
 
 	class TProcessQueuesTask: public TMainThreadTask {
 	private:
