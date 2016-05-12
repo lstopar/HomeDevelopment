@@ -432,8 +432,8 @@ function initSensors() {
 				var transFun = transformH[val.id];
 				var trans = transFun(val.value);
 				
-				if (log.debug())
-					log.debug('Received from radio %s: %d', val.id, trans);
+				if (log.trace())
+					log.trace('Received from radio %s: %d', val.id, trans);
 				
 				updateValue(val.id, trans);
 			});
