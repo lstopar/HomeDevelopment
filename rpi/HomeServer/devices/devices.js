@@ -292,7 +292,13 @@ var enoceanController = (function () {
 		
 		controllers: {
 			mainLight: {
-				init: function () {},
+				init: function () {
+					log.info('Initializing main light, setting timeout ...');
+					setTimeout(function () {
+						log.info('Turning main light on ...')
+						mainLightOn();
+					}, 500);
+				},
 				read: function (callback) {
 					var result = {};
 					result[MAIN_LIGHT_ID] = mainVal;
@@ -317,7 +323,13 @@ var enoceanController = (function () {
 				}
 			},
 			ambientLight: {
-				init: function () {},
+				init: function () {
+					log.info('Initializing ambient light, setting timeout ...');
+					setTimeout(function () {
+						log.info('Turning ambient light on ...')
+						ambientOn();
+					}, 500);
+				},
 				read: function (callback) {
 					var result = {};
 					result[AMBIENT_LIGHT_ID] = ambientVal;
