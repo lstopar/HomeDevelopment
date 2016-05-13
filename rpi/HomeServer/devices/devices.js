@@ -297,7 +297,7 @@ var enoceanController = (function () {
 					setTimeout(function () {
 						log.info('Turning main light on ...')
 						mainLightOn();
-					}, 500);
+					}, 2000);
 				},
 				read: function (callback) {
 					var result = {};
@@ -328,7 +328,7 @@ var enoceanController = (function () {
 					setTimeout(function () {
 						log.info('Turning ambient light on ...')
 						ambientOn();
-					}, 500);
+					}, 2000);
 				},
 				read: function (callback) {
 					var result = {};
