@@ -251,6 +251,8 @@ var TvController = function () {
 }
 
 var enoceanController = (function () {
+	var INITIALIZATION_TIMEOUT = 1000;
+	
 	var mainVal = 0;
 	var ambientVal = 0;
 	
@@ -297,7 +299,7 @@ var enoceanController = (function () {
 					setTimeout(function () {
 						log.info('Turning main light on ...')
 						mainLightOn();
-					}, 2000);
+					}, INITIALIZATION_TIMEOUT);
 				},
 				read: function (callback) {
 					var result = {};
@@ -328,7 +330,7 @@ var enoceanController = (function () {
 					setTimeout(function () {
 						log.info('Turning ambient light on ...')
 						ambientOn();
-					}, 2000);
+					}, INITIALIZATION_TIMEOUT);
 				},
 				read: function (callback) {
 					var result = {};

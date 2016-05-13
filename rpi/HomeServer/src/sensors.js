@@ -617,10 +617,6 @@ exports.init = function () {
 	
 	log.info('Initializing devices ...');
 	
-	for (var deviceN = 0; deviceN < devices.length; deviceN++) {
-		devices[deviceN].device.init();
-	}
-	
 	if (radio != null) {
 		log.info('Initializing radio ...');
 		radio.radio.init();
@@ -631,6 +627,10 @@ exports.init = function () {
 	if (enocean != null) {
 		log.info('Initialzing EnOcean radio ...');
 		enocean.init();
+	}
+	
+	for (var deviceN = 0; deviceN < devices.length; deviceN++) {
+		devices[deviceN].device.init();
 	}
 	
 	log.info('Starting sampling sensors ...');
