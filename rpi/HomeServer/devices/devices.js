@@ -78,19 +78,19 @@ function isMainLightOn() {
 }
 
 function mainLightOn() {
-	setValue({ sensorId: INT_MAIN_LIGHT_ID, value: 1 });
+	setValue({ sensorId: MAIN_LIGHT_ID, value: 1 });
 }
 
 function mainLightOff() {
-	setValue({ sensorId: INT_MAIN_LIGHT_ID, value: 0 });
+	setValue({ sensorId: MAIN_LIGHT_ID, value: 0 });
 }
 
 function ambientOn() {
-	setValue({ sensorId: INT_AMBIENT_LIGHT_ID, value: 1 });
+	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 1 });
 }
 
 function ambientOff() {
-	setValue({ sensorId: INT_AMBIENT_LIGHT_ID, value: 0 });
+	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 0 });
 }
 
 function ledStripOff() {
@@ -304,10 +304,10 @@ var enoceanController = (function () {
 					if (val != mainVal) {
 						mainVal = val;
 						if (mainVal > 0) {
-							mainLightOn();
+							setValue({ sensorId: INT_MAIN_LIGHT_ID, value: 1 });
 							onMainChanged({ id: MAIN_LIGHT_ID, value: val });
 						} else {
-							mainLightOff();
+							setValue({ sensorId: INT_MAIN_LIGHT_ID, value: 0 });
 							onMainChanged({ id: MAIN_LIGHT_ID, value: val });
 						}
 					}
@@ -329,10 +329,10 @@ var enoceanController = (function () {
 					if (val != ambientVal) {
 						ambientVal = val;
 						if (ambientVal > 0) {
-							ambientOn();
+							setValue({ sensorId: INT_AMBIENT_LIGHT_ID, value: 1 });
 							onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: val });
 						} else {
-							ambientOff();
+							setValue({ sensorId: INT_AMBIENT_LIGHT_ID, value: 0 });
 							onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: val });
 						}
 					}
