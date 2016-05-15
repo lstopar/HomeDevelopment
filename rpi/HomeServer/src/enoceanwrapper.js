@@ -1,6 +1,5 @@
 var config = require('../config.js');
 var rpi = require('../' + config.rpilib);
-//var enocean = require(config.enoceanLib);
 
 var gateway = null;
 

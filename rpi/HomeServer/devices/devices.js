@@ -252,12 +252,19 @@ var TvController = function () {
 
 var enoceanController = (function () {
 	var INITIALIZATION_TIMEOUT = 1000;
+	var SEND_TIMES = 2;
 	
 	var mainVal = 0;
 	var ambientVal = 0;
 	
 	var onMainChanged = function () {}
 	var onAmbientChanged = function () {}
+	
+	function setInternal(sensorId, value) {
+		for (var i = 0; i < SEND_TIMES; i++) {
+			setValue({ sensorId: sensorId, value: value });
+		}
+	}
 	
 	var that = {
 		onValue: function (sensorId, value) {
@@ -312,10 +319,10 @@ var enoceanController = (function () {
 					if (val != mainVal) {
 						mainVal = val;
 						if (mainVal > 0) {
-							setValue({ sensorId: INT_MAIN_LIGHT_ID, value: 1 });
+							setInternal(INT_MAIN_LIGHT_ID, 1);
 							onMainChanged({ id: MAIN_LIGHT_ID, value: val });
 						} else {
-							setValue({ sensorId: INT_MAIN_LIGHT_ID, value: 0 });
+							setInternal(INT_MAIN_LIGHT_ID, 0);
 							onMainChanged({ id: MAIN_LIGHT_ID, value: val });
 						}
 					}
@@ -343,10 +350,10 @@ var enoceanController = (function () {
 					if (val != ambientVal) {
 						ambientVal = val;
 						if (ambientVal > 0) {
-							setValue({ sensorId: INT_AMBIENT_LIGHT_ID, value: 1 });
+							setInternal(INT_AMBIENT_LIGHT_ID, 1);
 							onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: val });
 						} else {
-							setValue({ sensorId: INT_AMBIENT_LIGHT_ID, value: 0 });
+							setInternal(INT_AMBIENT_LIGHT_ID, 0);
 							onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: val });
 						}
 					}
