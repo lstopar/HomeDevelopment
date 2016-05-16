@@ -252,7 +252,6 @@ var TvController = function () {
 
 var enoceanController = (function () {
 	var INITIALIZATION_TIMEOUT = 1000;
-	var SEND_TIMES = 2;
 	
 	var mainVal = 0;
 	var ambientVal = 0;
@@ -261,9 +260,10 @@ var enoceanController = (function () {
 	var onAmbientChanged = function () {}
 	
 	function setInternal(sensorId, value) {
-		for (var i = 0; i < SEND_TIMES; i++) {
+		setValue({ sensorId: sensorId, value: value });
+		setTimeout(function () {
 			setValue({ sensorId: sensorId, value: value });
-		}
+		}, 1);
 	}
 	
 	var that = {
