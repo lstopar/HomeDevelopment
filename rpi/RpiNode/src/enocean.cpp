@@ -36,7 +36,7 @@ void TEoGateway::TReadThread::Run() {
 				PrintTm = CurrTm;
 			}
 
-//			TSysProc::Sleep(1);
+			TSysProc::Sleep(1);
 
 			IterN++;
 		} catch (const PExcept& Except) {
