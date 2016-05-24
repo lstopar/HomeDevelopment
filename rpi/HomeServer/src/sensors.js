@@ -104,10 +104,8 @@ function updateValue(sensorId, value) {
 		if (log.trace())
 			log.trace('Updating value for sensor "%s" to %d ...', sensorId, value);
 		
-		var config = getSensorConfig(sensorId);
-		var isVolatile = config.isVolatile != null ? config.isVolatile : false;
-		
 		var previousVal = values[sensorId]; 
+		var config = getSensorConfig(sensorId);
 		
 		if (value != previousVal) {
 			values[sensorId] = value;
@@ -126,7 +124,7 @@ function updateValue(sensorId, value) {
 			// devices callback
 			onValueCallback(sensorId, value);
 		}
-		else if (isVolatile) {
+		else if (config.isVolatile != null && config.isVolatile) {
 			onValueCallback(sensorId, value);
 		}
 	} catch (e) {
