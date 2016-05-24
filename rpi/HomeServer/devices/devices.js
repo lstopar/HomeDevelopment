@@ -621,6 +621,7 @@ module.exports = exports = function (_getValue, _setValue) {
 								unit: '',
 								name: 'Main Light Rocker',
 								description: '',
+								isVolatile: true,
 								hidden: true
 							},
 							{
@@ -630,6 +631,7 @@ module.exports = exports = function (_getValue, _setValue) {
 								unit: '',
 								name: 'Ambient Light Rocker',
 								description: '',
+								isVolatile: true,
 								hidden: true
 							}
 				    	]

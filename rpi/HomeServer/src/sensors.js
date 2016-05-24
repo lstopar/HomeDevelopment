@@ -104,6 +104,9 @@ function updateValue(sensorId, value) {
 		if (log.trace())
 			log.trace('Updating value for sensor "%s" to %d ...', sensorId, value);
 		
+		var config = getSensorConfig(sensorId);
+		var isVolatile = config.isVolatile != null ? config.isVolatile : false;
+		
 		var previousVal = values[sensorId]; 
 		
 		if (value != previousVal) {
@@ -112,7 +115,7 @@ function updateValue(sensorId, value) {
 			if (log.debug())
 				log.debug('Value of %s changed to %s', sensorId, value);
 			
-			var type = getSensorConfig(sensorId).type;
+			var type = config.type;
 			
 			// web sockets callback
 			callbacks.onValueReceived({
@@ -121,6 +124,9 @@ function updateValue(sensorId, value) {
 				type: type
 			});
 			// devices callback
+			onValueCallback(sensorId, value);
+		}
+		else if (isVolatile) {
 			onValueCallback(sensorId, value);
 		}
 	} catch (e) {
