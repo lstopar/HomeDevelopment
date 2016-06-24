@@ -406,7 +406,7 @@ var automatismController = (function () {
 			
 			if (value != isOn) {
 				isOn = value;
-				onChange({ id: AUTOMATISM_ID, value: val ? 1 : 0 });
+				onChange({ id: AUTOMATISM_ID, value: value ? 1 : 0 });
 			}
 		},
 		setOnChange: function (callback) {
