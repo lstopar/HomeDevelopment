@@ -384,8 +384,6 @@ var enoceanController = (function () {
 var automatismController = (function () {
 	var isOn = true;
 	
-	// TODO
-	
 	var that = {
 		isOn: function () {
 			return isOn;
@@ -393,8 +391,8 @@ var automatismController = (function () {
 		init: function () {
 		},
 		onValue: function (_isOn) {
-			if (log.trace())
-				log.trace('Received automatism value: ' + _isOn);
+			if (log.debug())
+				log.debug('Received automatism value: ' + _isOn);
 		},
 		read: function (callback) {
 			var result = {};
