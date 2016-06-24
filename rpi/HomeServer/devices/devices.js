@@ -384,6 +384,8 @@ var enoceanController = (function () {
 var automatismController = (function () {
 	var isOn = true;
 	
+	var onChange = function () {};
+	
 	var that = {
 		isOn: function () {
 			return isOn;
@@ -400,11 +402,15 @@ var automatismController = (function () {
 			callback(undefined, result);
 		},
 		set: function (opts) {
-			var value = opts.value;
-			isOn = value > 0;
+			var value = opts.value > 0;
+			
+			if (value != isOn) {
+				isOn = value;
+				onChange({ id: AUTOMATISM_ID, value: val ? 1 : 0 });
+			}
 		},
 		setOnChange: function (callback) {
-			onValueChanged = callback;
+			onChange = callback;
 		}
 	}
 	
