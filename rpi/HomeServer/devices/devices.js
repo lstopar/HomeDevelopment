@@ -723,7 +723,7 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	unit: '',
 						name: 'Automatic Lights',
 						description: '',
-				    	controller: enoceanController.controllers.ambientLight
+				    	controller: automatismController
 				    }
 				]
 			}
