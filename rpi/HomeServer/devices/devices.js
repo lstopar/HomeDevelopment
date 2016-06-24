@@ -30,6 +30,9 @@ var INT_MAIN_LIGHT_ID = 'int-light-main';
 var ROCKER_AMBIENT_LIGHT_ID = 'rocker-ambient';
 var ROCKER_MAIN_LIGHT_ID = 'rocker-main';
 
+// automatism
+var AUTOMATISM_ID = 'automatism';
+
 //=======================================================
 // CONSTANTS
 //=======================================================
@@ -78,19 +81,27 @@ function isMainLightOn() {
 }
 
 function mainLightOn() {
-	setValue({ sensorId: MAIN_LIGHT_ID, value: 1 });
+	if (automatismController.isOn()) {
+		setValue({ sensorId: MAIN_LIGHT_ID, value: 1 });
+	}
 }
 
 function mainLightOff() {
-	setValue({ sensorId: MAIN_LIGHT_ID, value: 0 });
+	if (automatismController.isOn()) {
+		setValue({ sensorId: MAIN_LIGHT_ID, value: 0 });
+	}
 }
 
 function ambientOn() {
-	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 1 });
+	if (automatismController.isOn()) {
+		setValue({ sensorId: AMBIENT_LIGHT_ID, value: 1 });
+	}
 }
 
 function ambientOff() {
-	setValue({ sensorId: AMBIENT_LIGHT_ID, value: 0 });
+	if (automatismController.isOn()) {
+		setValue({ sensorId: AMBIENT_LIGHT_ID, value: 0 });
+	}
 }
 
 function ledStripOff() {
@@ -102,8 +113,10 @@ function ledStripOff() {
 }
 
 function lightsOff() {
-	ambientOff();
-	ledStripOff();
+	if (automatismController.isOn()) {
+		ambientOff();
+		ledStripOff();
+	}
 }
 
 //=======================================================
@@ -365,32 +378,40 @@ var enoceanController = (function () {
 		}
 	};
 	
-	/*
+	return that;
+})();
 
-// sensors
-var MOTION_TV_ID = 'motion-tv';
-var MOTION_DOOR_ID = 'motion-door';
-var TV_ID = 'lr-tv';
-var LUMINOSITY_ID = 'lr-lum';
-var TEMPERATURE_ID = 'lr-temp';
-var HUMIDITY_ID = 'lr-hum';
-
-// RGB strip
-var LED_BLUE_ID = 'led-blue';
-var LED_RED_ID = 'led-red';
-var LED_GREEN_ID = 'led-green';
-var BLINK_RGB_ID = 'rgb-blink';
-var CYCLE_HSL_ID = 'hsl-cycle';
-
-// EnOcean devices
-var AMBIENT_LIGHT_ID = 'light-ambient-internal';
-var MAIN_LIGHT_ID = 'light-main-internal';
-var ROCKER_AMBIENT_LIGHT_ID = 'rocker-ambient';
-var ROCKER_MAIN_LIGHT_ID = 'rocker-main';
-	 */
+var automatismController = (function () {
+	var isOn = true;
+	
+	// TODO
+	
+	var that = {
+		isOn: function () {
+			return isOn;
+		},
+		init: function () {
+		},
+		onValue: function (_isOn) {
+			if (log.trace())
+				log.trace('Received automatism value: ' + _isOn);
+		},
+		read: function (callback) {
+			var result = {};
+			result[AUTOMATISM_ID] = isOn ? 1 : 0;
+			callback(undefined, result);
+		},
+		set: function (opts) {
+			var value = opts.value;
+			isOn = value > 0;
+		},
+		setOnChange: function (callback) {
+			onValueChanged = callback;
+		}
+	}
 	
 	return that;
-})()
+})();
 
 module.exports = exports = function (_getValue, _setValue) {
 	getValue = _getValue;
@@ -694,6 +715,15 @@ module.exports = exports = function (_getValue, _setValue) {
 				    	type: 'actuator',
 				    	unit: '',
 						name: 'Ambient Light',
+						description: '',
+				    	controller: enoceanController.controllers.ambientLight
+				    },
+				    {
+				    	id: AUTOMATISM_ID,
+				    	type: 'actuator',
+				    	img: 'img/motion.svg',
+				    	unit: '',
+						name: 'Automatic Lights',
 						description: '',
 				    	controller: enoceanController.controllers.ambientLight
 				    }
