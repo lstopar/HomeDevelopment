@@ -2,116 +2,121 @@
 <html lang="sl">
 
 <head>
-	<% include partials/head %>
-	<link href="lib/css/bootstrap-slider.min.css" rel="stylesheet" />
-	<link href="lib/css/bootstrap-switch.min.css" rel="stylesheet" />
+    <% include partials/head %>
+    <link href="lib/css/bootstrap-slider.min.css" rel="stylesheet" />
+    <link href="lib/css/bootstrap-switch.min.css" rel="stylesheet" />
 </head>
 
 <body>
     <div id="wrapper">
-		<% include partials/nav %>
-		
-		<div class="navbar-default sidebar" role="navigation">
-	        <div class="sidebar-nav navbar-collapse">
-	            <ul class="nav nav-pills nav-stacked">
-	            	<li>
-	                    <a id="a-home" href="#tab-home" data-toggle="pill">
-	                    	<span class="glyphicon glyphicon-home" aria-hidden="true"></span>
-	                    	Home
-	                    </a>
-	                </li>
-	                <li>
-	                    <a id="a-torrents" href="#tab-torrents" data-toggle="pill">
-	                    	<span class="glyphicon glyphicon-picture" aria-hidden="true"></span>
-	                    	Torrents
-	                    </a>
-	                </li>
-	            </ul>
-	        </div>
-	        <!-- /.sidebar-collapse -->
-	        <% var nodes = sensors.getNodes(); %>
-	        <% if (nodes.length > 0) { %>
-	        <h4>Devices</h4>
-	        <ul id="ul-nodes" class="list-group" style="margin-bottom: 0px;">
-            	<%
-            	for (var i = 0; i < nodes.length; i++) {
-            		var node = nodes[i];
-            		var connected = sensors.isOnline(node.id); %>
-            		<li class="list-group-item">
-            			<%= node.name %>
-            			<% if (connected) { %>
-            				<span id="span-status-node-<%= node.id %>" class="label label-success pull-right" style="margin-top: 2px;">Connected (<%= utils.formatConnTime(sensors.getConnChangedTime(node.id)) %>)</span>
-            			<% } else { %>
-            				<span id="span-status-node-<%= node.id %>" class="label label-danger pull-right" style="margin-top: 2px;">Disconnected (<%= utils.formatConnTime(sensors.getConnChangedTime(node.id)) %>)</span>
-            			<% } %>
-            		</li>
-            	<% } %>
+        <% include partials/nav %>
+
+        <div class="navbar-default sidebar" role="navigation">
+            <div class="sidebar-nav navbar-collapse">
+                <ul class="nav nav-pills nav-stacked">
+                    <li>
+                        <a id="a-home" href="#tab-home" data-toggle="pill">
+                            <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <a id="a-torrents" href="#tab-torrents" data-toggle="pill">
+                            <span class="glyphicon glyphicon-picture" aria-hidden="true"></span>
+                            Torrents
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.sidebar-collapse -->
+            <% var nodes = sensors.getNodes(); %>
+            <% if (nodes.length > 0) { %>
+            <h4>Devices</h4>
+            <ul id="ul-nodes" class="list-group" style="margin-bottom: 0px;">
+                <%
+                for (var i = 0; i < nodes.length; i++) {
+                    var node = nodes[i];
+                    var connected = sensors.isOnline(node.id); %>
+                    <li class="list-group-item">
+                        <%= node.name %>
+                        <% if (connected) { %>
+                            <span id="span-status-node-<%= node.id %>" class="label label-success pull-right" style="margin-top: 2px;">Connected (<%= utils.formatConnTime(sensors.getConnChangedTime(node.id)) %>)</span>
+                        <% } else { %>
+                            <span id="span-status-node-<%= node.id %>" class="label label-danger pull-right" style="margin-top: 2px;">Disconnected (<%= utils.formatConnTime(sensors.getConnChangedTime(node.id)) %>)</span>
+                        <% } %>
+                    </li>
+                <% } %>
             </ul>
             <% } %>
-	    </div>
+        </div>
     </div>
-    
+
     <div id="page-wrapper" class="container">
-    	<div class="tab-content">
-    		<div id="tab-home" role="tabpanel" class="tab-pane fade active">
-    			<div class="row">
-    				<%
-    				var layout = sensors.getLayout();
-    				for (var groupN = 0; groupN < layout.length; groupN++) { %>
-    					<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-    						<%
-    						var group = layout[groupN];
-							%>
-							<div id="thumb-<%= group.id %>" class="thumbnail">
-								<div class="img-thumbnail thumbnail-img-wrapper">
-									<div class="wrapper1">
-										<img id="img-<%= group.id %>" src="<%= group.img %>" alt="" />
-									</div>
-								</div>
-								<div class="caption">
-								<% for (var sensorN = 0; sensorN < group.sensors.length; sensorN++) { %>
-									<%
-									var sensor = group.sensors[sensorN];
-									var val = sensors.getValue(sensor.id);
-									%>
-									<% if (sensor.type == 'actuator') { %>
-										<div class="form-group">
-											<label for="chk-<%= sensor.id %>"><%= sensor.name %></label><br />
-											<input id="chk-<%= sensor.id %>" type="checkbox" class="form-control" />
-										</div>
-										<script type="text/javascript">
-										$(document).ready(function () {
-											createCheckbox('<%= sensor.id %>', <%= val == 1 %>);
-										});
-										</script>
-									<% } else if (sensor.type != 'dimmer') { %>
-										<h4><%= sensor.name %>: <span class="pull-right"><span id="span-val-<%= sensor.id %>"><%= utils.formatVal(sensor, val); %></span><%= sensor.unit %><span></span></h4>
-									<% } else { %>
-										<div class="form-group">
-											<label for="range-<%= sensor.id %>"><%= sensor.name %></label>
-											<input id="range-<%= sensor.id %>" type="range" class="form-control" />
-										</div>
-										<script type="text/javascript">
-										$(document).ready(function () {
-											<%
-											var min = sensor.min != null ? sensor.min : 0;
-											var max = sensor.max != null ? sensor.max : 100;
-											%>
-											createSlider('<%= sensor.id %>', <%= min %>, <%= max %>, <%= val %>);
-										});
-										</script>
-									<% } %>
-								<% } %>
-	      						</div>
-	    					</div>
-	  					</div>
-    				<% } %>
-				</div>
-    		</div>
-    		<div id="tab-torrents" role="tabpanel" class="tab-pane fade">
-   				<iframe id="frame-torrents" src="http://torrents:tugomerjeva@legoberry.home:9091/transmission/web/"></iframe>
-    		</div>
-    	</div>
+        <div class="tab-content">
+            <div id="tab-home" role="tabpanel" class="tab-pane fade active">
+                <div class="row">
+                    <%
+                    var layout = sensors.getLayout();
+                    for (var groupN = 0; groupN < layout.length; groupN++) { %>
+                        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                            <%
+                            var group = layout[groupN];
+                            %>
+                            <div id="thumb-<%= group.id %>" class="thumbnail">
+                                <div class="img-thumbnail thumbnail-img-wrapper">
+                                    <div class="wrapper1">
+                                        <img id="img-<%= group.id %>" src="<%= group.img %>" alt="" />
+                                    </div>
+                                </div>
+                                <div class="caption">
+                                <% for (var sensorN = 0; sensorN < group.sensors.length; sensorN++) { %>
+                                    <%
+                                    var sensor = group.sensors[sensorN];
+                                    var val = sensors.getValue(sensor.id);
+                                    %>
+                                    <% if (sensor.type == 'actuator') { %>
+                                        <div class="form-group">
+                                            <label for="chk-<%= sensor.id %>"><%= sensor.name %></label><br />
+                                            <input id="chk-<%= sensor.id %>" type="checkbox" class="form-control" />
+                                        </div>
+                                        <script type="text/javascript">
+                                        $(document).ready(function () {
+                                            createCheckbox('<%= sensor.id %>', <%= val == 1 %>);
+                                        });
+                                        </script>
+                                    <% } else if (sensor.type != 'dimmer') { %>
+                                        <h4><%= sensor.name %>: <span class="pull-right"><span id="span-val-<%= sensor.id %>"><%= utils.formatVal(sensor, val); %></span><%= sensor.unit %><span></span></h4>
+                                    <% } else { %>
+                                        <div class="form-group">
+                                            <label for="range-<%= sensor.id %>"><%= sensor.name %></label>
+                                            <input id="range-<%= sensor.id %>" type="range" class="form-control" />
+                                        </div>
+                                        <script type="text/javascript">
+                                        $(document).ready(function () {
+                                            <%
+                                            var min = sensor.min != null ? sensor.min : 0;
+                                            var max = sensor.max != null ? sensor.max : 100;
+                                            %>
+                                            createSlider('<%= sensor.id %>', <%= min %>, <%= max %>, <%= val %>);
+                                        });
+                                        </script>
+                                    <% } %>
+                                <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+            <div id="tab-torrents" role="tabpanel" class="tab-pane fade">
+                <iframe id="frame-torrents"></iframe>
+                <script type="application/javascript">
+                    $(document).ready(function () {
+                        $('#frame-torrents').attr('src', 'http://torrents:tugomerjeva@legoberry.home:9091/transmission/web/')
+                    })
+                </script>
+            </div>
+        </div>
     </div>
     <!-- /#wrapper -->
 
