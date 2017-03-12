@@ -1,1 +1,0 @@
-CC=arm-linux-gnueabihf-gcc-4.8.3 CXX=arm-linux-gnueabihf-g++ node-gyp clean configure --arch=arm rebuild
