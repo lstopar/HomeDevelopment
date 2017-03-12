@@ -193,7 +193,6 @@ var rf24Pinger = (function () {
 			}
 		},
 		onPong: function (nodeId) {	// TODO is not used
-//			log.info('Node %d ponged!', nodeId);
 			nodePongH[nodeId] = true;
 		},
 		ping: function () {
@@ -442,8 +441,8 @@ function initSensors() {
 				updateValue(val.id, trans);
 			});
 			radio.radio.on('pong', function (nodeId) {
-                if (log.debug())
-                    log.debug('Received pong from node %d, ignoring ...', nodeId);
+                if (log.trace())
+                    log.trace('Received pong from node %d, ignoring ...', nodeId);
 //				rf24Pinger.onPong(nodeId + '');
 			});
 		}
