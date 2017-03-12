@@ -109,10 +109,13 @@
                 </div>
             </div>
             <div id="tab-torrents" role="tabpanel" class="tab-pane fade">
-                <iframe id="frame-torrents"></iframe>
+                <!-- <iframe id="frame-torrents"></iframe> -->
                 <script type="application/javascript">
                     $(document).ready(function () {
-                        $('#frame-torrents').attr('src', 'http://torrents:tugomerjeva@legoberry.home:9091/transmission/web/')
+                        var iframe = $('<iframe />');
+                        iframe.attr('id', 'frame-torrents');
+                        iframe.attr('src', 'http://torrents:tugomerjeva@legoberry.home:9091/transmission/web/')
+                        $('#tab-torrents').append(iframe);
                     })
                 </script>
             </div>
