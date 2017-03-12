@@ -68,18 +68,6 @@
             ]
         },
         {
-            # node qminer module
-            'target_name': 'test',
-            'type': 'executable',
-            'sources': [
-                'test.cpp'
-            ],
-            'include_dirs': [
-            ],
-            'defines': [],
-            'dependencies': []
-        },
-        {
             # glib library
             'target_name': 'glib',
             'type': 'static_library',
