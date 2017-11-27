@@ -1,0 +1,6 @@
+#!/bin/bash
+
+curr_dir=`pwd`
+cd ../../AWShome
+python awshome.py
+cd $curr_dir

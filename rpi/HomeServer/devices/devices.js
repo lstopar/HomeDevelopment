@@ -53,70 +53,70 @@ var tv = null;
 //=======================================================
 
 function getLuminosity() {
-	return getValue(LUMINOSITY_ID);
+    return getValue(LUMINOSITY_ID);
 }
 
 function getMotionDoor() {
-	return getValue(MOTION_DOOR_ID) == 1;
+    return getValue(MOTION_DOOR_ID) == 1;
 }
 
 function getMotionTv() {
-	return getValue(MOTION_TV_ID) == 1;
+    return getValue(MOTION_TV_ID) == 1;
 }
 
 function getMotion() {
-	return getMotionDoor() || getMotionTv()	;
+    return getMotionDoor() || getMotionTv() ;
 }
 
 function isAmbientOn() {
-	return getValue(AMBIENT_LIGHT_ID) == 1;
+    return getValue(AMBIENT_LIGHT_ID) == 1;
 }
 
 function isLedStripOff() {
-	return getValue(LED_RED_ID) == 0 && getValue(LED_GREEN_ID) == 0 && getValue(LED_BLUE_ID) == 0;
+    return getValue(LED_RED_ID) == 0 && getValue(LED_GREEN_ID) == 0 && getValue(LED_BLUE_ID) == 0;
 }
 
 function isMainLightOn() {
-	return getValue(MAIN_LIGHT_ID) == 1;
+    return getValue(MAIN_LIGHT_ID) == 1;
 }
 
 function mainLightOn() {
-	if (automatismController.isOn()) {
-		setValue({ sensorId: MAIN_LIGHT_ID, value: 1 });
-	}
+    if (automatismController.isOn()) {
+        setValue({ sensorId: MAIN_LIGHT_ID, value: 1 });
+    }
 }
 
 function mainLightOff() {
-	if (automatismController.isOn()) {
-		setValue({ sensorId: MAIN_LIGHT_ID, value: 0 });
-	}
+    if (automatismController.isOn()) {
+        setValue({ sensorId: MAIN_LIGHT_ID, value: 0 });
+    }
 }
 
 function ambientOn() {
-	if (automatismController.isOn()) {
-		setValue({ sensorId: AMBIENT_LIGHT_ID, value: 1 });
-	}
+    if (automatismController.isOn()) {
+        setValue({ sensorId: AMBIENT_LIGHT_ID, value: 1 });
+    }
 }
 
 function ambientOff() {
-	if (automatismController.isOn()) {
-		setValue({ sensorId: AMBIENT_LIGHT_ID, value: 0 });
-	}
+    if (automatismController.isOn()) {
+        setValue({ sensorId: AMBIENT_LIGHT_ID, value: 0 });
+    }
 }
 
 function ledStripOff() {
-	setValue([
-	    { sensorId: LED_RED_ID, value: 0 },
-	    { sensorId: LED_GREEN_ID, value: 0 },
-	    { sensorId: LED_BLUE_ID, value: 0 }
-	]);
+    setValue([
+        { sensorId: LED_RED_ID, value: 0 },
+        { sensorId: LED_GREEN_ID, value: 0 },
+        { sensorId: LED_BLUE_ID, value: 0 }
+    ]);
 }
 
 function lightsOff() {
-	if (automatismController.isOn()) {
-		ambientOff();
-		ledStripOff();
-	}
+    if (automatismController.isOn()) {
+        ambientOff();
+        ledStripOff();
+    }
 }
 
 //=======================================================
@@ -124,15 +124,15 @@ function lightsOff() {
 //=======================================================
 
 function periodicCheck() {
-	try {
-		log.info('Performing periodic check ...');
-		
-		if (motionDetector.timeSinceMotion() > 1000*60*30) {
-			lightsOff();
-		}
-	} catch (e) {
-		log.error(e, 'Exception while performing periodic check!');
-	}
+    try {
+        log.info('Performing periodic check ...');
+
+        if (motionDetector.timeSinceMotion() > 1000*60*30) {
+            lightsOff();
+        }
+    } catch (e) {
+        log.error(e, 'Exception while performing periodic check!');
+    }
 }
 
 //=======================================================
@@ -140,599 +140,599 @@ function periodicCheck() {
 //=======================================================
 
 function onAmbientLight(value) {
-	// RGB LEDS
-	if (getValue(BLINK_RGB_ID) == 0 && getValue(CYCLE_HSL_ID) == 0) {
-		if (value == 1) {
-			if (isLedStripOff()) {
-				setValue([
-			  	    { sensorId: LED_RED_ID, value: 255 },
-			  	    { sensorId: LED_GREEN_ID, value: 72 },
-			  	    { sensorId: LED_BLUE_ID, value: 5 }
-			  	]);
-			}
-		} else {
-			if (!isLedStripOff()) {
-				ledStripOff();
-			}
-		}
-	}
+    // RGB LEDS
+    if (getValue(BLINK_RGB_ID) == 0 && getValue(CYCLE_HSL_ID) == 0) {
+        if (value == 1) {
+            if (isLedStripOff()) {
+                setValue([
+                    { sensorId: LED_RED_ID, value: 255 },
+                    { sensorId: LED_GREEN_ID, value: 72 },
+                    { sensorId: LED_BLUE_ID, value: 5 }
+                ]);
+            }
+        } else {
+            if (!isLedStripOff()) {
+                ledStripOff();
+            }
+        }
+    }
 }
 
 var MotionDetector = function () {
-	var EMPTY_ROOM_THRESHOLD = 1000*60*30;	// 15 mins
-	
-	var lastMotionTime = new Date().getTime();
-	
-	var that = {
-		onMotion: function (sensorId, motion) {
-			if (getMotion()) {
-				setValue({ sensorId: INDICATOR_LED_ID, value: 255 });
-								
-				if (getLuminosity() < LUMINOSITY_THRESHOLD && that.timeSinceMotion() > EMPTY_ROOM_THRESHOLD) {
-					ambientOn();
-				}
-				
-				lastMotionTime = new Date().getTime();
-			} else {
-				setValue({ sensorId: INDICATOR_LED_ID, value: 0 });
-			}
-		},
-		timeSinceMotion: function () {
-			return new Date().getTime() - lastMotionTime;
-		}
-	}
-	
-	return that;
+    var EMPTY_ROOM_THRESHOLD = 1000*60*30;  // 15 mins
+
+    var lastMotionTime = new Date().getTime();
+
+    var that = {
+        onMotion: function (sensorId, motion) {
+            if (getMotion()) {
+                setValue({ sensorId: INDICATOR_LED_ID, value: 255 });
+
+                if (getLuminosity() < LUMINOSITY_THRESHOLD && that.timeSinceMotion() > EMPTY_ROOM_THRESHOLD) {
+                    ambientOn();
+                }
+
+                lastMotionTime = new Date().getTime();
+            } else {
+                setValue({ sensorId: INDICATOR_LED_ID, value: 0 });
+            }
+        },
+        timeSinceMotion: function () {
+            return new Date().getTime() - lastMotionTime;
+        }
+    }
+
+    return that;
 }
 
 var TvController = function () {
-	var TV_SAMPLE_TIME = 5000;
-	
-	var isOn = false;
-	var isReading = false;
-	
-	var onValueChanged = function () {}
-	
-	function readTv() {
-		if (isReading) return;
-		
-		isReading = true;
-		
-		try {
-			if (log.trace())
-				log.trace('Pinging TV ...');
-			
-			utils.ping('tv.home', function (isAlive) {
-				try {
-					if (log.trace())
-						log.trace('Received response from TV: ' + isAlive);
-					
-					if (isOn != isAlive) {
-						onValueChanged({ id: TV_ID, value: isAlive ? 1 : 0 });
-					}
-				} catch (e) {
-					log.error(e, 'Exception while processing TV state!');
-				}
-				
-				isReading = false;
-		    });
-		} catch (e) {
-			log.error(e, 'Exception while pinging TV!');
-		}
-	}
-	
-	var that = {
-		onValue: function (_isOn) {
-			if (log.trace())
-				log.trace('Received TV value: ' + _isOn);
-			
-			if (_isOn != isOn) {
-				if (log.debug())
-					log.debug('TV status changed to ' + _isOn);
-				
-				if (_isOn) {
-					if (isAmbientOn()) {
-						ambientOff();
-					}
-					if (isMainLightOn()) {
-						mainLightOff();
-					}
-				} else {
-					if (getLuminosity() < LUMINOSITY_THRESHOLD && !isAmbientOn()) {
-						ambientOn();
-					}
-				}
-				
-				isOn = _isOn;
-			}
-		},
-		init: function () {
-			log.info('Initializing TV ...');
-			setInterval(readTv, TV_SAMPLE_TIME);
-		},
-		read: function (callback) {
-			var result = {};
-			result[TV_ID] = isOn ? 1 : 0;
-			callback(undefined, result);
-		},
-		setOnChange: function (callback) {
-			onValueChanged = callback;
-		}
-	}
-	
-	return that;
+    var TV_SAMPLE_TIME = 5000;
+
+    var isOn = false;
+    var isReading = false;
+
+    var onValueChanged = function () {}
+
+    function readTv() {
+        if (isReading) return;
+
+        isReading = true;
+
+        try {
+            if (log.trace())
+                log.trace('Pinging TV ...');
+
+            utils.ping('tv.home', function (isAlive) {
+                try {
+                    if (log.trace())
+                        log.trace('Received response from TV: ' + isAlive);
+
+                    if (isOn != isAlive) {
+                        onValueChanged({ id: TV_ID, value: isAlive ? 1 : 0 });
+                    }
+                } catch (e) {
+                    log.error(e, 'Exception while processing TV state!');
+                }
+
+                isReading = false;
+            });
+        } catch (e) {
+            log.error(e, 'Exception while pinging TV!');
+        }
+    }
+
+    var that = {
+        onValue: function (_isOn) {
+            if (log.trace())
+                log.trace('Received TV value: ' + _isOn);
+
+            if (_isOn != isOn) {
+                if (log.debug())
+                    log.debug('TV status changed to ' + _isOn);
+
+            //  if (_isOn) {
+            //      if (isAmbientOn()) {
+            //          ambientOff();
+            //      }
+            //      if (isMainLightOn()) {
+            //          mainLightOff();
+            //      }
+            //  } else {
+            //      if (getLuminosity() < LUMINOSITY_THRESHOLD && !isAmbientOn()) {
+            //          ambientOn();
+            //      }
+            //  }
+
+                isOn = _isOn;
+            }
+        },
+        init: function () {
+            log.info('Initializing TV ...');
+            setInterval(readTv, TV_SAMPLE_TIME);
+        },
+        read: function (callback) {
+            var result = {};
+            result[TV_ID] = isOn ? 1 : 0;
+            callback(undefined, result);
+        },
+        setOnChange: function (callback) {
+            onValueChanged = callback;
+        }
+    }
+
+    return that;
 }
 
 var enoceanController = (function () {
-	var INITIALIZATION_TIMEOUT = 1000;
-	
-	var mainVal = 0;
-	var ambientVal = 0;
-	
-	var onMainChanged = function () {}
-	var onAmbientChanged = function () {}
-	
-	function setInternal(sensorId, value) {
-		setValue({ sensorId: sensorId, value: value });
-		setTimeout(function () {
-			setValue({ sensorId: sensorId, value: value });
-		}, 1);
-	}
-	
-	var that = {
-		onValue: function (sensorId, value) {
-			if (sensorId == ROCKER_MAIN_LIGHT_ID || sensorId == INT_MAIN_LIGHT_ID) {
-				if (value != mainVal) {
-					if (log.debug())
-						log.debug('Setting value of main light from sensor: %s', sensorId);
-					
-					mainVal = value;
-					// notify sensors
-					onMainChanged({ id: MAIN_LIGHT_ID, value: value });
-				}
-				else if (log.debug()) {
-					log.debug('Received value for main light from %s, already set!', sensorId);
-				}
-			}
-			else if (sensorId == ROCKER_AMBIENT_LIGHT_ID || sensorId == INT_AMBIENT_LIGHT_ID) {	// ambient light
-				if (value != ambientVal) {
-					if (log.debug())
-						log.debug('Setting value of ambient light from sensor: %s', sensorId);
-					
-					ambientVal = value;
-					// notify sensors
-					onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: value });
-				}
-				else if (log.debug()) {
-					log.debug('Received value for ambient light from %s, already set!', sensorId);
-				}
-			}
-			else {
-				throw new Error('Unknown sensor ID in enoceanController: ' + sensorId);
-			}
-		},
-		
-		controllers: {
-			mainLight: {
-				init: function () {
-					log.info('Initializing main light, setting timeout ...');
-					setTimeout(function () {
-						log.info('Turning main light on ...')
-						mainLightOn();
-					}, INITIALIZATION_TIMEOUT);
-				},
-				read: function (callback) {
-					var result = {};
-					result[MAIN_LIGHT_ID] = mainVal;
-					callback(undefined, result);
-				},
-				set: function (opts) {
-					var val = opts.value;
-					
-					if (val != mainVal) {
-						mainVal = val;
-						if (mainVal > 0) {
-							setInternal(INT_MAIN_LIGHT_ID, 1);
-							onMainChanged({ id: MAIN_LIGHT_ID, value: val });
-						} else {
-							setInternal(INT_MAIN_LIGHT_ID, 0);
-							onMainChanged({ id: MAIN_LIGHT_ID, value: val });
-						}
-					}
-				},
-				setOnChange: function (callback) {
-					onMainChanged = callback;
-				}
-			},
-			ambientLight: {
-				init: function () {
-					log.info('Initializing ambient light, setting timeout ...');
-					setTimeout(function () {
-						log.info('Turning ambient light on ...')
-						ambientOn();
-					}, INITIALIZATION_TIMEOUT);
-				},
-				read: function (callback) {
-					var result = {};
-					result[AMBIENT_LIGHT_ID] = ambientVal;
-					callback(undefined, result);
-				},
-				set: function (opts) {
-					var val = opts.value;
-					
-					if (val != ambientVal) {
-						ambientVal = val;
-						if (ambientVal > 0) {
-							setInternal(INT_AMBIENT_LIGHT_ID, 1);
-							onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: val });
-						} else {
-							setInternal(INT_AMBIENT_LIGHT_ID, 0);
-							onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: val });
-						}
-					}
-				},
-				setOnChange: function (callback) {
-					onAmbientChanged = callback;
-				}
-			}
-		}
-	};
-	
-	return that;
+    var INITIALIZATION_TIMEOUT = 1000;
+
+    var mainVal = 0;
+    var ambientVal = 0;
+
+    var onMainChanged = function () {}
+    var onAmbientChanged = function () {}
+
+    function setInternal(sensorId, value) {
+        setValue({ sensorId: sensorId, value: value });
+        setTimeout(function () {
+            setValue({ sensorId: sensorId, value: value });
+        }, 1);
+    }
+
+    var that = {
+        onValue: function (sensorId, value) {
+            if (sensorId == ROCKER_MAIN_LIGHT_ID || sensorId == INT_MAIN_LIGHT_ID) {
+                if (value != mainVal) {
+                    if (log.debug())
+                        log.debug('Setting value of main light from sensor: %s', sensorId);
+
+                    mainVal = value;
+                    // notify sensors
+                    onMainChanged({ id: MAIN_LIGHT_ID, value: value });
+                }
+                else if (log.debug()) {
+                    log.debug('Received value for main light from %s, already set!', sensorId);
+                }
+            }
+            else if (sensorId == ROCKER_AMBIENT_LIGHT_ID || sensorId == INT_AMBIENT_LIGHT_ID) { // ambient light
+                if (value != ambientVal) {
+                    if (log.debug())
+                        log.debug('Setting value of ambient light from sensor: %s', sensorId);
+
+                    ambientVal = value;
+                    // notify sensors
+                    onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: value });
+                }
+                else if (log.debug()) {
+                    log.debug('Received value for ambient light from %s, already set!', sensorId);
+                }
+            }
+            else {
+                throw new Error('Unknown sensor ID in enoceanController: ' + sensorId);
+            }
+        },
+
+        controllers: {
+            mainLight: {
+                init: function () {
+                    log.info('Initializing main light, setting timeout ...');
+                    setTimeout(function () {
+                        log.info('Turning main light on ...')
+                        mainLightOn();
+                    }, INITIALIZATION_TIMEOUT);
+                },
+                read: function (callback) {
+                    var result = {};
+                    result[MAIN_LIGHT_ID] = mainVal;
+                    callback(undefined, result);
+                },
+                set: function (opts) {
+                    var val = opts.value;
+
+                    if (val != mainVal) {
+                        mainVal = val;
+                        if (mainVal > 0) {
+                            setInternal(INT_MAIN_LIGHT_ID, 1);
+                            onMainChanged({ id: MAIN_LIGHT_ID, value: val });
+                        } else {
+                            setInternal(INT_MAIN_LIGHT_ID, 0);
+                            onMainChanged({ id: MAIN_LIGHT_ID, value: val });
+                        }
+                    }
+                },
+                setOnChange: function (callback) {
+                    onMainChanged = callback;
+                }
+            },
+            ambientLight: {
+                init: function () {
+                    log.info('Initializing ambient light, setting timeout ...');
+                    setTimeout(function () {
+                        log.info('Turning ambient light on ...')
+                        ambientOn();
+                    }, INITIALIZATION_TIMEOUT);
+                },
+                read: function (callback) {
+                    var result = {};
+                    result[AMBIENT_LIGHT_ID] = ambientVal;
+                    callback(undefined, result);
+                },
+                set: function (opts) {
+                    var val = opts.value;
+
+                    if (val != ambientVal) {
+                        ambientVal = val;
+                        if (ambientVal > 0) {
+                            setInternal(INT_AMBIENT_LIGHT_ID, 1);
+                            onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: val });
+                        } else {
+                            setInternal(INT_AMBIENT_LIGHT_ID, 0);
+                            onAmbientChanged({ id: AMBIENT_LIGHT_ID, value: val });
+                        }
+                    }
+                },
+                setOnChange: function (callback) {
+                    onAmbientChanged = callback;
+                }
+            }
+        }
+    };
+
+    return that;
 })();
 
 var automatismController = (function () {
-	var isOn = true;
-	
-	var onChange = function () {};
-	
-	var that = {
-		isOn: function () {
-			return isOn;
-		},
-		init: function () {
-		},
-		onValue: function (_isOn) {
-			if (log.debug())
-				log.debug('Received automatism value: ' + _isOn);
-		},
-		read: function (callback) {
-			var result = {};
-			result[AUTOMATISM_ID] = isOn ? 1 : 0;
-			callback(undefined, result);
-		},
-		set: function (opts) {
-			var value = opts.value > 0;
-			
-			if (value != isOn) {
-				isOn = value;
-				onChange({ id: AUTOMATISM_ID, value: value ? 1 : 0 });
-			}
-		},
-		setOnChange: function (callback) {
-			onChange = callback;
-		}
-	}
-	
-	return that;
+    var isOn = true;
+
+    var onChange = function () {};
+
+    var that = {
+        isOn: function () {
+            return isOn;
+        },
+        init: function () {
+        },
+        onValue: function (_isOn) {
+            if (log.debug())
+                log.debug('Received automatism value: ' + _isOn);
+        },
+        read: function (callback) {
+            var result = {};
+            result[AUTOMATISM_ID] = isOn ? 1 : 0;
+            callback(undefined, result);
+        },
+        set: function (opts) {
+            var value = opts.value > 0;
+
+            if (value != isOn) {
+                isOn = value;
+                onChange({ id: AUTOMATISM_ID, value: value ? 1 : 0 });
+            }
+        },
+        setOnChange: function (callback) {
+            onChange = callback;
+        }
+    }
+
+    return that;
 })();
 
 module.exports = exports = function (_getValue, _setValue) {
-	getValue = _getValue;
-	setValue = _setValue;
-	
-	motionDetector = MotionDetector();
-	tv = TvController();
-	
-	setInterval(periodicCheck, 1000*60);
-	
-	function onValue(sensorId, value) {
-		if (log.trace())
-			log.trace('Received value in devices: { %s, %d }', sensorId, value);
-		
-		try {
-			logger.log({ sensorId: sensorId, value: value });
-		} catch (e) {
-			log.error(e, 'Exception while sending data to server!');
-		}
-		
-		if (sensorId == MOTION_DOOR_ID || sensorId == MOTION_TV_ID) {
-			motionDetector.onMotion(sensorId, value == 1);
-		}
-		else if (sensorId == TV_ID) {
-			tv.onValue(value == 1);
-		}
-		else if (sensorId == AMBIENT_LIGHT_ID) {
-			onAmbientLight(value);
-		}
-		else if (sensorId == ROCKER_AMBIENT_LIGHT_ID || sensorId == ROCKER_MAIN_LIGHT_ID
-				|| sensorId == INT_AMBIENT_LIGHT_ID || sensorId == INT_MAIN_LIGHT_ID) {
-			enoceanController.onValue(sensorId, value);
-		}
-	}
-	
-	return {
-		onValue: onValue,
-		layout: [
-			{
-				id: 'group-lights',
-				img: 'img/bulb.svg',
-				sensorIds: [
-				    MAIN_LIGHT_ID,
-				    AMBIENT_LIGHT_ID
-				]
-			},
-			{
-		    	id: 'group-ambient',
-		    	img: 'img/ambient.svg',
-		    	sensorIds: [
-		    	    LUMINOSITY_ID,
-		    	    TEMPERATURE_ID,
-		    	    HUMIDITY_ID,
-		    	    TV_ID
-		    	]
-		    },
-		    {
-		    	id: 'group-motion',
-		    	img: 'img/motion.svg',
-		    	sensorIds: [
-		    	    MOTION_DOOR_ID,
-		    	    MOTION_TV_ID
-		    	]
-		    },
-		    {
-		    	id: 'group-leds',
-		    	img: 'img/bulb.svg',
-		    	sensorIds: [
-		    	    LED_BLUE_ID,
-		    	    LED_RED_ID,
-		    	    LED_GREEN_ID,
-		    	    BLINK_RGB_ID,
-		    	    CYCLE_HSL_ID
-		    	]
-		    },
-		],
-		devices: [
-			{
-				type: 'Rf24',
-				nodes: [
-				    {
-				    	id: 01,
-				    	name: 'Arduino - TV',
-				    	sensors: [
-				    	    {
-				    	    	id: INDICATOR_LED_ID,
-				    	    	internalId: 3,
-				    	    	type: 'dimmer',
-				    	    	unit: '%',
-				    	    	name: 'Brightness',
-				    	    	description: 'Dimmer 1',
-				    	    	hidden: true
-				    	    },
-				    	    {
-				    	    	id: LED_BLUE_ID,
-				    	    	internalId: 5,
-				    	    	type: 'dimmer',
-				    	    	min: 0,
-				    	    	max: 255,
-				    	    	unit: '%',
-				    	    	name: 'LED blue',
-				    	    	description: 'Dimmer 1'
-				    	    },
-				    	    {
-				    	    	id: LED_RED_ID,
-				    	    	internalId: 6,
-				    	    	type: 'dimmer',
-				    	    	min: 0,
-				    	    	max: 255,
-				    	    	unit: '%',
-				    	    	name: 'LED red',
-				    	    	description: 'Dimmer 1'
-				    	    },
-				    	    {
-				    	    	id: LED_GREEN_ID,
-				    	    	internalId: 9,
-				    	    	type: 'dimmer',
-				    	    	min: 0,
-				    	    	max: 255,
-				    	    	unit: '%',
-				    	    	name: 'LED green',
-				    	    	description: 'Dimmer 1'
-				    	    },
-				    	    {
-				    	    	id: BLINK_RGB_ID,
-				    	    	internalId: 15,
-				    	    	type: 'actuator',
-				    	    	unit: '',
-				    	    	name: 'Blink RGB',
-				    	    	description: ''
-				    	    },
-				    	    {
-				    	    	id: CYCLE_HSL_ID,
-				    	    	internalId: 14,
-				    	    	type: 'actuator',
-				    	    	unit: '',
-				    	    	name: 'Cycle colors',
-				    	    	description: ''
-				    	    }
-				    	]
-				    },
-				    {
-				    	id: 02,
-				    	name: 'Arduino - Sofa',
-				    	sensors: [
-							{
-								id: LUMINOSITY_ID,
-								internalId: 3,
-								type: 'luminosity',
-								unit: '%',
-								name: 'Luminosity',
-								description: '',
-								transform: function (val) {
-									return val / 2.55;
-								}
-							},
-				    	    {
-				    	    	id: MOTION_TV_ID,
-				    	    	internalId: 4,
-				    	    	type: 'pir',
-				    	    	unit: '',
-				    	    	name: 'Motion TV',
-				    	    	description: ''
-				    	    },
-							{
-								id: MOTION_DOOR_ID,
-								internalId: 5,
-								type: 'pir',
-								unit: '',
-								name: 'Motion door',
-								description: ''
-							}
-				    	]
-				    }
-				],
-				configuration: {
-					pinCE: 25,		// RPI_V2_GPIO_P1_22	// TODO the pins are hardcoded in C++
-					pinCSN: 8,		// RPI_V2_GPIO_P1_24
-					id: 00,
-					verbose: false
-				}
-			},
-			{
-				type: 'EnOcean',
-				nodes: [
-				    {
-				    	id: 'nodon-module',
-				    	internalId: 26243606,
-				    	name: 'NodOn Relay',
-				    	type: 'D2-01-xx',
-				    	sensors: [
-							{
-								id: INT_MAIN_LIGHT_ID,
-								internalId: 0,
-								type: 'actuator',
-								unit: '',
-								name: 'Main Light',
-								description: '',
-								transform: function (val) {
-									return Math.min(1, val);
-								},
-								hidden: true
-							},
-							{
-								id: INT_AMBIENT_LIGHT_ID,
-								internalId: 1,
-								type: 'actuator',
-								unit: '',
-								name: 'Ambient Light',
-								description: '',
-								transform: function (val) {
-									return Math.min(1, val);
-								},
-								hidden: true
-							}
-				    	]
-				    },
-				    {
-				    	id: 'wall-rocker',
-				    	internalId: 4277920223,
-				    	name: 'Rocker Switch',
-				    	type: 'F6-02-xx',
-				    	sensors: [
-							{
-								id: ROCKER_AMBIENT_LIGHT_ID,
-								internalId: 0,
-								type: 'binary',
-								unit: '',
-								name: 'Main Light Rocker',
-								description: '',
-								isVolatile: true,
-								hidden: true
-							},
-							{
-								id: ROCKER_MAIN_LIGHT_ID,
-								internalId: 1,
-								type: 'binary',	// TODO change the type in the future
-								unit: '',
-								name: 'Ambient Light Rocker',
-								description: '',
-								isVolatile: true,
-								hidden: true
-							}
-				    	]
-				    }
-				],
-				configuration: {
-					storageFile: 'config/enocean.txt',
-					serialPort: '/dev/ttyUSB0',
-					verbose: false
-				}
-			},
-	  		{
-				type: "DHT11",
-				sensors: [
-					{
-						id: TEMPERATURE_ID,
-						type: "temperature",
-						unit: "\u2103",
-						name: "Temperature",
-						description: "Temperature in the living room"
-					},
-					{
-						id: HUMIDITY_ID,
-						type: "humidity",
-						unit: "%",
-						name: "Humidity",
-						description: "Humidity in the living room"
-					}
-				],
-				configuration: {
-					pin: 4,
-					temperatureId: TEMPERATURE_ID,
-					humidityId: HUMIDITY_ID,
-					timeout: 10000,
-					verbose: false
-				}
-			},
-			{
-				type: 'virtual',
-				sensors: [
-				    {
-				    	id: TV_ID,
-				    	type: 'binary',
-				    	img: 'img/tv.svg',
-				    	unit: '',
-				    	name: 'TV',
-				    	description: 'Television',
-				    	controller: tv
-				    },
-				    {
-				    	id: MAIN_LIGHT_ID,
-				    	type: 'actuator',
-				    	unit: '',
-						name: 'Main Light',
-						description: '',
-				    	controller: enoceanController.controllers.mainLight
-				    },
-				    {
-				    	id: AMBIENT_LIGHT_ID,
-				    	type: 'actuator',
-				    	unit: '',
-						name: 'Ambient Light',
-						description: '',
-				    	controller: enoceanController.controllers.ambientLight
-				    },
-				    {
-				    	id: AUTOMATISM_ID,
-				    	type: 'actuator',
-				    	img: 'img/motion.svg',
-				    	unit: '',
-						name: 'Automatic Lights',
-						description: '',
-				    	controller: automatismController
-				    }
-				]
-			}
-		]
-	} 
+    getValue = _getValue;
+    setValue = _setValue;
+
+    motionDetector = MotionDetector();
+    tv = TvController();
+
+    setInterval(periodicCheck, 1000*60);
+
+    function onValue(sensorId, value) {
+        if (log.trace())
+            log.trace('Received value in devices: { %s, %d }', sensorId, value);
+
+        try {
+            logger.log({ sensorId: sensorId, value: value });
+        } catch (e) {
+            log.error(e, 'Exception while sending data to server!');
+        }
+
+        if (sensorId == MOTION_DOOR_ID || sensorId == MOTION_TV_ID) {
+            motionDetector.onMotion(sensorId, value == 1);
+        }
+        else if (sensorId == TV_ID) {
+            tv.onValue(value == 1);
+        }
+        else if (sensorId == AMBIENT_LIGHT_ID) {
+            onAmbientLight(value);
+        }
+        else if (sensorId == ROCKER_AMBIENT_LIGHT_ID || sensorId == ROCKER_MAIN_LIGHT_ID
+                || sensorId == INT_AMBIENT_LIGHT_ID || sensorId == INT_MAIN_LIGHT_ID) {
+            enoceanController.onValue(sensorId, value);
+        }
+    }
+
+    return {
+        onValue: onValue,
+        layout: [
+            {
+                id: 'group-lights',
+                img: 'img/bulb.svg',
+                sensorIds: [
+                    MAIN_LIGHT_ID,
+                    AMBIENT_LIGHT_ID
+                ]
+            },
+            {
+                id: 'group-ambient',
+                img: 'img/ambient.svg',
+                sensorIds: [
+                    LUMINOSITY_ID,
+                    TEMPERATURE_ID,
+                    HUMIDITY_ID,
+                    TV_ID
+                ]
+            },
+            {
+                id: 'group-motion',
+                img: 'img/motion.svg',
+                sensorIds: [
+                    MOTION_DOOR_ID,
+                    MOTION_TV_ID
+                ]
+            },
+            {
+                id: 'group-leds',
+                img: 'img/bulb.svg',
+                sensorIds: [
+                    LED_BLUE_ID,
+                    LED_RED_ID,
+                    LED_GREEN_ID,
+                    BLINK_RGB_ID,
+                    CYCLE_HSL_ID
+                ]
+            },
+        ],
+        devices: [
+            {
+                type: 'Rf24',
+                nodes: [
+                    {
+                        id: 01,
+                        name: 'Arduino - TV',
+                        sensors: [
+                            {
+                                id: INDICATOR_LED_ID,
+                                internalId: 3,
+                                type: 'dimmer',
+                                unit: '%',
+                                name: 'Brightness',
+                                description: 'Dimmer 1',
+                                hidden: true
+                            },
+                            {
+                                id: LED_BLUE_ID,
+                                internalId: 5,
+                                type: 'dimmer',
+                                min: 0,
+                                max: 255,
+                                unit: '%',
+                                name: 'LED blue',
+                                description: 'Dimmer 1'
+                            },
+                            {
+                                id: LED_RED_ID,
+                                internalId: 6,
+                                type: 'dimmer',
+                                min: 0,
+                                max: 255,
+                                unit: '%',
+                                name: 'LED red',
+                                description: 'Dimmer 1'
+                            },
+                            {
+                                id: LED_GREEN_ID,
+                                internalId: 9,
+                                type: 'dimmer',
+                                min: 0,
+                                max: 255,
+                                unit: '%',
+                                name: 'LED green',
+                                description: 'Dimmer 1'
+                            },
+                            {
+                                id: BLINK_RGB_ID,
+                                internalId: 15,
+                                type: 'actuator',
+                                unit: '',
+                                name: 'Blink RGB',
+                                description: ''
+                            },
+                            {
+                                id: CYCLE_HSL_ID,
+                                internalId: 14,
+                                type: 'actuator',
+                                unit: '',
+                                name: 'Cycle colors',
+                                description: ''
+                            }
+                        ]
+                    },
+                    {
+                        id: 02,
+                        name: 'Arduino - Sofa',
+                        sensors: [
+                            {
+                                id: LUMINOSITY_ID,
+                                internalId: 3,
+                                type: 'luminosity',
+                                unit: '%',
+                                name: 'Luminosity',
+                                description: '',
+                                transform: function (val) {
+                                    return val / 2.55;
+                                }
+                            },
+                            {
+                                id: MOTION_TV_ID,
+                                internalId: 4,
+                                type: 'pir',
+                                unit: '',
+                                name: 'Motion TV',
+                                description: ''
+                            },
+                            {
+                                id: MOTION_DOOR_ID,
+                                internalId: 5,
+                                type: 'pir',
+                                unit: '',
+                                name: 'Motion door',
+                                description: ''
+                            }
+                        ]
+                    }
+                ],
+                configuration: {
+                    pinCE: 25,      // RPI_V2_GPIO_P1_22    // TODO the pins are hardcoded in C++
+                    pinCSN: 8,      // RPI_V2_GPIO_P1_24
+                    id: 00,
+                    verbose: false
+                }
+            },
+            {
+                type: 'EnOcean',
+                nodes: [
+                    {
+                        id: 'nodon-module',
+                        internalId: 26243606,
+                        name: 'NodOn Relay',
+                        type: 'D2-01-xx',
+                        sensors: [
+                            {
+                                id: INT_MAIN_LIGHT_ID,
+                                internalId: 0,
+                                type: 'actuator',
+                                unit: '',
+                                name: 'Main Light',
+                                description: '',
+                                transform: function (val) {
+                                    return Math.min(1, val);
+                                },
+                                hidden: true
+                            },
+                            {
+                                id: INT_AMBIENT_LIGHT_ID,
+                                internalId: 1,
+                                type: 'actuator',
+                                unit: '',
+                                name: 'Ambient Light',
+                                description: '',
+                                transform: function (val) {
+                                    return Math.min(1, val);
+                                },
+                                hidden: true
+                            }
+                        ]
+                    },
+                    {
+                        id: 'wall-rocker',
+                        internalId: 4277920223,
+                        name: 'Rocker Switch',
+                        type: 'F6-02-xx',
+                        sensors: [
+                            {
+                                id: ROCKER_AMBIENT_LIGHT_ID,
+                                internalId: 0,
+                                type: 'binary',
+                                unit: '',
+                                name: 'Main Light Rocker',
+                                description: '',
+                                isVolatile: true,
+                                hidden: true
+                            },
+                            {
+                                id: ROCKER_MAIN_LIGHT_ID,
+                                internalId: 1,
+                                type: 'binary', // TODO change the type in the future
+                                unit: '',
+                                name: 'Ambient Light Rocker',
+                                description: '',
+                                isVolatile: true,
+                                hidden: true
+                            }
+                        ]
+                    }
+                ],
+                configuration: {
+                    storageFile: 'config/enocean.txt',
+                    serialPort: '/dev/ttyUSB0',
+                    verbose: false
+                }
+            },
+            {
+                type: "DHT11",
+                sensors: [
+                    {
+                        id: TEMPERATURE_ID,
+                        type: "temperature",
+                        unit: "\u2103",
+                        name: "Temperature",
+                        description: "Temperature in the living room"
+                    },
+                    {
+                        id: HUMIDITY_ID,
+                        type: "humidity",
+                        unit: "%",
+                        name: "Humidity",
+                        description: "Humidity in the living room"
+                    }
+                ],
+                configuration: {
+                    pin: 4,
+                    temperatureId: TEMPERATURE_ID,
+                    humidityId: HUMIDITY_ID,
+                    timeout: 10000,
+                    verbose: false
+                }
+            },
+            {
+                type: 'virtual',
+                sensors: [
+                    {
+                        id: TV_ID,
+                        type: 'binary',
+                        img: 'img/tv.svg',
+                        unit: '',
+                        name: 'TV',
+                        description: 'Television',
+                        controller: tv
+                    },
+                    {
+                        id: MAIN_LIGHT_ID,
+                        type: 'actuator',
+                        unit: '',
+                        name: 'Main Light',
+                        description: '',
+                        controller: enoceanController.controllers.mainLight
+                    },
+                    {
+                        id: AMBIENT_LIGHT_ID,
+                        type: 'actuator',
+                        unit: '',
+                        name: 'Ambient Light',
+                        description: '',
+                        controller: enoceanController.controllers.ambientLight
+                    },
+                    {
+                        id: AUTOMATISM_ID,
+                        type: 'actuator',
+                        img: 'img/motion.svg',
+                        unit: '',
+                        name: 'Automatic Lights',
+                        description: '',
+                        controller: automatismController
+                    }
+                ]
+            }
+        ]
+    }
 }

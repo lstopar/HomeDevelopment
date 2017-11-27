@@ -1,0 +1,6 @@
+#!/bin/bash
+
+curr_dir=`pwd`
+cd ..
+sudo node main.js config/config-release.json
+cd $curr_dir
