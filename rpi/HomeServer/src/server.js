@@ -121,6 +121,29 @@ function initApi() {
 			handleServerError(e, req, res);
 		}
 	});
+
+    app.post(API_PATH + '/get', function (req, res) {
+        try {
+            var sensorId = req.body.id;
+            
+            log.debug(JSON.stringify(req.body));
+            
+            if (sensorId == null) {
+                handleBadRequest(req, res, 'Sensor id missing!');
+                return;
+            }
+            
+            if (log.debug())
+                log.debug('Gettting value of %s', sensorId);
+            
+            var value = sensors.getValue(sensorId);
+            
+            res.send({ value: value });
+            res.end();
+        } catch (e) {
+            handleServerError(e, req, res);
+        }
+    });
 	
 	app.post(API_PATH + '/eolearnmode', function (req, res) {
 		try {
