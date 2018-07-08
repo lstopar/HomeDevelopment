@@ -2,5 +2,6 @@
 
 curr_dir=`pwd`
 cd ..
-sudo node main.js config/config-release.json
+# sudo node main.js config/config-release.json
+node main.js config/config-release.json
 cd $curr_dir

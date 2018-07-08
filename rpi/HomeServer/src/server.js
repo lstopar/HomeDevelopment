@@ -124,21 +124,31 @@ function initApi() {
 
     app.post(API_PATH + '/get', function (req, res) {
         try {
-            var sensorId = req.body.id;
-            
-            log.debug(JSON.stringify(req.body));
-            
-            if (sensorId == null) {
+            // var sensorId = req.body.id;
+            if (log.debug())
+                log.debug('processing `get` with body: %s', JSON.stringify(req.body));
+
+            var sensorIds = req.body;
+
+            var result = [];
+            // var sensorIds = bodyJson.sensorIds;
+
+            if (sensorIds == null) {
                 handleBadRequest(req, res, 'Sensor id missing!');
                 return;
             }
+
+            for (var valN = 0; valN < sensorIds.length; ++valN) {
+                var sensorId = sensorIds[valN];
+
+                if (log.debug())
+                    log.debug('Getting value of %s', sensorId);
+
+                var value = sensors.getValue(sensorId);
+                result.push(value);
+            }
             
-            if (log.debug())
-                log.debug('Gettting value of %s', sensorId);
-            
-            var value = sensors.getValue(sensorId);
-            
-            res.send({ value: value });
+            res.send(result);
             res.end();
         } catch (e) {
             handleServerError(e, req, res);

@@ -98,8 +98,8 @@ void TNodejsDHT11Sensor::init(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
-TNodejsDHT11Sensor::TReadTask::TReadTask(const v8::FunctionCallbackInfo<v8::Value>& Args):
-		TNodeTask(Args),
+TNodejsDHT11Sensor::TReadTask::TReadTask(const v8::FunctionCallbackInfo<v8::Value>& Args, const bool& IsAsync):
+		TNodeTask(Args, IsAsync),
 		JsSensor(nullptr) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
@@ -227,8 +227,8 @@ void TNodeJsYL40Adc::setOutput(const v8::FunctionCallbackInfo<v8::Value>& Args) 
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
-TNodeJsYL40Adc::TReadTask::TReadTask(const v8::FunctionCallbackInfo<v8::Value>& Args):
-		TNodeTask(Args),
+TNodeJsYL40Adc::TReadTask::TReadTask(const v8::FunctionCallbackInfo<v8::Value>& Args, const bool& IsAsync):
+		TNodeTask(Args, IsAsync),
 		Adc(nullptr) {
 	Adc = ObjectWrap::Unwrap<TNodeJsYL40Adc>(Args.Holder());
 }
@@ -647,7 +647,7 @@ void TNodeJsF602Rocker::OnMsg(const eoMessage& Msg) {
 	}
 }
 
-void TNodeJsF602Rocker::id(v8::Local<v8::String> Name, const v8::PropertyCallbackInfo<v8::Value>& Info) {
+void TNodeJsF602Rocker::id(v8::Local<v8::Name> Name, const v8::PropertyCallbackInfo<v8::Value>& Info) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
@@ -655,7 +655,7 @@ void TNodeJsF602Rocker::id(v8::Local<v8::String> Name, const v8::PropertyCallbac
 	Info.GetReturnValue().Set(v8::Number::New(Isolate, JsDevice->GetDeviceId()));
 }
 
-void TNodeJsF602Rocker::type(v8::Local<v8::String> Name, const v8::PropertyCallbackInfo<v8::Value>& Info) {
+void TNodeJsF602Rocker::type(v8::Local<v8::Name> Name, const v8::PropertyCallbackInfo<v8::Value>& Info) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
@@ -800,7 +800,7 @@ void TNodeJsD201Device::on(const v8::FunctionCallbackInfo<v8::Value>& Args) {
 	Args.GetReturnValue().Set(v8::Undefined(Isolate));
 }
 
-void TNodeJsD201Device::id(v8::Local<v8::String> Name, const v8::PropertyCallbackInfo<v8::Value>& Info) {
+void TNodeJsD201Device::id(v8::Local<v8::Name> Name, const v8::PropertyCallbackInfo<v8::Value>& Info) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
@@ -808,7 +808,7 @@ void TNodeJsD201Device::id(v8::Local<v8::String> Name, const v8::PropertyCallbac
 	Info.GetReturnValue().Set(v8::Number::New(Isolate, JsDevice->DeviceId));
 }
 
-void TNodeJsD201Device::type(v8::Local<v8::String> Name, const v8::PropertyCallbackInfo<v8::Value>& Info) {
+void TNodeJsD201Device::type(v8::Local<v8::Name> Name, const v8::PropertyCallbackInfo<v8::Value>& Info) {
 	v8::Isolate* Isolate = v8::Isolate::GetCurrent();
 	v8::HandleScope HandleScope(Isolate);
 
