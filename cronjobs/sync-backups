@@ -1,0 +1,7 @@
+#!/bin/bash
+
+src_dir="/home/lstopar/backups"
+dst_dir="/mnt/nfs-wd/backups/databases"
+dst_host="legoberry"
+
+scp -r "$src_dir/*" "$dst_host:$dst_dir"
